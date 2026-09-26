@@ -1,0 +1,24 @@
+# entorno y caches
+.venv/
+__pycache__/
+*.pyc
+
+# archivos generados (se regeneran con los scripts)
+salida/
+prueba/
+el_llamado/out/
+mago/*.png
+mago/*.gif
+sprites_x/*.png
+sprites_x/animaciones/
+sprites_x/boxes.json
+
+# referencias descargadas: sprites con copyright de terceros, solo para uso local como referencia
+referencias/
+
+# videos
+*.mp4
+*.wav
+
+# configuración local de Claude Code (permisos personales)
+.claude/settings.local.json
