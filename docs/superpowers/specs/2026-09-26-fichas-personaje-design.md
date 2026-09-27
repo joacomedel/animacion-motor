@@ -72,7 +72,7 @@ descripción del usuario
 | `sprites_lib/tests_personaje.py` | Tests de consistencia + informe `informe.md` | render, ficha, escala |
 | `sprites_lib/fotos_control.py` | Guardar/comparar las poses aprobadas; imagen antes/después si cambian | — |
 | `personajes/generar.py` | CLI: `validar`, `hoja`, `tests`, `aprobar`, `exportar` para cualquier ficha | todo |
-| Skill nueva `sprite-personaje` | Flujo completo descripción → ficha → hoja → tests → aprobación | — |
+| Skill nueva `sprite-personaje` | Entrevista de requisitos (3.9) → ficha → hoja → tests → aprobación | todo |
 
 Los archivos `personajes/mago_*.py` actuales quedan como referencia hasta que la ficha del mago los reemplace.
 `pixel2d.py` queda como respaldo (ver 3.3).
@@ -169,6 +169,31 @@ Salida: `salida/<personaje>/<estilo>/informe.md` con ✓/✗ por regla y la evid
 .venv/bin/python -m personajes.generar tests mago --estilo todos
 ```
 
+### 3.9 Entrevista de personaje (skill `sprite-personaje`, paso 0)
+
+El usuario describe al personaje en texto libre; la skill conduce una **entrevista especializada** (inspirada en la
+skill genérica `interview-me`: una pregunta por vez, opciones con `AskUserQuestion`, objeciones activas) y termina en
+la ficha.
+
+1. **Temas fijos** (checklist; ningún personaje queda a medias): identidad y rol · silueta clave · cuerpo (clase de
+   altura, complexión, piel) · ropa y accesorios con su por qué · colores con significado · vistas, direcciones y
+   animaciones necesarias · referencias (alimentan `sprite-referencia` / `sprite-estilo` / `sprite-analizar`).
+   No repregunta lo que ya está en la descripción; lo refleja para confirmar.
+2. **Objeciones informadas por el kit** (lo que un entrevistador genérico no sabe):
+   - **Legibilidad por escala**: tamaño mínimo legible de un accesorio en el estilo elegido (p. ej. en stardew, nada
+     menor a 2 px; ~3 accesorios legibles en 16 px de ancho) → propone agrandar, fusionar o priorizar.
+   - **Conflictos de oclusión**: capa y pelo largo de espaldas, arma y escudo del mismo lado, etc.
+   - **Distinción del elenco**: compara silueta y paleta contra las fichas existentes y avisa si se parece demasiado
+     a otro personaje.
+   - **Compatibilidad**: componentes o anclas que no existen todavía → los anota como trabajo nuevo.
+3. **Opciones visuales**: cuando la decisión es visual (silueta, paleta, largo de pelo), genera miniaturas rápidas
+   con el motor (p. ej. 3 variantes, pose neutra, dirección S) y las muestra antes de preguntar.
+4. **Salida**: `personajes/fichas/<nombre>.yaml` + validación + resumen legible (quién es, qué lleva y por qué,
+   decisiones tomadas en la entrevista y sus motivos) → **aprobación 1**.
+
+Las decisiones de la entrevista quedan registradas en la ficha (campo `decisiones:` con pregunta, respuesta y
+motivo), para que cualquier cambio futuro sepa por qué el personaje es como es.
+
 ## 4. Fases
 
 1. **Fase 1 (este diseño)**: ficha + validador + escala + cuerpo/anclas + componentes del mago + `CamaraLateral` +
@@ -189,6 +214,8 @@ Salida: `salida/<personaje>/<estilo>/informe.md` con ✓/✗ por regla y la evid
 - Romper a propósito una regla (quitar la pulsera en una dirección, subir los ojos 2 px, recortar la cabeza) hace
   fallar el test correspondiente con un mensaje claro.
 - El lateral pasa `comparar_estilo` contra Mega Man X en las métricas no informativas.
+- La entrevista, con una descripción ambigua o problemática (p. ej. 5 accesorios chicos en stardew), detecta
+  los problemas de legibilidad y propone alternativas antes de escribir la ficha.
 
 ## 6. Fuera de alcance (fase 1)
 
