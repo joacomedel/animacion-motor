@@ -49,6 +49,9 @@ class CabezaHumana(Componente):
             esc.caja(ctx.a["cabeza"], ctx.anat.cabeza, mat, n=3.2)
         else:
             esc.elipsoide(ctx.a["cabeza"], ctx.anat.cabeza, mat)
+        # nariz: asoma hacia donde mira; de perfil es lo que dice "para allá va"
+        A = ctx.anat
+        esc.esfera(ctx.a["cabeza"] + v(A.cabeza[0] * .98, 0, -A.cabeza[2] * .3), .55 * ctx.escala(), "piel")
         # orejas: pieza propia (contorno propio); rompen la silueta cuadrada y agregan detalle dibujado
         entrar(esc, ctx, spec, 1)
         s, rz = ctx.escala(), ctx.anat.cabeza[2]
