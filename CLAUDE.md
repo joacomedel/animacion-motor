@@ -11,6 +11,9 @@
 - **Forma de trabajo:** mostrar algo rápido y pedir feedback en cada etapa (boceto antes de afinar); como máximo 2
   vueltas de corrección propias antes de consultar; estilos activos: stardew y lateral (volumen solo si se pide).
 - **Tokens:** números antes que imágenes, un estilo por vez al iterar, tests del archivo tocado, ajuste fino largo → subagente.
+  Para usar o extender la librería leer primero `sprites_lib/MAPA.md` (firmas, componentes, anclas) y abrir solo el
+  archivo que haga falta; si cambia la API, regenerarlo con `.venv/bin/python -m sprites_lib.mapa`.
+  `pytest` por defecto saltea los tests lentos (volumen); `-m ""` corre todos, solo al cerrar la rama.
 
 ## Kit de sprites
 | Qué | Dónde |

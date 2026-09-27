@@ -18,7 +18,7 @@ def test_ficha_del_mago_es_valida(mago):
     assert mago["_nombre"] == "mago"
 
 
-@pytest.mark.parametrize("estilo", ["stardew", "volumen", "lateral"])
+@pytest.mark.parametrize("estilo", ["stardew", pytest.param("volumen", marks=pytest.mark.lento), "lateral"])
 def test_cada_componente_se_ve_en_alguna_direccion(mago, estilo):
     todo = render_todo(mago, estilo, poses=("quieto",))
     specs = next(iter(todo.values()))[0].specs

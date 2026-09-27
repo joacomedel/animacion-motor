@@ -21,7 +21,7 @@ from sprites_lib.exportar import exportar_direcciones
 from sprites_lib.ficha import FichaInvalida, cargar
 from sprites_lib.hoja_modelo import hoja
 from sprites_lib.poses import fps
-from sprites_lib.tests_personaje import correr_tests, informe_md
+from sprites_lib.tests_personaje import correr_tests, informe_md, t_recorte, t_tamano
 
 SALIDA = "salida"
 
@@ -56,7 +56,8 @@ def cmd_boceto(a):
     est = "stardew" if a.estilo == "todos" else a.estilo.split(",")[0]
     f = cargar(a.nombre, estilos=[est])
     dirs = [d for d in ("S", "E", "W") if d in ESTILOS[est]["direcciones"]] or ESTILOS[est]["direcciones"][:2]
-    cuadros = [render_cuadro(f, est, "quieto", 0, d).img for d in dirs]
+    crudos = [render_cuadro(f, est, "quieto", 0, d) for d in dirs]
+    cuadros = [c.img for c in crudos]
     cw, ch = cuadros[0].size
     z = max(4, 192 // ch)
     hoja = Image.new("RGB", (len(cuadros) * (cw * z + 16) + 16, ch * z + 32), (60, 58, 80))
@@ -68,6 +69,10 @@ def cmd_boceto(a):
     ruta = os.path.join(sal, "boceto.png")
     hoja.save(ruta)
     print(f"boceto ({est}: {', '.join(dirs)}) → {ruta}")
+    # resumen en números para no tener que abrir la imagen: alto y recorte (los tests completos van en `hoja`)
+    todo = {"quieto": crudos}
+    for r in (t_tamano(f, est, todo), t_recorte(todo)):
+        print(f"  {'OK' if r.ok else 'FALLA'} {r.regla}: {r.detalle}" + "".join(f"\n     - {e}" for e in r.evidencia[:3]))
     return 0
 
 

@@ -38,6 +38,9 @@ y commitear `personajes/aprobados/`.
 Recién con la hoja aprobada (fase 2 del diseño: poses clave medidas en referencias con `sprite-analizar`).
 
 ## Ahorro de tokens
+- Antes de escribir un componente nuevo, leer `sprites_lib/MAPA.md` y copiar el patrón de un componente parecido
+  (abrir solo ese archivo), no toda la librería.
+- `boceto` ya imprime alto y recorte: si dice FALLA, corregir antes de mostrar.
 - Números antes que imágenes: leer el resumen de la consola; abrir una imagen con Read solo antes de mostrarla o
   cuando un número no alcanza para entender el problema.
 - Un estilo por vez (`--estilo stardew`), no `todos`, mientras se itera.

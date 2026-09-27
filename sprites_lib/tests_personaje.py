@@ -1,6 +1,7 @@
 """Tests de consistencia de un personaje sobre todos sus cuadros renderizados (todas las poses y direcciones).
 Cada test devuelve un Resultado con la evidencia exacta (pose/dirección/cuadro) para poder corregir."""
 import contextlib
+import functools
 import io
 import os
 from dataclasses import dataclass, field
@@ -306,6 +307,13 @@ def t_distinto(ficha):
     return _res("distinto del elenco", fallas, f"se distingue de {', '.join(otros)}")
 
 
+@functools.lru_cache(maxsize=None)
+def _metricas_ref(ruta, celda, recorte, _mtime):
+    """La referencia no cambia entre tests: se mide una vez por proceso (mtime invalida si se reemplaza)."""
+    from .comparar_estilo import metricas
+    return metricas(ruta, celda, recorte)[0]
+
+
 def t_estilo(ficha, estilo, todo, carpeta):
     ref = ESTILOS[estilo].get("referencia")
     if not ref or not os.path.exists(ref["ruta"]):
@@ -319,7 +327,8 @@ def t_estilo(ficha, estilo, todo, carpeta):
     os.makedirs(carpeta, exist_ok=True)
     ruta = os.path.join(carpeta, "_estilo.png")
     tira.save(ruta)
-    r, _ = metricas(ref["ruta"], ref["celda"], ref.get("recorte"))
+    r = _metricas_ref(ref["ruta"], tuple(ref["celda"]), tuple(ref["recorte"]) if ref.get("recorte") else None,
+                      os.path.getmtime(ref["ruta"]))
     m, _ = metricas(ruta, (cw, ch))
     salida = io.StringIO()
     with contextlib.redirect_stdout(salida):

@@ -9,6 +9,7 @@ Flujo: Escena(camara) → primitivas (esfera, elipsoide, cápsula, faldón) con 
 El render hace z-buffer, 3 tonos por material según la luz, contorno interior (entre piezas y por salto de
 profundidad), detalles de 1 px visibles y contorno exterior.
 """
+import functools
 import math
 
 import numpy as np
@@ -100,9 +101,16 @@ def _mover(a, dy, dx, relleno):
 
 
 def _esfera_dirs(r, paso=.3):
-    n = max(8, int(2 * math.pi * r / paso))
+    return _dirs_n(max(8, int(2 * math.pi * r / paso)))
+
+
+@functools.lru_cache(maxsize=None)
+def _dirs_n(n):
+    """Direcciones de una esfera con n meridianos. Cacheado (se pide miles de veces por hoja); solo lectura."""
     th, ph = np.meshgrid(np.linspace(0, math.pi, n // 2 + 1), np.linspace(0, 2 * math.pi, n, endpoint=False))
-    return np.stack([np.sin(th) * np.cos(ph), np.sin(th) * np.sin(ph), np.cos(th)], -1)
+    d = np.stack([np.sin(th) * np.cos(ph), np.sin(th) * np.sin(ph), np.cos(th)], -1)
+    d.setflags(write=False)
+    return d
 
 
 class Escena:

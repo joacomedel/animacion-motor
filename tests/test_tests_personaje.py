@@ -95,6 +95,7 @@ def test_tatuaje_tapado_por_las_rastas_de_espaldas_no_es_falla(mago, todo_mago):
     assert not any("tatuaje_runas" in e and "/N/" in e for e in r.evidencia), r.evidencia
 
 
+@pytest.mark.lento
 def test_pies_en_iso_pueden_quedar_a_distinta_altura(mago):
     r = tp.t_tamano(mago, "volumen", render_todo(mago, "volumen", poses=("quieto",)))
     assert r.ok, r.evidencia
@@ -116,6 +117,7 @@ def test_lineas_guia_ignoran_direcciones_donde_el_ancla_no_se_ve():
     assert not any("visor@ojo_derecho" in e for e in r.evidencia), r.evidencia
 
 
+@pytest.mark.lento
 def test_lineas_guia_en_iso_descuentan_la_profundidad():
     clast = cargar("clast")
     r = tp.t_lineas_guia(clast, render_todo(clast, "volumen", poses=("quieto",)))

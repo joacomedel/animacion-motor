@@ -19,7 +19,7 @@ def test_ficha_de_clast_es_valida(clast):
     assert clast["identidad"]["nombre"] == "Clast"
 
 
-@pytest.mark.parametrize("estilo", ["stardew", "volumen", "lateral"])
+@pytest.mark.parametrize("estilo", ["stardew", pytest.param("volumen", marks=pytest.mark.lento), "lateral"])
 def test_cada_componente_se_ve_en_alguna_direccion(clast, estilo):
     todo = render_todo(clast, estilo, poses=("quieto",))
     specs = next(iter(todo.values()))[0].specs
