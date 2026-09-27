@@ -14,9 +14,16 @@ def _hacia_afuera(p, centro):
 
 def _detalles_metal(esc, ctx, p, segmentos, juntas):
     if p.get("rayas"):
+        # rayas de desgaste cada ~1.5 px, alternando de lado: detalle dibujado (sin esto el metal es una mancha lisa)
         col = ctx.paleta[p["rayas"]][1]
         for q0, q1, r in segmentos:
-            esc.detalle(q0 + (q1 - q0) * .5 + ctx.cam_local * r, col)
+            eje = q1 - q0
+            largo = float(np.linalg.norm(eje))
+            lat = perpendicular(eje / (largo + 1e-9))
+            n = max(2, int(largo / (1.5 * ctx.escala())))
+            for i in range(n):
+                t = (i + .5) / n
+                esc.detalle(q0 + eje * t + ctx.cam_local * r + lat * r * (.45 if i % 2 else -.45), col)
     if p.get("juntas"):
         col = ctx.paleta[p["juntas"]][1]
         for j, r in juntas:

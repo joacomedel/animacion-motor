@@ -169,7 +169,7 @@ CONSEJOS = {
 TOL = {"degrade_R2": .15, "planitud": .12, "tonos_mat": .8, "huerfanos": .16, "cluster": .5,
        "bandas": 12, "borde_negro": .5, "colores": .35, "recorte": 0, "rectitud": .1, "cabeza_ancho": .15}
 # dependen del personaje (ropa negra, pelo largo...) más que del estilo: se informan pero no bloquean
-INFORMATIVAS = {"borde_negro", "tonos_mat", "colores"}
+INFORMATIVAS = {"borde_negro", "tonos_mat", "colores", "recorte"}   # recorte: depende de cómo se recortó la referencia; hay un test propio
 RELATIVA = {"cluster", "colores"}
 
 

@@ -13,6 +13,21 @@ COLORES_GUIA = {"coronilla": (255, 120, 120), "ojos": (120, 220, 255), "hombros"
                 "cintura": (160, 255, 140), "suelo": (200, 200, 200)}
 
 
+FUENTES = ("/usr/share/fonts/google-noto/NotoSans-Regular.ttf",
+           "/usr/share/fonts/liberation-sans-fonts/LiberationSans-Regular.ttf",
+           "/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf")
+
+
+def _fuente(tam=11):
+    """Una TrueType con tildes y ñ si hay alguna instalada; si no, la de Pillow (sin tildes)."""
+    for ruta in FUENTES:
+        try:
+            return ImageFont.truetype(ruta, tam)
+        except OSError:
+            continue
+    return ImageFont.load_default()
+
+
 def _texto(d, xy, txt, col=(230, 230, 240), ancho=58, font=None):
     x, y = xy
     for linea in textwrap.wrap(str(txt), ancho) or [""]:
@@ -29,10 +44,11 @@ def hoja(ficha, estilo, todo, resultados, ruta):
     cw, ch = todo[(poses[0], dirs[0])][0].img.size
     colw, filah, panel = cw * Z + 16, ch * Z + 34, 440
     W = colw * len(dirs) + panel
-    H = max(filah * len(poses) + 20, 620)
+    lineas = 14 + 2 * len(ficha["componentes"]) + 2 * len(ficha["paleta"]) + len(resultados) + len(ficha["identidad"]["concepto"]) // 55
+    H = max(filah * len(poses) + 20, 40 + 15 * lineas)          # que entre todo el panel de texto
     im = Image.new("RGB", (W, H), FONDO)
     d = ImageDraw.Draw(im)
-    font = ImageFont.load_default()
+    font = _fuente()
     for r, pose in enumerate(poses):
         y0 = 22 + r * filah
         d.text((6, y0 - 18), f"pose: {pose}", fill=(255, 220, 90), font=font)

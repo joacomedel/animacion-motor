@@ -6,8 +6,8 @@ from sprites_lib.ficha import cargar
 
 
 def mask(c, i):
-    n = c.buf["comp_nombres"]
-    return (c.buf["comp"] == n.index(i)) if i in n else np.zeros(c.buf["comp"].shape, bool)
+    from sprites_lib.tests_personaje import mascara      # incluye las partes ('ojos@cara#ojo_izquierdo')
+    return mascara(c, i)
 
 
 @pytest.fixture(scope="module")

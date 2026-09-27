@@ -34,6 +34,7 @@ paleta:                               # tono base; el estilo deriva sombra y luz
   ropa:   {base: "#9c4a3c", por_que: "rojo ladrillo desgastado: complementario del verde, máximo contraste"}
   cuero:  {base: "#5a3a28", por_que: "cinturón"}
   cable:  {base: "#2e3238", por_que: "cables internos del muñón"}
+  pelo:   {base: "#3a302a", por_que: "pelo rapado oscuro: marca la forma de la cabeza (sin él es un bloque de piel)"}
   luz:    {base: "#5cf07a", emisivo: true,
            por_que: "verde: su color identitario; solo en detalles chicos (visor, chispas, juntas) para no competir con el rojo"}
 

@@ -5,8 +5,8 @@ from sprites_lib.ficha import cargar
 
 
 def pix(c, i):
-    n = c.buf["comp_nombres"]
-    return int((c.buf["comp"] == n.index(i)).sum()) if i in n else 0
+    from sprites_lib.tests_personaje import mascara      # incluye las partes ('ojos@cara#ojo_izquierdo')
+    return int(mascara(c, i).sum())
 
 
 @pytest.fixture(scope="module")

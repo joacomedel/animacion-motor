@@ -88,3 +88,41 @@ def test_informe(mago, todo_mago, tmp_path):
     assert {r.regla for r in res} >= {"visibilidad de componentes", "líneas guía", "paleta", "tamaño y pivote",
                                      "recorte", "cara visible", "simetría", "distinto del elenco",
                                      "estilo vs referencia", "partes ausentes"}
+
+
+def test_tatuaje_tapado_por_las_rastas_de_espaldas_no_es_falla(mago, todo_mago):
+    r = tp.t_visibilidad(mago, todo_mago)
+    assert not any("tatuaje_runas" in e and "/N/" in e for e in r.evidencia), r.evidencia
+
+
+def test_pies_en_iso_pueden_quedar_a_distinta_altura(mago):
+    r = tp.t_tamano(mago, "volumen", render_todo(mago, "volumen", poses=("quieto",)))
+    assert r.ok, r.evidencia
+
+
+def test_estilo_sin_calibrar_advierte_pero_no_bloquea(mago, monkeypatch):
+    from sprites_lib.estilos import ESTILOS
+    ref = dict(ESTILOS["lateral"]["referencia"], calibrada=False)
+    monkeypatch.setitem(ESTILOS["lateral"], "referencia", ref)
+    r = tp.t_estilo(mago, "lateral", render_todo(mago, "lateral", poses=("quieto",)), "salida/_prueba")
+    if r.omitido:
+        pytest.skip("sin referencia local")
+    assert r.ok and "sin calibrar" in r.detalle and r.evidencia
+
+
+def test_lineas_guia_ignoran_direcciones_donde_el_ancla_no_se_ve():
+    clast = cargar("clast")
+    r = tp.t_lineas_guia(clast, render_todo(clast, "stardew"))
+    assert not any("visor@ojo_derecho" in e for e in r.evidencia), r.evidencia
+
+
+def test_lineas_guia_en_iso_descuentan_la_profundidad():
+    clast = cargar("clast")
+    r = tp.t_lineas_guia(clast, render_todo(clast, "volumen", poses=("quieto",)))
+    assert r.ok, r.evidencia
+
+
+def test_mascara_incluye_las_partes_del_componente(todo_mago):
+    c = todo_mago[("quieto", "S")][0]
+    partes = [n for n in c.buf["comp_nombres"] if n.startswith("ojos@cara#")]
+    assert len(partes) == 2 and tp.mascara(c, "ojos@cara").sum() >= sum(tp.mascara(c, p).sum() for p in partes)

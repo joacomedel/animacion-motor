@@ -28,10 +28,10 @@ class Rastas(Componente):
         for i in range(n):
             ang = np.pi * (.5 + i / (n - 1))              # de un costado a otro pasando por la nuca
             pts = [hc + v(np.cos(ang) * rf * .95, np.sin(ang) * rl * .93, rz * .15)]   # asoman del volumen de la cabeza sin salirse de la celda
-            for j in range(1, pasos + 1):
+            for j in range(1, pasos + 1 - (i * 2) % 3):    # largos desparejos: la cortina no queda recta
                 sw = np.sin(j * .9 - ctx.ps["fase"] * 2 * np.pi + i) * .35 * s
                 pts.append(pts[-1] + v(-.2 * s + sw * .6, np.sin(ang) * .03 * s, -1.55 * s - (prev - bob) * .2 * s))
-            mat = spec["material"] if i % 2 else f'{spec["material"]}_b'
+            mat = f'{spec["material"]}_b' if i % 3 == 1 else spec["material"]
             for q0, q1 in zip(pts, pts[1:]):
                 esc.capsula(q0, q1, .85 * s, mat)
             if p["cuentas"] and i in (0, n - 1):
@@ -99,6 +99,9 @@ class TatuajeRunas(Componente):
         for q0, q1, r in segs:
             for k in (np.linspace(.3, .8, n) if n > 1 else [.5]):
                 esc.detalle(q0 + (q1 - q0) * k + ctx.cam_local * r, col)
+        # una runa junto al codo (el ancla del brazo): si se ve el brazo, se ven las runas
+        hom, codo = segs[0][0], segs[0][1]
+        esc.detalle(hom + (codo - hom) * .9 + ctx.cam_local * A.r_brazo, col)
 
 
 @registrar
@@ -127,8 +130,8 @@ class TunicaAbierta(Componente):
         sube = a["cintura"][2] - (A.pelvis_u + A.pelvis[2] * .8)
         lag = np.sin(2 * np.pi * (ctx.ps["fase"] - .1) * 2)
         hasta = {"hasta_rodilla": A.cadera_u * .45, "medio_muslo": A.cadera_u * .7, "tobillo": A.cadera_u * .12}[p["faldon"]]
-        pliegue = lambda d, t: np.where((np.floor(np.arctan2(d[..., 1], d[..., 0]) * 5 / np.pi) % 2) == 0,
-                                        m, f"{m}_b").astype(object)
+        pliegue = lambda d, t: np.where((np.floor(np.arctan2(d[..., 1], d[..., 0]) * 7 / np.pi) % 3) == 1,
+                                        f"{m}_b", m).astype(object)
         esc.faldon(a["cintura"], v(-A.H * .05 - .6 * lag * s, 0, hasta + sube), A.pelvis[1] * 1.0,
                    A.pelvis[1] * 1.3, pliegue)
         if p["mangas"]:

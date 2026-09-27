@@ -109,13 +109,13 @@ def anatomia(estilo, clase="adulto", complexion="normal"):
     )
 
 
-def centro_cara(cam_local):
+def centro_cara(cam_local, fuerza=.9):
     """Trampa de Stardew: la cara se corre hacia la cámara. De frente queda adelante; de perfil, sobre el costado
     visible (si no, desde el costado solo se ve pelo); de espaldas queda oculta."""
     ch = np.array([cam_local[0], cam_local[1], 0.0])
     n = np.linalg.norm(ch)
     ch = ch / n if n > 1e-9 else ch
-    c = np.array([1.0, 0, 0]) + .9 * ch
+    c = np.array([1.0, 0, 0]) + fuerza * ch
     return c / (np.linalg.norm(c) + 1e-9)
 
 
@@ -156,7 +156,7 @@ def posar(anat, ps, cam_local):
         a[f"muneca_{lado}"], a[f"mano_{lado}"] = codo + (mano - codo) * .8, mano
     rf, rl, rz = A.cabeza
     hc = v(.1 * esc, 0, A.cabeza_u + sube)
-    c = centro_cara(cam_local)
+    c = centro_cara(cam_local, ESTILOS[A.estilo]["proporciones"].get("cara_hacia_camara", .9))
     perp = np.array([-c[1], c[0], 0.0])                    # hacia la izquierda del personaje, sobre la cara
     cara = hc + np.array([c[0] * rf, c[1] * rl, 0.0]) * 1.02
     a.update(

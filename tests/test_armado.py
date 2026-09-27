@@ -14,8 +14,8 @@ FICHA = {
 
 
 def pix(c, comp_id):
-    n = c.buf["comp_nombres"]
-    return int((c.buf["comp"] == n.index(comp_id)).sum()) if comp_id in n else 0
+    from sprites_lib.tests_personaje import mascara      # incluye las partes ('ojos@cara#ojo_izquierdo')
+    return int(mascara(c, comp_id).sum())
 
 
 def test_registro_tiene_el_cuerpo_base():
@@ -82,3 +82,31 @@ def test_clase_grande_usa_su_celda():
     assert c.img.size == (32, 48)
     alto = celda("stardew", "grande")["gy"] - c.anclas_px["coronilla"][1]
     assert abs(alto - c.anat.alto_px) <= 1
+
+
+def test_cabeza_rapada_marca_la_zona_del_pelo():
+    """Sin material 'pelo', el rapado usa un tono de piel más oscuro (con 'pelo' usa ese color: otro test)."""
+    f = dict(FICHA, cuerpo=dict(FICHA["cuerpo"], cabello="rapado"), paleta={"piel": FICHA["paleta"]["piel"]})
+    c = render_cuadro(f, "stardew", "quieto", 0, "N")          # de espaldas: casi todo es cuero cabelludo
+    a = np.array(c.img)
+    n = c.buf["comp_nombres"]
+    m = c.buf["comp"] == n.index("cabeza_humana@cabeza")
+    from sprites_lib.paleta import paleta_estilo
+    rapado = set(paleta_estilo(f["paleta"], ESTILOS["stardew"])["piel_b"])
+    colores = {tuple(int(x) for x in p) for p in a[m][:, :3]}
+    assert colores & rapado                                    # la zona del pelo corto tiene su propio tono
+
+
+def test_rapado_usa_el_color_de_pelo_si_existe():
+    from sprites_lib.paleta import paleta_estilo
+    f = dict(FICHA, cuerpo=dict(FICHA["cuerpo"], cabello="rapado"))
+    c = render_cuadro(f, "stardew", "quieto", 0, "N")
+    m = c.buf["comp"] == c.buf["comp_nombres"].index("cabeza_humana@cabeza")
+    colores = {tuple(int(x) for x in p) for p in np.array(c.img)[m][:, :3]}
+    assert colores & set(paleta_estilo(f["paleta"], ESTILOS["stardew"])["pelo"])
+
+
+def test_la_cabeza_tiene_orejas():
+    c = render_cuadro(FICHA, "stardew", "quieto", 0, "S")
+    m = c.buf["comp"] == c.buf["comp_nombres"].index("cabeza_humana@cabeza")
+    assert len(set(c.buf["pieza"][m].tolist())) >= 2          # cabeza y orejas con contorno propio

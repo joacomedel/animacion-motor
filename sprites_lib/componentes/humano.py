@@ -23,15 +23,25 @@ class CabezaHumana(Componente):
 
     def dibujar(self, esc, ctx, spec):
         entrar(esc, ctx, spec)
-        c = centro_cara(ctx.cam_local)
+        c = centro_cara(ctx.cam_local, ctx.est["proporciones"].get("cara_hacia_camara", .9))
         corto = spec["parametros"]["cabello"] == "corto"
 
         def mat(d):
+            frente = d[..., 0] * c[0] + d[..., 1] * c[1]
             m = np.full(d.shape[:-1], "piel", dtype=object)
+            if not corto:
+                # rapado: la zona del pelo corto (arriba y atrás) va en el color de pelo (o un tono de piel más oscuro);
+                # si no, la cabeza es un bloque liso de piel
+                zona = (d[..., 2] > .35) | ((frente < -.25) & (d[..., 2] > -.35))
+                base = "pelo" if "pelo" in ctx.paleta else "piel_b"
+                ang = np.arctan2(d[..., 1], -d[..., 0])
+                veta = (np.floor(ang * 9 / np.pi) % 3) == 1 if base == "pelo" else np.zeros(d.shape[:-1], bool)
+                m[zona] = base
+                m[zona & veta] = "pelo_b"                     # textura de pelo corto (detalle dibujado)
             if corto:
                 frente = d[..., 0] * c[0] + d[..., 1] * c[1]
                 ang = np.arctan2(d[..., 1], -d[..., 0])
-                pelo = np.where((np.floor(ang * 7 / np.pi) % 2) == 0, "pelo", "pelo_b")     # mechones
+                pelo = np.where((np.floor(ang * 9 / np.pi) % 3) == 1, "pelo_b", "pelo")     # mechones: 1 de cada 3
                 m = np.where((frente > .62) & (d[..., 2] < .42), "piel", pelo).astype(object)
             return m
 
@@ -39,6 +49,13 @@ class CabezaHumana(Componente):
             esc.caja(ctx.a["cabeza"], ctx.anat.cabeza, mat, n=3.2)
         else:
             esc.elipsoide(ctx.a["cabeza"], ctx.anat.cabeza, mat)
+        # orejas: pieza propia (contorno propio); rompen la silueta cuadrada y agregan detalle dibujado
+        entrar(esc, ctx, spec, 1)
+        s, rz = ctx.escala(), ctx.anat.cabeza[2]
+        for lado in ("derecha", "izquierda"):
+            sien = ctx.a[f"sien_{lado}"]
+            hacia_centro = (ctx.a["cabeza"] - sien) * np.array([0, .05, 0])        # pegadas a la cabeza, pero asomando
+            esc.esfera(sien + hacia_centro + v(0, 0, -rz * .45), .7 * s, "piel")
 
 
 @registrar
@@ -58,6 +75,7 @@ class Ojos(Componente):
         for nombre, e, lado in (("ojo_izquierdo", izq, 1), ("ojo_derecho", der, -1)):
             if p["solo"] and nombre != p["solo"]:
                 continue
+            esc.componente = f'{spec["id"]}#{nombre}'      # cada ojo es una parte: se mide por separado
             if ctx.est["ojos"] == "stardew":
                 esc.detalle(e + v(0, 0, 1.0 * s), oscuro)              # pestaña
                 esc.detalle(e, BLANCO)
@@ -65,7 +83,15 @@ class Ojos(Componente):
             else:
                 esc.detalle(e, BLANCO)
                 esc.detalle(e - perp * lado * .6 * s, oscuro)
+        esc.componente = f'rostro@{spec["ancla"]}'     # cejas, nariz y boca aparte: las líneas guía miden los ojos
         esc.detalle(ctx.a["cara"] + v(0, 0, -ctx.anat.cabeza[2] * .55), _oscuro(pal["piel"][0], .8))   # boca
+        esc.detalle(ctx.a["cara"] + v(.3 * s, 0, -ctx.anat.cabeza[2] * .3), pal["piel"][0])           # sombra de nariz
+        ceja = pal["pelo"][0] if "pelo" in pal else _oscuro(pal["piel"][0], .6)
+        for nombre, e, lado in (("ojo_izquierdo", izq, 1), ("ojo_derecho", der, -1)):
+            if p["solo"] and nombre != p["solo"]:
+                continue
+            for k in (0, 1):                                                                       # cejas de 2 px
+                esc.detalle(e + v(0, 0, 2.0 * s) - perp * lado * k * .9 * s, ceja)
 
 
 @registrar

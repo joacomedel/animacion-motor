@@ -93,3 +93,10 @@ def test_el_antebrazo_nunca_se_estira():
                 for s, lado in (("derecho", "derecha"), ("izquierdo", "izquierda")):
                     largo = np.linalg.norm(a[f"mano_{lado}"] - a[f"codo_{s}"])
                     assert largo <= A.antebrazo + .01, (est, pose, s, largo, A.antebrazo)
+
+
+def test_de_perfil_la_cara_mira_hacia_adelante_en_lateral():
+    """La trampa de Stardew (cara hacia la cámara) no aplica en plataformas: de perfil, la cara mira hacia donde va."""
+    A = anatomia("lateral")
+    a = posar(A, cuadros("quieto")[0], np.array([0.0, -1.0, 0.0]))     # cámara del lado derecho
+    assert abs(a["cara"][1] - a["cabeza"][1]) < A.cabeza[1] * .35

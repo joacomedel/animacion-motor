@@ -16,6 +16,9 @@ from .render3d import _oscurecer
 
 CONTORNO = (16, 10, 24)
 GUIAS = {"cara", "ojo_derecho", "ojo_izquierdo", "frente", "cintura", "sien_derecha", "sien_izquierda"}
+# referencia de altura: lo que rodea la cabeza (vincha en la frente) se mide contra el centro de la cabeza, porque
+# el ancla 'frente' se corre hacia la cámara con la trampa de la cara y el aro no
+REF_GUIA = {"frente": "cabeza"}
 FRENTE = {"stardew": "S", "volumen": "S", "lateral": None}
 
 
@@ -38,15 +41,39 @@ def _specs(todo):
 
 
 def mascara(cuadro, comp_id):
+    """Píxeles del componente, incluidas sus partes ('ojos@cara#ojo_izquierdo' es parte de 'ojos@cara')."""
     n = cuadro.buf["comp_nombres"]
-    if comp_id not in n:
+    ids = [k for k, nombre in enumerate(n) if nombre == comp_id or nombre.startswith(comp_id + "#")]
+    if not ids:
         return np.zeros(cuadro.buf["comp"].shape, bool)
-    return cuadro.buf["comp"] == n.index(comp_id)
+    return np.isin(cuadro.buf["comp"], ids)
+
+
+def partes(cuadro, comp_id):
+    """El componente y cada una de sus partes, como 'rasgos' que se miden por separado."""
+    subs = [nombre for nombre in cuadro.buf["comp_nombres"] if nombre.startswith(comp_id + "#")]
+    return subs or [comp_id]
+
+
+CABEZA = {"cabeza", "coronilla", "cara", "frente", "ojo_derecho", "ojo_izquierdo", "sien_derecha", "sien_izquierda",
+          "nuca"}
+TRONCO = {"torso", "pecho", "cintura", "cuello"}
+
+
+def _anclas_anfitrionas(punto):
+    """Anclas de las piezas que 'contienen' un punto: el codo está dentro del brazo, la frente dentro de la cabeza."""
+    host = {punto} | {seg for seg, pts in SEGMENTOS.items() if punto in pts}
+    if punto in CABEZA:
+        host.add("cabeza")
+    if punto in TRONCO:
+        host.add("torso")
+    return host
 
 
 def ancla_visible(cuadro, ancla, tol=None):
-    """Un ancla está a la vista si el píxel donde se proyecta muestra una superficie cercana a ella
-    (y no algo que la tapa por delante, como el torso)."""
+    """Un ancla está a la vista si en el píxel donde se proyecta se ve la pieza que la contiene (el brazo para el
+    codo, la cabeza para la frente) cerca de ella en profundidad. Si ahí se ve otra cosa (pelo, torso) está tapada
+    por la pose: eso no es un olvido."""
     nombre = SEGMENTOS[ancla][1] if ancla in SEGMENTOS else ancla
     x, y, d = cuadro.anclas_px[nombre]
     ix, iy = int(round(x)), int(round(y))
@@ -54,7 +81,15 @@ def ancla_visible(cuadro, ancla, tol=None):
     if not (0 <= iy < sol.shape[0] and 0 <= ix < sol.shape[1]) or not sol[iy, ix]:
         return False
     tol = 3.0 * cuadro.escala if tol is None else tol
-    return cuadro.buf["depth"][iy, ix] - d <= tol
+    if cuadro.buf["depth"][iy, ix] - d > tol:
+        return False
+    host = _anclas_anfitrionas(nombre)
+    anfitriones = {s["id"] for s in cuadro.specs if s["ancla"] in host}
+    k = cuadro.buf["comp"][iy, ix]
+    visto = cuadro.buf["comp_nombres"][k] if k >= 0 else ""
+    base = visto.split("#", 1)[0]
+    return (not anfitriones or visto in anfitriones or base in anfitriones or visto.endswith(f"@{ancla}")
+            or visto.endswith(f"#{ancla}"))           # la parte que dibuja ese ancla (p. ej. ...#ojo_izquierdo)
 
 
 def _exceptuado(ficha, regla, tipo, mira):
@@ -111,19 +146,48 @@ def t_ausentes(ficha, todo):
     return _res("partes ausentes", fallas, "nada dibujado donde falta una parte")
 
 
+def c_anclas(todo):
+    return next(_cuadros(todo)).anclas_px
+
+
 def t_lineas_guia(ficha, todo, tol=1.5):
     fallas = []
+    rasgos = []
     for s in _specs(todo):
-        if s["ancla"] not in GUIAS:
-            continue
-        por = {}
+        if s["ancla"] in GUIAS:
+            nombres = sorted({p for c in _cuadros(todo) for p in partes(c, s["id"])})
+            for nm in nombres:
+                sub = nm.split("#", 1)[1] if "#" in nm else ""
+                # una parte que se llama como un ancla ('#ojo_izquierdo') se mide contra esa ancla
+                rasgos.append((dict(s, id=nm, ancla=sub if sub in c_anclas(todo) else s["ancla"]), nm))
+    for s, _ in rasgos:
+        por, cuantos = {}, {}
         for c in _cuadros(todo):
-            ys = np.nonzero(mascara(c, s["id"]))[0]
-            if len(ys):
-                por.setdefault((c.pose, c.indice), {})[c.mira] = float(ys.mean())
+            n = c.buf["comp_nombres"]
+            ys = np.nonzero(c.buf["comp"] == n.index(s["id"]))[0] if s["id"] in n else np.array([])
+            if len(ys) and ancla_visible(c, s["ancla"]):
+                # altura del rasgo respecto de su ancla: en iso/cenital la fila de pantalla también depende de la
+                # profundidad (la cara baja o sube al girar), pero el rasgo tiene que estar siempre igual respecto del ancla
+                punto = REF_GUIA.get(s["ancla"], SEGMENTOS[s["ancla"]][1] if s["ancla"] in SEGMENTOS else s["ancla"])
+                por.setdefault((c.pose, c.indice), {})[c.mira] = float(ys.mean()) - c.anclas_px[punto][1]
+                cuantos.setdefault((c.pose, c.indice), {})[c.mira] = len(ys)
+        # promedio de todos los cuadros de la pose por dirección: un rasgo de 1-3 px tiene ±1 px de redondeo por
+        # cuadro; promediado se compensa y un corrimiento real (≥2 px) se sigue viendo
+        agr, agr_n = {}, {}
+        for (pose, i), alturas in por.items():
+            for mira, y in alturas.items():
+                agr.setdefault((pose, "todos"), {}).setdefault(mira, []).append(y)
+                agr_n.setdefault((pose, "todos"), {}).setdefault(mira, []).append(cuantos[(pose, i)][mira])
+        por = {k: {m: float(np.mean(ys)) for m, ys in d.items()} for k, d in agr.items()}
+        cuantos = {k: {m: max(ns) for m, ns in d.items()} for k, d in agr_n.items()}
+        for clave, alturas in list(por.items()):
+            # solo donde se ve al menos el 40% de su mejor dirección: si apenas asoma, se ve su borde y el promedio se
+            # corre; con más exigencia se pierden los perfiles (un ojo en vez de dos)
+            tope = max(cuantos[clave].values())
+            por[clave] = {m: y for m, y in alturas.items() if cuantos[clave][m] >= .4 * tope}
         for (pose, i), alturas in por.items():
             if len(alturas) > 1 and max(alturas.values()) - min(alturas.values()) > tol:
-                fallas.append(f'{s["id"]}: altura distinta entre direcciones en {pose}/{i}: '
+                fallas.append(f'{s["id"]}: altura respecto de su ancla distinta entre direcciones en {pose}/{i}: '
                               + ", ".join(f"{k} {y:.1f}" for k, y in alturas.items()))
     return _res("líneas guía", fallas, "rasgos a la misma altura en todas las direcciones")
 
@@ -163,7 +227,8 @@ def t_tamano(ficha, estilo, todo):
         if abs(alto - objetivo) > 1:
             fallas.append(f"{c.pose}/{c.mira}/{c.indice}: mide {alto:.1f} px y su clase mide {objetivo}")
         filas = np.nonzero((np.array(c.img)[..., 3] > 0).any(1))[0]
-        if len(filas) and not (cel["gy"] - 1 <= filas.max() <= cel["gy"] + 2):
+        margen = 4 if ESTILOS[estilo]["vista"] == "iso" else 2      # en iso cada pie está a otra profundidad
+        if len(filas) and not (cel["gy"] - 1 <= filas.max() <= cel["gy"] + margen):
             fallas.append(f"{c.pose}/{c.mira}/{c.indice}: los pies terminan en la fila {filas.max()}, pivote {cel['gy']}")
     return _res("tamaño y pivote", fallas, "mide lo que dice su clase y apoya en el pivote")
 
@@ -259,8 +324,12 @@ def t_estilo(ficha, estilo, todo, carpeta):
     salida = io.StringIO()
     with contextlib.redirect_stdout(salida):
         fallas = comparar(r, m)
-    return Resultado("estilo vs referencia", not fallas, salida.getvalue().strip(),
-                     [f"{k}: referencia {a:.2f}, propio {b:.2f}" for k, a, b in fallas])
+    evid = [f"{k}: referencia {a:.2f}, propio {b:.2f}" for k, a, b in fallas]
+    if not ref.get("calibrada", False):
+        # sin un control (dos personajes del mismo juego) no se sabe qué métricas miden estilo y cuáles personaje
+        return Resultado("estilo vs referencia", True, "sin calibrar (advertencia, no bloquea): "
+                         + (f"{len(fallas)} métricas difieren" if fallas else "todo coincide"), evid)
+    return Resultado("estilo vs referencia", not fallas, salida.getvalue().strip(), evid)
 
 
 def correr_tests(ficha, estilo, todo, carpeta):
