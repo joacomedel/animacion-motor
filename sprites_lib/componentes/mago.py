@@ -27,13 +27,13 @@ class Rastas(Componente):
         bob, prev = ctx.ps["bob"], ctx.ps["bob_prev"]
         for i in range(n):
             ang = np.pi * (.5 + i / (n - 1))              # de un costado a otro pasando por la nuca
-            pts = [hc + v(np.cos(ang) * rf * 1.1, np.sin(ang) * rl * 1.02, rz * .15)]
+            pts = [hc + v(np.cos(ang) * rf * .95, np.sin(ang) * rl * .93, rz * .15)]   # asoman del volumen de la cabeza sin salirse de la celda
             for j in range(1, pasos + 1):
                 sw = np.sin(j * .9 - ctx.ps["fase"] * 2 * np.pi + i) * .35 * s
-                pts.append(pts[-1] + v(-.35 * s + sw, np.sin(ang) * .06 * s, -1.55 * s - (prev - bob) * .2 * s))
+                pts.append(pts[-1] + v(-.2 * s + sw * .6, np.sin(ang) * .03 * s, -1.55 * s - (prev - bob) * .2 * s))
             mat = spec["material"] if i % 2 else f'{spec["material"]}_b'
             for q0, q1 in zip(pts, pts[1:]):
-                esc.capsula(q0, q1, .95 * s, mat)
+                esc.capsula(q0, q1, .85 * s, mat)
             if p["cuentas"] and i in (0, n - 1):
                 esc.detalle(pts[-1] + ctx.cam_local * .9 * s + v(0, 0, -.6 * s), ctx.paleta[p["cuentas"]][1])
 
