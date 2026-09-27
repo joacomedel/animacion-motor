@@ -174,6 +174,7 @@ class Escena:
                   None if conservar is None else conservar(d))
 
     def capsula(self, a, b, r, mat, tapas=True):
+        """mat: nombre, o función(dirs, t)->array de nombres (t∈[0,1] de a hacia b; las tapas usan t=0 y t=1)."""
         a, b = np.asarray(a, float), np.asarray(b, float)
         ax = b - a; L = np.linalg.norm(ax) + 1e-9; ax /= L
         e1 = np.cross(ax, [0, 0, 1.0])
@@ -183,9 +184,13 @@ class Escena:
         t, ang = np.meshgrid(np.linspace(0, L, int(L / .3) + 2),
                              np.linspace(0, 2 * math.pi, max(8, int(2 * math.pi * r / .3)), endpoint=False))
         d = np.cos(ang)[..., None] * e1 + np.sin(ang)[..., None] * e2
-        self._add(a + t[..., None] * ax + r * d, d, mat)
+        self._add(a + t[..., None] * ax + r * d, d, mat if isinstance(mat, str) else mat(d, t / L))
         if tapas:
-            self.esfera(a, r, mat); self.esfera(b, r, mat)
+            if isinstance(mat, str):
+                self.esfera(a, r, mat); self.esfera(b, r, mat)
+            else:
+                self.esfera(a, r, lambda dd: mat(dd, np.zeros(dd.shape[:-1])))
+                self.esfera(b, r, lambda dd: mat(dd, np.ones(dd.shape[:-1])))
 
     def faldon(self, arriba, abajo, r1, r2, mat, conservar=lambda d: d[..., 0] < .35, recorte=None):
         """Tronco de cono (túnica, capa, falda). conservar(dirs) decide qué ángulos existen (por defecto abierto

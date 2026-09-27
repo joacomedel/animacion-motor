@@ -18,19 +18,23 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `brazo_humano` · brazo_derecho, brazo_izquierdo · piel · —
 - `brazo_robotico` · brazo_derecho, brazo_izquierdo · metal · juntas=None, rayas=None, mano='pinza_3_dedos'
 - `brazo_robotico_amputado` · brazo_derecho, brazo_izquierdo · metal · termina_en=None, juntas=None
+- `brazo_skin` · brazo_derecho, brazo_izquierdo · — · skin=None
 - `cabeza_humana` · cabeza · piel · cabello='corto'
+- `cabeza_skin` · cabeza · — · skin=None
 - `cables_nuca` · nuca · cable · cables=2, luz_en_punta=None, largo='corto'
 - `cinturon` · cintura · cuero · hebilla=None
 - `munon_cables` · codo_derecho, codo_izquierdo, rodilla_derecha, rodilla_izquierda · cable · cables=3, largo_px=2, chispa=None, chispa_cada_cuadros=3
 - `ojos` · cara · — · solo=None, iris=None
 - `pierna_humana` · pierna_derecha, pierna_izquierda · piel · calzado=None
 - `pierna_robotica` · pierna_derecha, pierna_izquierda · metal · juntas=None, rodilla='piston', pie='bota_metalica'
+- `pierna_skin` · pierna_derecha, pierna_izquierda · — · skin=None
 - `placa_sien` · sien_derecha, sien_izquierda · metal · —
 - `pulsera` · muneca_derecha, muneca_izquierda · oro · grosor=1.0
 - `rastas` · cabeza · pelo · cantidad=6, largo='hombros', cuentas=None
 - `remera_larga_rota` · torso · ropa · largo='medio_muslo', jirones=3, sin_mangas=True
 - `tatuaje_runas` · brazo_derecho, brazo_izquierdo · runa · puntos_por_segmento=1
 - `torso_humano` · torso · piel · —
+- `torso_skin` · torso · — · skin=None
 - `tunica_abierta` · torso · tunica · interior=None, ribete=None, faldon='hasta_rodilla', mangas=True
 - `vincha` · frente · oro · gema=None
 - `visor` · ojo_derecho, ojo_izquierdo · metal · lente=None, tamano_min_px=2
@@ -151,6 +155,16 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `medir(estilo='lpc', pose='caminar_lpc', mira='E')` Por cuadro: silueta (IoU) y error de cada hueso; el muñeco se corre en x una sola vez para toda la tira.
 - `imagen(res, ruta, zoom=6)` Tres filas: LPC, nuestro muñeco y siluetas superpuestas (azul LPC, rojo nuestro, violeta coinciden)
 - `resumen(res)`
+
+### `skins` — Skins tipo Minecraft: el muñeco base y sus animaciones son siempre los mismos; un personaje es solo un PNG de
+- `material(c)`
+- clase `Skin`  · métodos: color, zona, paleta
+- `cargar(ruta)`
+- `u_de(d, ref=0.0)` Ángulo alrededor del eje vertical → u (0.5 = hacia ref, que por defecto es adelante).
+- `desde_colores(colores, ruta)` Skin simple a partir de colores (como la skin por defecto de Minecraft): pelo arriba y atrás, remera con
+- `ficha(ruta, nombre=None)` Ficha mínima para renderizar una skin con el pipeline de siempre (render_cuadro, tests, exportar).
+- `guia(ruta, zoom=16)` PNG ampliado con cada zona rotulada y el frente marcado: la plantilla para pintar una skin a mano.
+- `demo(ruta, anim='caminar_lpc', estilo='stardew')`
 
 ### `componentes` — Biblioteca de componentes: cada pieza de un personaje (cabeza, brazo robótico, pulsera...) sabe dibujarse
 - clase `Componente`  · métodos: dibujar

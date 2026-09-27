@@ -65,4 +65,4 @@ def perpendicular(eje):
     return p / np.linalg.norm(p)
 
 
-from . import humano, mago, robot, ropa  # noqa: E402,F401  (registra todos los componentes)
+from . import humano, mago, robot, ropa, skin  # noqa: E402,F401  (registra todos los componentes)

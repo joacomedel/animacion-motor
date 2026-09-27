@@ -12,6 +12,10 @@ from .render3d import Escena
 BASE_HUMANO = [("cabeza_humana", "cabeza"), ("ojos", "cara"), ("torso_humano", "torso"),
                ("brazo_humano", "brazo_izquierdo"), ("brazo_humano", "brazo_derecho"),
                ("pierna_humana", "pierna_izquierda"), ("pierna_humana", "pierna_derecha")]
+# muñeco con skin (sprites_lib/skins.py): mismas piezas, el color sale del PNG de la skin
+BASE_SKIN = [("cabeza_skin", "cabeza"), ("ojos", "cara"), ("torso_skin", "torso"),
+             ("brazo_skin", "brazo_izquierdo"), ("brazo_skin", "brazo_derecho"),
+             ("pierna_skin", "pierna_izquierda"), ("pierna_skin", "pierna_derecha")]
 
 
 def _lista(x):
@@ -26,12 +30,15 @@ def expandir(ficha):
     ocupadas = {(p["tipo"], p["ancla"]) for p in propios}
     sustituidas = set((cu.get("sustituciones") or {}).keys())
     base = []
-    for tipo, an in BASE_HUMANO:
+    con_skin = cu.get("base") == "skin"
+    for tipo, an in BASE_SKIN if con_skin else BASE_HUMANO:
         if an in sustituidas or (tipo, an) in ocupadas:
             continue
         b = {"tipo": tipo, "ancla": an}
         if tipo == "cabeza_humana":
             b["parametros"] = {"cabello": cu.get("cabello", "corto")}
+        elif con_skin:
+            b["parametros"] = {"iris": "iris"} if tipo == "ojos" else {"skin": cu["skin"]}
         base.append(b)
     specs = []
     for i, s in enumerate(base + propios):
