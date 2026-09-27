@@ -16,7 +16,7 @@ TOPES = {"identidad", "cuerpo", "paleta", "componentes", "reglas_globales", "exc
          "objeciones_resueltas", "creditos", "estilos"}
 CLAVES_CUERPO = {"base", "clase_altura", "complexion", "piel", "cabello", "sustituciones", "ausentes"}
 CLAVES_COMP = {"tipo", "ancla", "material", "parametros", "por_que", "reglas", "nuevo"}
-CABELLOS = {"rapado", "corto"}
+CABELLOS = {"rapado", "corto", "cresta"}
 REGLAS_COMP = {"visible_si_ancla_visible", "siempre_visible", "simetrico"}
 REGLAS_GLOBALES = {"paleta_identica_entre_direcciones", "lineas_guia", "nada_recortado", "tamano_de_clase",
                    "cara_visible_en", "distinto_de"}

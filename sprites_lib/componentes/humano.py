@@ -24,7 +24,8 @@ class CabezaHumana(Componente):
     def dibujar(self, esc, ctx, spec):
         entrar(esc, ctx, spec)
         c = centro_cara(ctx.cam_local, ctx.est["proporciones"].get("cara_hacia_camara", .9))
-        corto = spec["parametros"]["cabello"] == "corto"
+        cabello = spec["parametros"]["cabello"]
+        corto = cabello == "corto"
 
         def mat(d):
             frente = d[..., 0] * c[0] + d[..., 1] * c[1]
@@ -49,6 +50,17 @@ class CabezaHumana(Componente):
             esc.caja(ctx.a["cabeza"], ctx.anat.cabeza, mat, n=3.2)
         else:
             esc.elipsoide(ctx.a["cabeza"], ctx.anat.cabeza, mat)
+        if cabello == "cresta":
+            # cresta: de la nuca a la frente, más alta adelante y terminando en punta hacia donde mira.
+            # De perfil la silueta de la cabeza señala la dirección (como las rastas del mago señalan la nuca).
+            entrar(esc, ctx, spec, 2)
+            rf, rl, rz = ctx.anat.cabeza
+            hc, s = ctx.a["cabeza"], ctx.escala()
+            pts = [hc + v(rf * t, 0, rz * (.95 + .12 * (t + 1))) for t in (-.9, -.45, 0, .45, .85)]
+            pts.append(hc + v(rf * 1.25, 0, rz * 1.0))                     # punta hacia adelante
+            for i, (q0, q1) in enumerate(zip(pts, pts[1:])):
+                esc.capsula(q0, q1, (.9 + .15 * i) * s, "pelo" if i % 2 == 0 else "pelo_b")
+            entrar(esc, ctx, spec, 0)
         # nariz: asoma hacia donde mira; de perfil es lo que dice "para allá va"
         A = ctx.anat
         esc.esfera(ctx.a["cabeza"] + v(A.cabeza[0] * .98, 0, -A.cabeza[2] * .3), .55 * ctx.escala(), "piel")

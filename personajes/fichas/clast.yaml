@@ -19,7 +19,7 @@ cuerpo:
   clase_altura: adulto                # misma altura que el mago: son del mismo mundo
   complexion: normal
   piel: clara
-  cabello: rapado                     # para que se vean la placa y los cables de la nuca
+  cabello: cresta                     # costados rapados (se ven la placa y los cables) + cresta que marca el frente
   sustituciones:                      # partes del cuerpo base reemplazadas por componentes
     brazo_izquierdo: brazo_robotico
     brazo_derecho: brazo_robotico_amputado
@@ -84,7 +84,7 @@ componentes:
     ancla: nuca
     por_que: "conexión del visor: se ven de espaldas y cuentan que es cyborg"
     material: cable
-    parametros: {cables: 2, luz_en_punta: luz}
+    parametros: {cables: 3, luz_en_punta: luz, largo: hombros}
     reglas: [visible_si_ancla_visible]
     nuevo: true
   - tipo: remera_larga_rota
@@ -131,6 +131,9 @@ decisiones:                              # registro de la entrevista
   - {pregunta: "color de ropa", respuesta: "rojo ladrillo desgastado", motivo: "complementario del verde"}
   - {pregunta: "piel", respuesta: "clara", motivo: "contrasta con rojo y gris; distinta del mago"}
   - {pregunta: "complexión", respuesta: "adulto normal", motivo: "misma altura que el mago"}
+
+  - {pregunta: "cabeza poco legible de perfil (feedback del boceto)", respuesta: "algo que caiga atrás + pelo con forma",
+     motivo: "cresta que apunta hacia adelante y cables largos atrás: la silueta dice hacia dónde mira"}
 
 objeciones_resueltas:
   - "En 16×32 la cara mide ~6 px: visor de al menos 2 px y en color emisivo para que se lea."

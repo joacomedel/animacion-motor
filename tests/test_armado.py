@@ -110,3 +110,13 @@ def test_la_cabeza_tiene_orejas():
     c = render_cuadro(FICHA, "stardew", "quieto", 0, "S")
     m = c.buf["comp"] == c.buf["comp_nombres"].index("cabeza_humana@cabeza")
     assert len(set(c.buf["pieza"][m].tolist())) >= 2          # cabeza y orejas con contorno propio
+
+
+def test_cresta_es_una_pieza_que_asoma_hacia_adelante():
+    f = dict(FICHA, cuerpo=dict(FICHA["cuerpo"], cabello="cresta"))
+    c = render_cuadro(f, "stardew", "quieto", 0, "E")          # de perfil, mirando a la derecha
+    m = c.buf["comp"] == c.buf["comp_nombres"].index("cabeza_humana@cabeza")
+    piezas = set(c.buf["pieza"][m].tolist())
+    assert len(piezas) >= 3                                    # cabeza, orejas y cresta
+    xs = np.nonzero(m)[1]
+    assert xs.max() - c.anclas_px["cabeza"][0] > c.anclas_px["cabeza"][0] - xs.min() - 1   # asoma hacia adelante

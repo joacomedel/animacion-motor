@@ -169,16 +169,19 @@ class CablesNuca(Componente):
     tipo = "cables_nuca"
     anclas_validas = ("nuca",)
     material_defecto = "cable"
-    params_defecto = {"cables": 2, "luz_en_punta": None}
+    params_defecto = {"cables": 2, "luz_en_punta": None, "largo": "corto"}
     params_material = ("luz_en_punta",)
 
     def dibujar(self, esc, ctx, spec):
         o, e, p = ctx.a["nuca"], ctx.escala(), spec["parametros"]
         n = max(1, int(p["cables"]))
         entrar(esc, ctx, spec)
+        caida = {"corto": 2.2, "hombros": 5.5}[p["largo"]]              # largos: dan la "masa atrás" de la cabeza
         for i in range(n):
             lat = (i - (n - 1) / 2) * 1.4 * e
-            fin = o + v(-1.6 * e, lat, -2.2 * e)
-            esc.capsula(o + v(-.2 * e, lat, 0), fin, .42 * e, spec["material"])
+            medio = o + v(-1.4 * e, lat, -caida * .45 * e)
+            fin = o + v(-2.0 * e, lat * 1.2, -caida * e)
+            esc.capsula(o + v(-.2 * e, lat, 0), medio, .45 * e, spec["material"])
+            esc.capsula(medio, fin, .45 * e, spec["material"])
             if p["luz_en_punta"]:
                 esc.detalle(fin + ctx.cam_local * .4 * e, ctx.paleta[p["luz_en_punta"]][1])
