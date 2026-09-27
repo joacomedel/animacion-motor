@@ -30,7 +30,7 @@ class CabezaHumana(Componente):
         def mat(d):
             frente = d[..., 0] * c[0] + d[..., 1] * c[1]
             m = np.full(d.shape[:-1], "piel", dtype=object)
-            if not corto:
+            if cabello not in ("corto", "calvo"):
                 # rapado: la zona del pelo corto (arriba y atrás) va en el color de pelo (o un tono de piel más oscuro);
                 # si no, la cabeza es un bloque liso de piel
                 zona = (d[..., 2] > .35) | ((frente < -.25) & (d[..., 2] > -.35))

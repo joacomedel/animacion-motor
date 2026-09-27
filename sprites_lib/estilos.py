@@ -34,7 +34,8 @@ ESTILOS = {
         celda=dict(cw=16, ch=32, gx=8, gy=30),
         render=dict(umbrales=(.12, .82), contorno="color", interior="color", oscurecer=.45, sombreado="borde"),
         proporciones=dict(cabezas=2.2, cabeza_frac=.36, piernas_frac=.29, hombros_frac=.12, brazos_frac=.74,
-                          forma_cabeza="caja", bajar_punos=0, cara_hacia_camara=.55, luz=(-.25, .75, .6)),   # .9 dejaba el perfil de frente
+                          forma_cabeza="caja", bajar_punos=0, cara_hacia_camara=.55, luz=(-.25, .75, .6),   # .9 dejaba el perfil de frente
+                          paso=.7),        # celda de 16 px: el paso completo de LPC saca el pie de la celda
         tonos=dict(sombra=(.66, (70, 40, 120), .25), luz=(1.22, (255, 236, 160), .2)),
         ojos="stardew",
         referencia=dict(ruta="referencias/stardew/abigail.png", celda=(16, 32), recorte=(0, 0, 64, 128),

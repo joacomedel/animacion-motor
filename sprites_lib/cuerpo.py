@@ -77,6 +77,7 @@ class Anatomia:
     r_pie: float
     escala_rig: float
     bajar_punos: float
+    paso: float = 1.0          # cuánto del largo de paso del ciclo entra en la celda del estilo
 
 
 def anatomia(estilo, clase="adulto", complexion="normal"):
@@ -105,7 +106,7 @@ def anatomia(estilo, clase="adulto", complexion="normal"):
         brazo=brazos * .51, antebrazo=brazos * .49,
         r_muslo=H * .048 * grosor, r_canilla=H * .041 * grosor, r_brazo=H * .035 * grosor,
         r_antebrazo=H * .033 * grosor, r_mano=H * .046 * grosor, r_pie=r_pie,
-        escala_rig=(muslo + canilla) / 14.0, bajar_punos=pr["bajar_punos"] * H / 37,
+        escala_rig=(muslo + canilla) / 14.0, bajar_punos=pr["bajar_punos"] * H / 37, paso=pr.get("paso", 1.0),
     )
 
 
@@ -140,7 +141,7 @@ def posar(anat, ps, cam_local):
         m = masc(lado)
         pie, ang = (ps["pie_a"], ps["ang_a"]) if s < 0 else (ps["pie_b"], ps["ang_b"])
         cad = cad_c + v(0, s * A.cadera_l, 0)
-        tob = v((pie[0] - 18) * k, s * A.cadera_l, (34 - pie[1]) * k + A.r_pie * .3)
+        tob = v((pie[0] - 18) * k * A.paso, s * A.cadera_l, (34 - pie[1]) * k + A.r_pie * .3)
         rod = ik_3d(cad, tob, A.muslo, A.canilla, (1.0, 0, 0))          # rodilla adelante
         r = math.radians(ang)
         a[f"cadera_{lado}"], a[f"rodilla_{lado}"] = cad, rod

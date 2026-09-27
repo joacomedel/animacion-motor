@@ -21,8 +21,8 @@ REF_HUESOS = "referencias/caminar/lpc_E_huesos.json"
 SALIDA = "salida/plantillas/caminar_lpc"
 MUNECO = {
     "identidad": {"nombre": "muñeco base"},
-    "cuerpo": {"base": "humano", "clase_altura": "adulto", "complexion": "normal", "cabello": "rapado"},
-    "paleta": {"piel": {"base": "#f9d5ba"}, "pelo": {"base": "#f9d5ba"}},
+    "cuerpo": {"base": "humano", "clase_altura": "adulto", "complexion": "normal", "cabello": "calvo"},
+    "paleta": {"piel": {"base": "#f9d5ba"}},
     "componentes": [],
 }
 # criterio (px a escala LPC): error medio y peor caso. El peor caso admite 4 px porque la plantilla es simétrica y
