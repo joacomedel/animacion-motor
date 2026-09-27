@@ -61,6 +61,7 @@ componentes:
     nuevo: true
   - tipo: pierna_robotica
     ancla: [pierna_izquierda, pierna_derecha]
+    por_que: "prótesis industriales: lo mecánico domina de la cintura para abajo"
     material: metal
     parametros: {juntas: luz, rodilla: piston, pie: bota_metalica}
     reglas: [visible_si_ancla_visible, simetrico]
@@ -74,11 +75,13 @@ componentes:
     nuevo: true
   - tipo: placa_sien
     ancla: sien_derecha
+    por_que: "implante del mismo lado del daño"
     material: metal
     reglas: [visible_si_ancla_visible]
     nuevo: true
   - tipo: cables_nuca
     ancla: nuca
+    por_que: "conexión del visor: se ven de espaldas y cuentan que es cyborg"
     material: cable
     parametros: {cables: 2, luz_en_punta: luz}
     reglas: [visible_si_ancla_visible]
@@ -91,11 +94,13 @@ componentes:
     nuevo: true
   - tipo: cinturon
     ancla: cintura
+    por_que: "sostiene la remera y marca la cintura"
     material: cuero
     parametros: {hebilla: metal}
     nuevo: true
   - tipo: ojos
     ancla: cara
+    por_que: "solo el ojo izquierdo es humano; el derecho está bajo el visor"
     parametros: {solo: ojo_izquierdo}     # el derecho queda cubierto por el visor
 
 reglas_globales:
