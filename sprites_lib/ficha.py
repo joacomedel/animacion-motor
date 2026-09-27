@@ -8,7 +8,7 @@ import yaml
 from .componentes import REGISTRO
 from .cuerpo import COMPLEXIONES, PADRE, SEGMENTOS, VOCABULARIO, anclas_ausentes
 from .escala import CLASES
-from .estilos import ESTILOS
+from .estilos import ESTILOS, VERIFICACION
 from .paleta import HEX
 
 CARPETA = os.path.join("personajes", "fichas")
@@ -83,7 +83,7 @@ def validar(f, estilos=None):
     if cu.get("cabello", "corto") == "corto" and "pelo" not in pal:
         e.append("paleta: falta 'pelo' (cabello: corto)")
     materiales = set(pal) | {f"{m}_b" for m in pal} | ({"mano"} if "piel" in pal else set())
-    estilos = estilos or f.get("estilos") or list(ESTILOS)
+    estilos = estilos or f.get("estilos") or [k for k in ESTILOS if k not in VERIFICACION]
     for est in estilos:
         if est not in ESTILOS:
             e.append(f"estilo desconocido {est!r}{_sug(est, ESTILOS)}")

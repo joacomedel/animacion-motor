@@ -11,6 +11,9 @@ TAMANOS = {
                     celdas={"nino": (56, 60), "adulto": (56, 60), "grande": (72, 76), "gigante": (88, 96)}),
     "lateral": dict(adulto_px=33, pie_desde_abajo=2,
                     celdas={"nino": (40, 40), "adulto": (40, 40), "grande": (48, 52), "gigante": (64, 64)}),
+    # solo para verificar plantillas de movimiento contra LPC (celda y alto de la referencia)
+    "lpc": dict(adulto_px=43, pie_desde_abajo=5,     # contorno + pie redondo suman 3 px: queda de 46 como LPC
+                celdas={"nino": (64, 64), "adulto": (64, 64), "grande": (64, 64), "gigante": (64, 64)}),
 }
 
 

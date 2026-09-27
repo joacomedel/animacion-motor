@@ -77,7 +77,8 @@ def test_vocabulario_y_padres():
 
 
 def test_poses():
-    assert set(POSES) == {"neutra", "quieto"}
+    assert set(POSES) == {"neutra", "quieto", "caminar_lpc"}
+    assert [ps["bob"] for ps in cuadros("caminar_lpc")] == [1, 1, 0, 0, 1, 1, 0, 0]
     assert [ps["bob"] for ps in cuadros("quieto")] == [0, 0, 1, 1]
     assert [ps["cuadro"] for ps in cuadros("quieto")] == [0, 1, 2, 3]
     with pytest.raises(KeyError, match="pose desconocida"):

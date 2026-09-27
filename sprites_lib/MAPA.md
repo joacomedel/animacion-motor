@@ -8,6 +8,7 @@ Flujo: ficha YAML → `ficha.cargar` → `armado.render_cuadro` (cuerpo base + c
 | volumen | iso | SE E NE N NW W SW S | 36 | 56×60 | no |
 | stardew | cenital | S E N W | 26 | 16×32 | sí |
 | lateral | lateral | E W | 33 | 40×40 | sí |
+| lpc | lateral | E W | 43 | 64×64 | no |
 
 ## Anclas
 antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, cadera_derecha, cadera_izquierda, cara, cintura, codo_derecho, codo_izquierdo, coronilla, cuello, frente, hombro_derecho, hombro_izquierdo, mano_derecha, mano_izquierda, muneca_derecha, muneca_izquierda, nuca, ojo_derecho, ojo_izquierdo, pecho, pie_derecho, pie_izquierdo, pierna_derecha, pierna_izquierda, rodilla_derecha, rodilla_izquierda, sien_derecha, sien_izquierda, suelo, tobillo_derecho, tobillo_izquierdo, torso
@@ -145,6 +146,11 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 
 ### `lado_a_lado` — Comparación visual ampliada: cuadros de referencia y propios intercalados, para revisarlos con Read.
 - `lado_a_lado(salida, items, zoom=14)`
+
+### `comparar_plantilla` — Comparar una plantilla de movimiento contra la referencia de la que salió: huesos y silueta, cuadro por cuadro.
+- `medir(estilo='lpc', pose='caminar_lpc', mira='E')` Por cuadro: silueta (IoU) y error de cada hueso; el muñeco se corre en x una sola vez para toda la tira.
+- `imagen(res, ruta, zoom=6)` Tres filas: LPC, nuestro muñeco y siluetas superpuestas (azul LPC, rojo nuestro, violeta coinciden)
+- `resumen(res)`
 
 ### `componentes` — Biblioteca de componentes: cada pieza de un personaje (cabeza, brazo robótico, pulsera...) sabe dibujarse
 - clase `Componente`  · métodos: dibujar

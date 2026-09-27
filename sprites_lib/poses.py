@@ -1,7 +1,7 @@
 """Poses clave como datos (mismo formato que los ciclos: rig lateral, piso y=34, cadera x=18).
 Fase 1: 'neutra' (pose A de construcción) y 'quieto' (respiración). Las animaciones de la fase 2 serán
 secuencias de poses clave aprobadas."""
-from .ciclos import QUIETO
+from .ciclos import CAMINAR_LPC, QUIETO
 from .ciclos import pose as _pose
 
 NEUTRA = dict(
@@ -9,7 +9,7 @@ NEUTRA = dict(
     bob=[0], pie=[(18, 32.5)], pie_ang=[0], mano=dict(cx=20, ax=0, y0=27.5, ay=0), lag_faldon=1,
     abrir_brazos=1.4,                         # 2.2 se sale de una celda de 16 px
 )
-POSES = {"neutra": NEUTRA, "quieto": QUIETO}
+POSES = {"neutra": NEUTRA, "quieto": QUIETO, "caminar_lpc": CAMINAR_LPC}
 
 
 def cuadros(nombre):

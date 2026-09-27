@@ -57,10 +57,22 @@ ESTILOS = {
         paleta="rampas de 3-5 tonos por material; contorno negro también por dentro",
         ciclos=["correr", "quieto"],
     ),
+    "lpc": dict(
+        descripcion="Solo verificación: el muñeco al tamaño y proporciones de la referencia LPC (cabeza 45%), "
+                    "para comparar plantillas de movimiento hueso por hueso y silueta contra silueta.",
+        vista="lateral", direcciones=["E", "W"],       # LPC de perfil: los dos pies sobre la misma línea
+        render=dict(umbrales=(.12, .82), contorno="negro", interior="color", oscurecer=.45, sombreado="borde"),
+        proporciones=dict(cabezas=2.2, cabeza_frac=.45, piernas_frac=.30, hombros_frac=.12, brazos_frac=1.2,
+                          forma_cabeza="esfera", bajar_punos=0, cara_hacia_camara=.55, luz=(-.25, .75, .6)),
+        tonos=dict(sombra=(.66, (70, 40, 120), .25), luz=(1.22, (255, 236, 160), .2)),
+        ojos="punto", referencia=None, paleta="piel base de LPC", ciclos=["caminar_lpc"],
+    ),
 }
 
 # estilos que se generan por defecto ("--estilo todos"); volumen queda disponible pero el usuario prefiere stardew
 ACTIVOS = ["stardew", "lateral"]
+# estilos que no son del juego: solo sirven para verificar plantillas contra su referencia (no se validan en fichas)
+VERIFICACION = ["lpc"]
 
 _UZ = {"iso": .92, "cenital": .92, "lateral": 1.0}
 
