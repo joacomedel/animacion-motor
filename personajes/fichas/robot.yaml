@@ -1,0 +1,134 @@
+# Ficha de personaje — resultado de la entrevista del 2026-09-27
+# Estado: borrador para APROBACIÓN 1 (todavía no hay generador: se implementa en la fase 1)
+
+identidad:
+  nombre: "Cable"                     # provisorio, a confirmar
+  concepto: >
+    Cyborg sobreviviente: un humano al que le reemplazaron brazos y piernas por prótesis
+    industriales. Perdió el antebrazo derecho en una pelea reciente; el muñón quedó con los
+    cables arrancados y todavía chispea. Conserva el torso y la cara humanos, con un visor
+    y una placa en la sien del mismo lado del daño.
+  rol: protagonista                   # "no importa" → se trata como protagonista: todas las direcciones, máxima legibilidad
+  silueta_clave: "brazo derecho que termina en el codo + visor verde brillante"
+  lectura_por_lado: >
+    Todo el daño está del lado derecho (muñón, visor, placa): mirando a la derecha (E) se ve
+    "la máquina rota"; mirando a la izquierda (W) se ve "el humano".
+
+cuerpo:
+  base: humano
+  clase_altura: adulto                # misma altura que el mago: son del mismo mundo
+  complexion: normal
+  piel: clara
+  cabello: rapado                     # para que se vean la placa y los cables de la nuca
+  sustituciones:                      # partes del cuerpo base reemplazadas por componentes
+    brazo_izquierdo: brazo_robotico
+    brazo_derecho: brazo_robotico_amputado
+    pierna_izquierda: pierna_robotica
+    pierna_derecha: pierna_robotica
+  ausentes: [antebrazo_derecho, muneca_derecha, mano_derecha]
+
+paleta:                               # tono base; el estilo deriva sombra y luz
+  piel:   {base: "#e8b894", por_que: "piel clara: lo humano que le queda"}
+  metal:  {base: "#8a929c", por_que: "gris acero rayado: prótesis industriales, usadas pero cuidadas"}
+  metal_raya: {base: "#c4ccd4", por_que: "rayas claras del acero: desgaste"}
+  ropa:   {base: "#9c4a3c", por_que: "rojo ladrillo desgastado: complementario del verde, máximo contraste"}
+  cuero:  {base: "#5a3a28", por_que: "cinturón"}
+  cable:  {base: "#2e3238", por_que: "cables internos del muñón"}
+  luz:    {base: "#5cf07a", emisivo: true,
+           por_que: "verde: su color identitario; solo en detalles chicos (visor, chispas, juntas) para no competir con el rojo"}
+
+componentes:
+  - tipo: brazo_robotico
+    ancla: brazo_izquierdo
+    material: metal
+    parametros: {juntas: luz, rayas: metal_raya, mano: pinza_3_dedos}
+    por_que: "prótesis completa del lado sano"
+    reglas: [visible_si_ancla_visible]
+    nuevo: true
+  - tipo: brazo_robotico_amputado
+    ancla: brazo_derecho
+    material: metal
+    parametros: {termina_en: codo_derecho}
+    por_que: "perdió el antebrazo en una pelea reciente"
+    reglas: [visible_si_ancla_visible, ausente_mas_alla_de_codo_derecho]
+    nuevo: true
+  - tipo: munon_cables
+    ancla: codo_derecho
+    material: cable
+    parametros: {cables: 3, largo_px: 2, chispa: luz, chispa_cada_cuadros: 3}
+    por_que: "arrancado, con cables: cuenta que el daño es reciente"
+    reglas: [visible_si_ancla_visible]
+    nuevo: true
+  - tipo: pierna_robotica
+    ancla: [pierna_izquierda, pierna_derecha]
+    material: metal
+    parametros: {juntas: luz, rodilla: piston, pie: bota_metalica}
+    reglas: [visible_si_ancla_visible, simetrico]
+    nuevo: true
+  - tipo: visor
+    ancla: ojo_derecho
+    material: metal
+    parametros: {lente: luz, tamano_min_px: 2}
+    por_que: "implante sobre el ojo derecho, del mismo lado del daño"
+    reglas: [visible_si_ancla_visible]
+    nuevo: true
+  - tipo: placa_sien
+    ancla: sien_derecha
+    material: metal
+    reglas: [visible_si_ancla_visible]
+    nuevo: true
+  - tipo: cables_nuca
+    ancla: nuca
+    material: cable
+    parametros: {cables: 2, luz_en_punta: luz}
+    reglas: [visible_si_ancla_visible]
+    nuevo: true
+  - tipo: remera_larga_rota
+    ancla: torso
+    material: ropa
+    parametros: {largo: medio_muslo, jirones: 3, sin_mangas: true}
+    por_que: "una sola prenda larga: muy legible a baja resolución"
+    nuevo: true
+  - tipo: cinturon
+    ancla: cintura
+    material: cuero
+    parametros: {hebilla: metal}
+    nuevo: true
+  - tipo: ojos
+    ancla: cara
+    parametros: {solo: ojo_izquierdo}     # el derecho queda cubierto por el visor
+
+reglas_globales:
+  - paleta_identica_entre_direcciones
+  - lineas_guia                          # ojos/visor, hombros y cinturón a la misma altura en todas las direcciones
+  - nada_recortado
+  - tamano_de_clase                      # alto = adulto del estilo, igual que el mago
+  - cara_visible_en: [S, E, W]
+  - distinto_de: [mago]                  # silueta y paleta distinguibles del resto del elenco
+
+excepciones:
+  - regla: visible_si_ancla_visible
+    componente: munon_cables
+    direcciones: [W]
+    motivo: "de perfil hacia la izquierda el codo derecho queda del lado lejano, tapado por el torso (oclusión por pose)"
+
+decisiones:                              # registro de la entrevista
+  - {pregunta: "rol", respuesta: "no importa", motivo: "se trata como protagonista: lo más exigente sirve para cualquier rol"}
+  - {pregunta: "lado del antebrazo faltante", respuesta: "derecho", motivo: "elección del usuario"}
+  - {pregunta: "historia del muñón", respuesta: "arrancado, con cables", motivo: "daño reciente, más dramático"}
+  - {pregunta: "cabeza", respuesta: "humana con implantes (visor, placa en la sien, cables en la nuca)", motivo: "elección del usuario"}
+  - {pregunta: "lado del visor", respuesta: "derecho, cabeza rapada",
+     motivo: "concentra el daño de un lado; rapado para que se vean placa y cables"}
+  - {pregunta: "torso", respuesta: "ropa gastada: remera larga rota + cinturón", motivo: "una prenda grande se lee mejor que varias chicas"}
+  - {pregunta: "color identitario", respuesta: "verde", motivo: "se distingue del cian del mago"}
+  - {pregunta: "metal", respuesta: "gris acero rayado", motivo: "elección del usuario"}
+  - {pregunta: "color de ropa", respuesta: "rojo ladrillo desgastado", motivo: "complementario del verde"}
+  - {pregunta: "piel", respuesta: "clara", motivo: "contrasta con rojo y gris; distinta del mago"}
+  - {pregunta: "complexión", respuesta: "adulto normal", motivo: "misma altura que el mago"}
+
+objeciones_resueltas:
+  - "En 16×32 la cara mide ~6 px: visor de al menos 2 px y en color emisivo para que se lea."
+  - "El verde solo en detalles chicos: si ocupara superficie grande competiría con el rojo."
+  - "El muñón se tapa de perfil hacia la izquierda: se declaró como excepción por oclusión, no como error."
+
+creditos: []                            # no se usaron referencias externas para este personaje
