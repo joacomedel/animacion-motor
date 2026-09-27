@@ -287,6 +287,22 @@ def ik_sagital(a, b, l1, l2, doblez):
     return v(k[0], a[1], -k[1])
 
 
+def ik_3d(a, b, l1, l2, polo):
+    """IK de dos huesos en 3D: la articulación intermedia se dobla hacia 'polo' (p. ej. (1,0,0) rodilla adelante,
+    (-1,0,0) codo atrás). A diferencia de ik_sagital, respeta desplazamientos laterales (brazos abiertos)."""
+    a, b, polo = np.asarray(a, float), np.asarray(b, float), np.asarray(polo, float)
+    eje = b - a
+    dist = max(1e-9, float(np.linalg.norm(eje)))
+    u = eje / dist
+    d = max(1e-3, min(dist, l1 + l2 - 1e-3))
+    k = (l1 * l1 - l2 * l2 + d * d) / (2 * d)
+    h = math.sqrt(max(0.0, l1 * l1 - k * k))
+    p = polo - (polo @ u) * u
+    n = np.linalg.norm(p)
+    p = p / n if n > 1e-9 else np.array([0.0, 0.0, 0.0])
+    return a + u * k + p * h
+
+
 def sombra(camara, rx=10.0, ry=4.6, col=(10, 8, 18, 210)):
     """Sombra 2:1 con dithering bajo el punto de apoyo."""
     cw, ch = camara.cw, camara.ch
