@@ -13,7 +13,7 @@ import sys
 from sprites_lib import fotos_control
 from sprites_lib.armado import render_todo
 from sprites_lib.escala import celda
-from sprites_lib.estilos import ESTILOS
+from sprites_lib.estilos import ACTIVOS, ESTILOS
 from sprites_lib.exportar import exportar_direcciones
 from sprites_lib.ficha import FichaInvalida, cargar
 from sprites_lib.hoja_modelo import hoja
@@ -24,7 +24,7 @@ SALIDA = "salida"
 
 
 def _estilos(arg):
-    return list(ESTILOS) if arg == "todos" else arg.split(",")
+    return list(ACTIVOS) if arg == "todos" else arg.split(",")
 
 
 def _generar(nombre, estilo):

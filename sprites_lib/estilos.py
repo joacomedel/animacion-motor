@@ -59,6 +59,9 @@ ESTILOS = {
     ),
 }
 
+# estilos que se generan por defecto ("--estilo todos"); volumen queda disponible pero el usuario prefiere stardew
+ACTIVOS = ["stardew", "lateral"]
+
 _UZ = {"iso": .92, "cenital": .92, "lateral": 1.0}
 
 
