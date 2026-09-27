@@ -61,3 +61,14 @@ _UZ = {"iso": .92, "cenital": .92, "lateral": 1.0}
 def uz(estilo):
     """Cuántos px de pantalla ocupa 1 unidad de altura del mundo en ese estilo."""
     return _UZ[ESTILOS[estilo]["vista"]]
+
+
+def crear_camara(estilo, mira, celda):
+    """Cámara del estilo para una dirección y una celda (ver escala.celda)."""
+    from .render3d import Camara, CamaraCenital, CamaraLateral
+    e = ESTILOS[estilo]
+    if mira not in e["direcciones"]:
+        raise ValueError(f"{mira!r} no es una dirección del estilo {estilo}: {', '.join(e['direcciones'])}")
+    luz = e["proporciones"]["luz"]
+    clase = {"iso": Camara, "cenital": CamaraCenital, "lateral": CamaraLateral}[e["vista"]]
+    return clase(mira, luz=luz, **celda)
