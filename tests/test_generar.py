@@ -57,3 +57,11 @@ def test_fotos_de_control_detectan_cambios(tmp_path, monkeypatch):
     r = fotos_control.comparar("mago", "stardew", todo, str(tmp_path / "dif"))
     assert not r.ok and "neutra_S_0.png" in r.evidencia[0]
     assert os.path.exists(tmp_path / "dif" / "neutra_S_0.png")
+
+
+def test_boceto_rapido_una_sola_imagen(tmp_path, monkeypatch):
+    monkeypatch.setattr(generar, "SALIDA", str(tmp_path))
+    assert generar.main(["boceto", "clast"]) == 0
+    img = Image.open(tmp_path / "clast" / "boceto.png")
+    assert img.width > img.height                          # frente y perfil lado a lado
+    assert not (tmp_path / "clast" / "stardew").exists()   # no corre la generación completa

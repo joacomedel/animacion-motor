@@ -1,5 +1,6 @@
 """CLI de personajes desde fichas.
 
+  .venv/bin/python -m personajes.generar boceto  <nombre> [--estilo stardew]   (rápido: frente y perfil, sin tests)
   .venv/bin/python -m personajes.generar validar <nombre|ruta.yaml> [--estilo todos]
   .venv/bin/python -m personajes.generar hoja    <nombre> --estilo stardew|volumen|lateral|todos
   .venv/bin/python -m personajes.generar tests   <nombre> --estilo ...
@@ -11,7 +12,9 @@ import os
 import sys
 
 from sprites_lib import fotos_control
-from sprites_lib.armado import render_todo
+from PIL import Image
+
+from sprites_lib.armado import render_cuadro, render_todo
 from sprites_lib.escala import celda
 from sprites_lib.estilos import ACTIVOS, ESTILOS
 from sprites_lib.exportar import exportar_direcciones
@@ -46,6 +49,26 @@ def _resumen(estilo, res):
         for e in r.evidencia[:5]:
             print(f"       - {e}")
     return 1 if mal else 0
+
+
+def cmd_boceto(a):
+    """Primer vistazo para pedir feedback: un estilo, frente y perfil, pose quieto, sin tests ni exportación."""
+    est = "stardew" if a.estilo == "todos" else a.estilo.split(",")[0]
+    f = cargar(a.nombre, estilos=[est])
+    dirs = [d for d in ("S", "E", "W") if d in ESTILOS[est]["direcciones"]] or ESTILOS[est]["direcciones"][:2]
+    cuadros = [render_cuadro(f, est, "quieto", 0, d).img for d in dirs]
+    cw, ch = cuadros[0].size
+    z = max(4, 192 // ch)
+    hoja = Image.new("RGB", (len(cuadros) * (cw * z + 16) + 16, ch * z + 32), (60, 58, 80))
+    for i, im in enumerate(cuadros):
+        grande = im.resize((cw * z, ch * z), Image.NEAREST)
+        hoja.paste(grande, (16 + i * (cw * z + 16), 16), grande)
+    sal = os.path.join(SALIDA, f["_nombre"])
+    os.makedirs(sal, exist_ok=True)
+    ruta = os.path.join(sal, "boceto.png")
+    hoja.save(ruta)
+    print(f"boceto ({est}: {', '.join(dirs)}) → {ruta}")
+    return 0
 
 
 def cmd_validar(a):
@@ -92,13 +115,13 @@ def cmd_aprobar(a):
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="personajes.generar", description="Personajes consistentes desde fichas")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for n in ("validar", "hoja", "tests", "aprobar"):
+    for n in ("boceto", "validar", "hoja", "tests", "aprobar"):
         p = sub.add_parser(n)
         p.add_argument("nombre")
         p.add_argument("--estilo", default="todos")
     a = ap.parse_args(argv)
     try:
-        return {"validar": cmd_validar, "hoja": cmd_hoja, "tests": cmd_tests, "aprobar": cmd_aprobar}[a.cmd](a)
+        return {"boceto": cmd_boceto, "validar": cmd_validar, "hoja": cmd_hoja, "tests": cmd_tests, "aprobar": cmd_aprobar}[a.cmd](a)
     except FileNotFoundError as e:
         print(f"error: {e}", file=sys.stderr)
         return 2

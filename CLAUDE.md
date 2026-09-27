@@ -8,16 +8,20 @@
   comando con permiso automático).
 - Al terminar una animación, abrirla con `xdg-open` para que el usuario la vea.
 - La exportación es genérica (PNG + JSON + GIF): el motor del juego todavía no está definido.
+- **Forma de trabajo:** mostrar algo rápido y pedir feedback en cada etapa (boceto antes de afinar); como máximo 2
+  vueltas de corrección propias antes de consultar; estilos activos: stardew y lateral (volumen solo si se pide).
+- **Tokens:** números antes que imágenes, un estilo por vez al iterar, tests del archivo tocado, ajuste fino largo → subagente.
 
 ## Kit de sprites
 | Qué | Dónde |
 |---|---|
-| Skills | `.claude/skills/`: `sprite-referencia`, `sprite-analizar`, `sprite-estilo`, `sprite-2d-lateral`, `sprite-isometrico`, `pixel-art-video` |
+| Skills | `.claude/skills/`: `sprite-personaje`, `sprite-referencia`, `sprite-analizar`, `sprite-estilo`, `sprite-2d-lateral`, `sprite-isometrico`, `pixel-art-video` |
 | Librería común | `sprites_lib/`: `ciclos` (movimientos medidos), `rig` (IK), `pixel2d` (capas lateral), `render3d` (motor 3D: iso 8 direcciones o cenital 4), `estilos` (perfiles de look: volumen, stardew), `referencia` (cortar sheets), `analizar` (medir), `exportar` |
-| Personajes (plantillas) | `personajes/mago_lateral.py`, `personajes/mago_iso.py`, `personajes/mago_stardew.py` → copiar para personajes nuevos |
+| Personajes | fichas en `personajes/fichas/*.yaml` → `personajes/generar.py` (boceto/validar/hoja/tests/aprobar); aprobados en `personajes/aprobados/`. `personajes/mago_*.py` = versión anterior sin ficha |
 | Salida del juego | `salida/<personaje>/<anim>/` |
 | Referencias descargadas | `referencias/` (y `sprites_x/`: Mega Man X separado en 14 animaciones) |
 | Experimentos anteriores | `mago/`, `el_llamado/`, `prueba/` (no usar como base; la versión vigente está en `personajes/`) |
 
 Un sprite = personaje (`personajes/`) + movimiento (`ciclos`) + estilo (`estilos`).
+Personaje nuevo → skill `sprite-personaje` (entrevista → ficha → boceto → hoja + tests → aprobación → animaciones).
 Flujo típico: referencia → analizar movimiento y/o estilo → personaje → revisar cuadros ampliados contra la referencia → exportar.
