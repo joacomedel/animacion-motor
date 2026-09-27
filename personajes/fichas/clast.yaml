@@ -6,12 +6,12 @@ identidad:
   concepto: >
     Cyborg sobreviviente: un humano al que le reemplazaron brazos y piernas por prótesis
     industriales. Perdió el antebrazo derecho en una pelea reciente; el muñón quedó con los
-    cables arrancados y todavía chispea. Conserva el torso y la cara humanos, con un visor
-    y una placa en la sien del mismo lado del daño.
+    cables arrancados y todavía chispea. Conserva el torso y la cara humanos, con una placa
+    en la sien del mismo lado del daño.
   rol: protagonista                   # "no importa" → se trata como protagonista: todas las direcciones, máxima legibilidad
-  silueta_clave: "brazo derecho que termina en el codo + visor verde brillante"
+  silueta_clave: "brazo derecho que termina en el codo + cresta que apunta hacia adelante"
   lectura_por_lado: >
-    Todo el daño está del lado derecho (muñón, visor, placa): mirando a la derecha (E) se ve
+    Todo el daño está del lado derecho (muñón y placa): mirando a la derecha (E) se ve
     "la máquina rota"; mirando a la izquierda (W) se ve "el humano".
 
 cuerpo:
@@ -36,7 +36,7 @@ paleta:                               # tono base; el estilo deriva sombra y luz
   cable:  {base: "#2e3238", por_que: "cables internos del muñón"}
   pelo:   {base: "#3a302a", por_que: "pelo rapado oscuro: marca la forma de la cabeza (sin él es un bloque de piel)"}
   luz:    {base: "#5cf07a", emisivo: true,
-           por_que: "verde: su color identitario; solo en detalles chicos (visor, chispas, juntas) para no competir con el rojo"}
+           por_que: "verde: su color identitario; solo en detalles chicos (chispas, juntas, cables) para no competir con el rojo"}
 
 componentes:
   - tipo: brazo_robotico
@@ -67,13 +67,6 @@ componentes:
     parametros: {juntas: luz, rodilla: piston, pie: bota_metalica}
     reglas: [visible_si_ancla_visible, simetrico]
     nuevo: true
-  - tipo: visor
-    ancla: ojo_derecho
-    material: metal
-    parametros: {lente: luz, tamano_min_px: 2}
-    por_que: "implante sobre el ojo derecho, del mismo lado del daño"
-    reglas: [visible_si_ancla_visible]
-    nuevo: true
   - tipo: placa_sien
     ancla: sien_derecha
     por_que: "implante del mismo lado del daño"
@@ -82,7 +75,7 @@ componentes:
     nuevo: true
   - tipo: cables_nuca
     ancla: nuca
-    por_que: "conexión del visor: se ven de espaldas y cuentan que es cyborg"
+    por_que: "cables del implante: caen atrás, marcan la nuca y cuentan que es cyborg"
     material: cable
     parametros: {cables: 3, luz_en_punta: luz, largo: hombros}
     reglas: [visible_si_ancla_visible]
@@ -101,12 +94,11 @@ componentes:
     nuevo: true
   - tipo: ojos
     ancla: cara
-    por_que: "solo el ojo izquierdo es humano; el derecho está bajo el visor"
-    parametros: {solo: ojo_izquierdo}     # el derecho queda cubierto por el visor
+    por_que: "los dos ojos humanos a la vista: se lee su expresión y hacia dónde mira"
 
 reglas_globales:
   - paleta_identica_entre_direcciones
-  - lineas_guia                          # ojos/visor, hombros y cinturón a la misma altura en todas las direcciones
+  - lineas_guia                          # ojos, hombros y cinturón a la misma altura en todas las direcciones
   - nada_recortado
   - tamano_de_clase                      # alto = adulto del estilo, igual que el mago
   - cara_visible_en: [S, E, W]
@@ -135,8 +127,10 @@ decisiones:                              # registro de la entrevista
   - {pregunta: "cabeza poco legible de perfil (feedback del boceto)", respuesta: "algo que caiga atrás + pelo con forma",
      motivo: "cresta que apunta hacia adelante y cables largos atrás: la silueta dice hacia dónde mira"}
 
+  - {pregunta: "visor (feedback del boceto)", respuesta: "sacarlo: que se vean ambos ojos",
+     motivo: "la cara se lee mejor con los dos ojos humanos"}
+
 objeciones_resueltas:
-  - "En 16×32 la cara mide ~6 px: visor de al menos 2 px y en color emisivo para que se lea."
   - "El verde solo en detalles chicos: si ocupara superficie grande competiría con el rojo."
   - "El muñón se tapa de perfil hacia la izquierda: se declaró como excepción por oclusión, no como error."
 
