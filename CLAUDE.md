@@ -14,6 +14,11 @@
   Para usar o extender la librería leer primero `sprites_lib/MAPA.md` (firmas, componentes, anclas) y abrir solo el
   archivo que haga falta; si cambia la API, regenerarlo con `.venv/bin/python -m sprites_lib.mapa`.
   `pytest` por defecto saltea los tests lentos (volumen); `-m ""` corre todos, solo al cerrar la rama.
+- **Subagentes** (`.claude/agents/`): `pintor-skins` (haiku) para skins y variantes, `revisor-sprites` (sonnet) para
+  revisar imágenes fuera del contexto principal (una imagen en el contexto se reenvía en cada turno),
+  `medidor-animaciones` (sonnet) para plantillas nuevas. Diseño del motor y revisión final de rama: opus (sesión
+  principal). Tareas de 1-2 comandos (correr tests, generar una demo): hacerlas directo, delegar cuesta más.
+  No cambiar de modelo a mitad de sesión (rompe la caché); `/compact` antes de una pausa larga.
 
 ## Kit de sprites
 | Qué | Dónde |
