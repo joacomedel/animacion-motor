@@ -215,7 +215,7 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `hash_archivo(ruta)` Hash `sha256:` de los bytes de un archivo; `sha256:falta` si no existe.
 - `escribir(carpeta, artefacto, fuentes, metricas, nota=None)` Congela un artefacto aprobado: escribe `<carpeta>/estado.json` y devuelve su ruta.
 - `leer(carpeta)` Carga `<carpeta>/estado.json`, o `None` si el artefacto no está aprobado.
-- `deriva(estado_dict, fuentes)` Claves de `fuentes` cuyo hash difiere del guardado (las que falten en el guardado también cuentan).
+- `deriva(estado_dict, fuentes)` Claves con hash distinto o ausentes de cualquiera de los dos lados (simétrico), ordenadas.
 - `listar(raiz)` Lista los artefactos aprobados bajo `raiz` (nombre, estilo, carpeta y estado), ordenados.
 
 ### `componentes` — Biblioteca de componentes: cada pieza de un personaje (cabeza, brazo robótico, pulsera...) sabe dibujarse

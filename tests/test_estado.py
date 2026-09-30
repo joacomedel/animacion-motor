@@ -11,6 +11,7 @@ def test_deriva_detecta_cambio():
     est = {"fuentes": {"ciclo": "sha256:aaa", "perfil": "sha256:bbb"}}
     assert estado.deriva(est, {"ciclo": "sha256:aaa", "perfil": "sha256:bbb"}) == []
     assert estado.deriva(est, {"ciclo": "sha256:nuevo", "perfil": "sha256:bbb"}) == ["ciclo"]
+    assert estado.deriva({"fuentes": {"a": "sha256:1", "b": "sha256:2"}}, {"a": "sha256:1"}) == ["b"]
 
 
 def test_escribir_y_leer_ida_vuelta(tmp_path):

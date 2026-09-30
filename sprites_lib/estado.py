@@ -49,9 +49,11 @@ def leer(carpeta):
 
 
 def deriva(estado_dict, fuentes):
-    """Claves de `fuentes` cuyo hash difiere del guardado (las que falten en el guardado también cuentan)."""
+    """Claves con hash distinto o ausentes de cualquiera de los dos lados (simétrico), ordenadas."""
     guardadas = estado_dict.get("fuentes", {})
-    return sorted(k for k, v in fuentes.items() if guardadas.get(k) != v)
+    claves = set(guardadas) ^ set(fuentes)
+    claves |= {k for k in guardadas.keys() & fuentes.keys() if guardadas[k] != fuentes[k]}
+    return sorted(claves)
 
 
 def listar(raiz):
