@@ -218,6 +218,14 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `deriva(estado_dict, fuentes)` Claves con hash distinto o ausentes de cualquiera de los dos lados (simétrico), ordenadas.
 - `listar(raiz)` Lista los artefactos aprobados bajo `raiz` (nombre, estilo, carpeta y estado), ordenados.
 
+### `gates` — Motor de gates: corre checks y arma un veredicto VERDE/ROJO con evidencia para el agente.
+- clase `Veredicto`
+- `correr(checks)` Ejecuta cada check (callable sin argumentos); si uno explota, ese check queda rojo con la excepción.
+- `informe(v)` Texto legible: primera línea `VERDE (n/m)` o `ROJO (k fallan)`, y después cada fallo con hasta 5 evidencias.
+- `guardar(v, ruta)` Escribe el veredicto en `ruta` como JSON (`verde`, `informe` legible y un objeto por check); devuelve la ruta.
+- `check_determinismo(estilo, pose='quieto', mira=None, veces=2)` Renderiza la ficha mínima `veces` veces en el mismo (pose, mira) y compara los píxeles entre corridas.
+- `check_deriva(estado_dict, fuentes, regla='deriva')` Compara las fuentes actuales contra las aprobadas; sin aprobación previa el check queda omitido (pasa).
+
 ### `componentes` — Biblioteca de componentes: cada pieza de un personaje (cabeza, brazo robótico, pulsera...) sabe dibujarse
 - clase `Componente`  · métodos: dibujar
 - `registrar(cls)`
