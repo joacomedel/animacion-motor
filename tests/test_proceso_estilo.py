@@ -24,8 +24,14 @@ def test_aprobar_congela_y_deriva(tmp_path, monkeypatch):
 def test_aprobar_rojo_no_escribe(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     from sprites_lib import gates
-    monkeypatch.setattr(proceso_estilo, "correr_gate",
-                        lambda estilo: gates.correr([lambda: gates.Resultado("test", False, "forzado")]))
+
+    monkeypatch.setattr(
+        proceso_estilo,
+        "correr_gate",
+        lambda estilo: gates.correr(
+            [lambda: gates.Resultado("test", False, "forzado")]
+        ),
+    )
     assert proceso_estilo.main(["aprobar", "stardew"]) == 1
     assert not (tmp_path / "aprobados").exists()
 
@@ -46,9 +52,17 @@ def test_referencia_sin_especimen_omite(tmp_path, monkeypatch):
     assert r.ok and r.omitido
 
 
-def test_referencia_compara_especimen():
+def test_referencia_compara_especimen(tmp_path, monkeypatch):
     if not os.path.exists("referencias/stardew/abigail.png"):
-        pytest.skip("falta referencias/stardew/abigail.png (gitignored): no hay referencia que comparar")
+        pytest.skip(
+            "falta referencias/stardew/abigail.png (gitignored): no hay referencia que comparar"
+        )
+    from sprites_lib import estilos
+    from tests import apoyo
+
+    ruta = apoyo.guardar_ficha(apoyo.fichas_dir(tmp_path), apoyo.heroe(), "heroe")
+    ref = dict(estilos.ESTILOS["stardew"]["referencia"], especimen=ruta)
+    monkeypatch.setitem(estilos.ESTILOS["stardew"], "referencia", ref)
     r = proceso_estilo.check_referencia("stardew")
     assert r.ok and not r.omitido
     assert "espécimen" in r.detalle
@@ -56,7 +70,10 @@ def test_referencia_compara_especimen():
 
 def test_especimen_faltante_omite(tmp_path, monkeypatch):
     from sprites_lib import estilos
-    ref_real = os.path.abspath("referencias/stardew/abigail.png")     # antes del chdir: la referencia existe
+
+    ref_real = os.path.abspath(
+        "referencias/stardew/abigail.png"
+    )  # antes del chdir: la referencia existe
     monkeypatch.chdir(tmp_path)
     ref = dict(estilos.ESTILOS["stardew"]["referencia"], ruta=ref_real)
     monkeypatch.setitem(estilos.ESTILOS["stardew"], "referencia", ref)
