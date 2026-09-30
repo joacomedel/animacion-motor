@@ -209,6 +209,15 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `para_json(pul)`
 - `main(argv=None)`
 
+### `estado` — Estado de artefactos aprobados: hash de la fuente, fecha y detección de deriva.
+- `canonico(obj)` Serialización canónica de un objeto (claves ordenadas) para que el hash sea estable.
+- `hash_obj(obj)` Hash `sha256:` de un objeto JSON-serializable, independiente del orden de las claves.
+- `hash_archivo(ruta)` Hash `sha256:` de los bytes de un archivo; `sha256:falta` si no existe.
+- `escribir(carpeta, artefacto, fuentes, metricas, nota=None)` Congela un artefacto aprobado: escribe `<carpeta>/estado.json` y devuelve su ruta.
+- `leer(carpeta)` Carga `<carpeta>/estado.json`, o `None` si el artefacto no está aprobado.
+- `deriva(estado_dict, fuentes)` Claves de `fuentes` cuyo hash difiere del guardado (las que falten en el guardado también cuentan).
+- `listar(raiz)` Lista los artefactos aprobados bajo `raiz` (nombre, estilo, carpeta y estado), ordenados.
+
 ### `componentes` — Biblioteca de componentes: cada pieza de un personaje (cabeza, brazo robótico, pulsera...) sabe dibujarse
 - clase `Componente`  · métodos: dibujar
 - `registrar(cls)`
