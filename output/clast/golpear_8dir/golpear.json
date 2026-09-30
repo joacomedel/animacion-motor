@@ -1,0 +1,567 @@
+{
+ "frames": [
+  {
+   "filename": "golpear_S_0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_S_1",
+   "frame": {
+    "x": 24,
+    "y": 0,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_S_2",
+   "frame": {
+    "x": 48,
+    "y": 0,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_S_3",
+   "frame": {
+    "x": 72,
+    "y": 0,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_S_4",
+   "frame": {
+    "x": 96,
+    "y": 0,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_S_5",
+   "frame": {
+    "x": 120,
+    "y": 0,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_SE_0",
+   "frame": {
+    "x": 0,
+    "y": 32,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_SE_1",
+   "frame": {
+    "x": 24,
+    "y": 32,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_SE_2",
+   "frame": {
+    "x": 48,
+    "y": 32,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_SE_3",
+   "frame": {
+    "x": 72,
+    "y": 32,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_SE_4",
+   "frame": {
+    "x": 96,
+    "y": 32,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_SE_5",
+   "frame": {
+    "x": 120,
+    "y": 32,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_E_0",
+   "frame": {
+    "x": 0,
+    "y": 64,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_E_1",
+   "frame": {
+    "x": 24,
+    "y": 64,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_E_2",
+   "frame": {
+    "x": 48,
+    "y": 64,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_E_3",
+   "frame": {
+    "x": 72,
+    "y": 64,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_E_4",
+   "frame": {
+    "x": 96,
+    "y": 64,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_E_5",
+   "frame": {
+    "x": 120,
+    "y": 64,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_NE_0",
+   "frame": {
+    "x": 0,
+    "y": 96,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_NE_1",
+   "frame": {
+    "x": 24,
+    "y": 96,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_NE_2",
+   "frame": {
+    "x": 48,
+    "y": 96,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_NE_3",
+   "frame": {
+    "x": 72,
+    "y": 96,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_NE_4",
+   "frame": {
+    "x": 96,
+    "y": 96,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_NE_5",
+   "frame": {
+    "x": 120,
+    "y": 96,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_N_0",
+   "frame": {
+    "x": 0,
+    "y": 128,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_N_1",
+   "frame": {
+    "x": 24,
+    "y": 128,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_N_2",
+   "frame": {
+    "x": 48,
+    "y": 128,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_N_3",
+   "frame": {
+    "x": 72,
+    "y": 128,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_N_4",
+   "frame": {
+    "x": 96,
+    "y": 128,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_N_5",
+   "frame": {
+    "x": 120,
+    "y": 128,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_NW_0",
+   "frame": {
+    "x": 0,
+    "y": 160,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_NW_1",
+   "frame": {
+    "x": 24,
+    "y": 160,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_NW_2",
+   "frame": {
+    "x": 48,
+    "y": 160,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_NW_3",
+   "frame": {
+    "x": 72,
+    "y": 160,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_NW_4",
+   "frame": {
+    "x": 96,
+    "y": 160,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_NW_5",
+   "frame": {
+    "x": 120,
+    "y": 160,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_W_0",
+   "frame": {
+    "x": 0,
+    "y": 192,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_W_1",
+   "frame": {
+    "x": 24,
+    "y": 192,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_W_2",
+   "frame": {
+    "x": 48,
+    "y": 192,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_W_3",
+   "frame": {
+    "x": 72,
+    "y": 192,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_W_4",
+   "frame": {
+    "x": 96,
+    "y": 192,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_W_5",
+   "frame": {
+    "x": 120,
+    "y": 192,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_SW_0",
+   "frame": {
+    "x": 0,
+    "y": 224,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_SW_1",
+   "frame": {
+    "x": 24,
+    "y": 224,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_SW_2",
+   "frame": {
+    "x": 48,
+    "y": 224,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_SW_3",
+   "frame": {
+    "x": 72,
+    "y": 224,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_SW_4",
+   "frame": {
+    "x": 96,
+    "y": 224,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  },
+  {
+   "filename": "golpear_SW_5",
+   "frame": {
+    "x": 120,
+    "y": 224,
+    "w": 24,
+    "h": 32
+   },
+   "duration": 83
+  }
+ ],
+ "meta": {
+  "image": "golpear.png",
+  "size": {
+   "w": 144,
+   "h": 256
+  },
+  "cell": {
+   "w": 24,
+   "h": 32
+  },
+  "fps": 12,
+  "loop": false,
+  "pivot": {
+   "x": 12,
+   "y": 30
+  },
+  "animations": {
+   "S": [
+    "golpear_S_0",
+    "golpear_S_1",
+    "golpear_S_2",
+    "golpear_S_3",
+    "golpear_S_4",
+    "golpear_S_5"
+   ],
+   "SE": [
+    "golpear_SE_0",
+    "golpear_SE_1",
+    "golpear_SE_2",
+    "golpear_SE_3",
+    "golpear_SE_4",
+    "golpear_SE_5"
+   ],
+   "E": [
+    "golpear_E_0",
+    "golpear_E_1",
+    "golpear_E_2",
+    "golpear_E_3",
+    "golpear_E_4",
+    "golpear_E_5"
+   ],
+   "NE": [
+    "golpear_NE_0",
+    "golpear_NE_1",
+    "golpear_NE_2",
+    "golpear_NE_3",
+    "golpear_NE_4",
+    "golpear_NE_5"
+   ],
+   "N": [
+    "golpear_N_0",
+    "golpear_N_1",
+    "golpear_N_2",
+    "golpear_N_3",
+    "golpear_N_4",
+    "golpear_N_5"
+   ],
+   "NW": [
+    "golpear_NW_0",
+    "golpear_NW_1",
+    "golpear_NW_2",
+    "golpear_NW_3",
+    "golpear_NW_4",
+    "golpear_NW_5"
+   ],
+   "W": [
+    "golpear_W_0",
+    "golpear_W_1",
+    "golpear_W_2",
+    "golpear_W_3",
+    "golpear_W_4",
+    "golpear_W_5"
+   ],
+   "SW": [
+    "golpear_SW_0",
+    "golpear_SW_1",
+    "golpear_SW_2",
+    "golpear_SW_3",
+    "golpear_SW_4",
+    "golpear_SW_5"
+   ]
+  }
+ }
+}

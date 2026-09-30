@@ -9,8 +9,9 @@ import os
 AQUI = os.path.dirname(__file__)
 RUTA = os.path.join(AQUI, "MAPA.md")
 MODULOS = ["escala", "paleta", "estilos", "cuerpo", "poses", "ciclos", "rig", "render3d", "armado", "ficha",
-           "tests_personaje", "comparar_estilo", "hoja_modelo", "fotos_control", "exportar", "referencia",
-           "analizar", "pixel2d", "lado_a_lado", "comparar_plantilla", "skins", "componentes/__init__"]
+           "tests_personaje", "proporciones", "comparar_estilo", "hoja_modelo", "fotos_control", "exportar", "referencia",
+           "analizar", "pixel2d", "lado_a_lado", "comparar_plantilla", "skins", "muneco", "zonas", "pulido",
+           "estado", "gates", "proceso_estilo", "proceso_anim", "proceso_skin", "componentes/__init__"]
 
 
 def _primera(doc):

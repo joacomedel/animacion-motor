@@ -204,3 +204,291 @@ alto, 46 px en total). Marcas por cuadro en `referencias/caminar/lpc_E_huesos.js
   4. `escala_rig` no es 1: una unidad del rig mide 0,82 px en `lpc`. Convertir las medidas con ese factor.
 - **Trampa de LPC que no copiamos**: el hombro cercano está 4 px atrás del centro del torso y el lejano 4 px adelante,
   por eso el brazo lejano "sale del pecho". Nuestros hombros van en su lugar: la mano lejana queda fuera de la meta.
+
+## Plantilla de salto — Mega Man X (boceto, medido el 2026-09-27)
+Fuente: `sprites_x/animaciones/06_saltar.png` (SNES, celda 35×46, piso y=45, solo referencia de movimiento). 6 cuadros,
+sin repetición (no es cíclico como caminar/correr). Ciclo en `ciclos.SALTAR`, pose nueva en `poses.POSES["saltar"]`.
+
+- **Cómo se midió**: `python -m sprites_lib.analizar` sobre la tira → bbox y "rebote" (borde superior relativo) por
+  cuadro: `[9, 0, 0, 4, 5, 14]`. Confirmado a ojo con `grilla_00.png`/`grilla_05.png`: 0 agachada (anticipación,
+  pies en el piso), 1–2 despegue y pico (piernas se recogen, sube el cuerpo entero), 3–4 caída (piernas se abren y
+  después se estiran buscando el piso), 5 aterrizaje (agachada más profunda que la de salida: amortigua el golpe).
+- **El sprite NO se traslada verticalmente (decisión de diseño, 2026-09-27)**: la altura del salto la pone el
+  motor del juego, no el dibujo. `bob` en `SALTAR` nunca es negativo (0 = altura de parado, + = agachado): en el
+  aire el cuerpo se dibuja **a la altura de parado**, solo cambia la pose (piernas que se recogen/estiran, brazos
+  que suben), como si algo sostuviera al personaje. Solo agachada (cuadro 0) y aterrizaje (cuadro 5) bajan el
+  cuerpo de verdad, porque ahí los pies siguen en el piso.
+  - Motivo: con `bob` negativo (versión anterior) la cabeza subía por encima de la de parado y en los cuadros de
+    pico llegaba a tocar el borde superior de la celda de 32 px (13 px opacos en la fila 0) — cortaba la cabeza.
+    Con `bob` acotado a `[0, +∞)` la cabeza de parado es el techo real y siempre queda ≥1 px de margen arriba
+    (verificado con `test_animaciones_juego.py`, que corre esto para **todas** las animaciones y estilos activos,
+    no solo salto).
+  - La sensación de "subir" en el aire la da la pose (piernas recogidas en el pico = cuerpo más chico, se separa
+    del piso visualmente) más el `offset_y` que se le pasa al motor (ver abajo), no un desplazamiento del dibujo.
+- **`offset_y` (meta del JSON, para el motor)**: cuánto tiene que levantar el motor el sprite completo por cuadro,
+  en px de juego, negativo = arriba. Se guarda en `ciclos.SALTAR["offset_y"]` y sale en el JSON exportado
+  (`sprites_lib.poses.offset_y(anim)`). Para `saltar`: `[0, -4, -8, -4, 0, 0]` — 0 en los cuadros que tocan el piso
+  (agachada y aterrizaje), más negativo en el pico. Caminar/quieto no llevan `offset_y` (el piso no se mueve).
+- **`loop` (meta del JSON, por animación, no por estilo)**: caminar/quieto/correr son cíclicos (`loop: true`);
+  saltar se juega una sola vez (`loop: false`). Se lee de `ciclos.<CICLO>["loop"]` vía `sprites_lib.poses.loop(anim)`;
+  antes `exportar.py` lo tenía fijo en `True` para todo.
+- **`pivot` (meta del JSON, por estilo, no por animación)**: punto de los pies dentro de la celda. Sale de
+  proyectar el ancla `suelo` (origen del mundo, no se mueve con la pose) con `armado.pivote(estilo)` — da el mismo
+  punto para cualquier pose/dirección/personaje de ese estilo (stardew: `(8, 30)` en celda 16×32; lateral: `(20, 38)`
+  en celda 40×40). Antes `demo()`/`muneco.demo()` no lo pasaban y quedaba `null` en el JSON.
+- **No cíclico → sin desfase**: las dos piernas van juntas (mismo tiempo, sin cruce), así que `desfase=0` y la
+  misma `pie`/`mano` sirve para ambas piernas/brazos (antes, en caminar, el desfase corría la misma curva medio
+  ciclo para simular la pierna contraria).
+- **Verificación (liviana, es un boceto)**: no se armó un comparador de huesos nuevo (eso implicaría un estilo de
+  verificación con la proporción y celda exactas de Mega Man X, como se hizo para LPC). En cambio:
+  1. Forma de la curva de altura: "rebote" (borde superior relativo) de nuestro propio muñeco vs. el medido en la
+     referencia — nuestro `[8, 0, 0, 0, 4, 10]` contra `[9, 0, 0, 4, 5, 14]` (con el `bob` viejo, antes de sacarle
+     la traslación del cuerpo; ahora esa forma la debe reproducir `offset_y` + pose, no el render).
+  2. `test_animaciones_juego.py::test_ningun_cuadro_toca_el_borde_superior`: ningún cuadro de ninguna
+     animación/estilo activo tiene píxeles opacos en la fila 0 de la celda.
+- **Errores corregidos al calibrarlo**:
+  1. Primer intento: copiar el `bob` medido de la referencia directo en px de la referencia (hasta 14) sin revisar
+     la escala del rig → con `pie` cerca del piso en el aterrizaje, la cadera calculada quedaba **por debajo del
+     tobillo** (pierna invertida). Se corrigió midiendo la cadera y el tobillo proyectados de nuestro propio
+     muñeco (`render_cuadro(...).anclas_px`) para cada `bob`/`pie` candidato y ajustando hasta que
+     `tobillo_y - cadera_y` fuera siempre positivo y ≤ muslo + canilla (~9 px en `lateral`).
+  2. `bob` y `pie` usan factores de escala distintos (`.9*esc` contra `escala_rig`): no se puede mezclar el mismo
+     número de px para los dos sin convertir.
+  3. Segundo intento: `bob` negativo en vuelo (para simular la altura del salto en el propio dibujo) cortaba la
+     cabeza contra el borde de la celda en stardew (32 px de alto). Se sacó la traslación del cuerpo del ciclo y
+     se movió a `offset_y` (responsabilidad del motor, no del sprite).
+
+### Checklist para un salto nuevo
+- [ ] `bob` nunca negativo: en el aire, como mucho la altura de parado (0); agachado (+) solo cuando los pies
+      tocan el piso.
+- [ ] La sensación de altura va en `offset_y` (meta del JSON), no en el dibujo.
+- [ ] `pie` sí puede recogerse mucho en el aire (rodillas arriba) sin romper la pierna: verificar cadera por
+      encima del tobillo y que no se pase de muslo + canilla.
+- [ ] `loop: false` en el ciclo si no se repite; `pivot` sale solo de `armado.pivote(estilo)`.
+- [ ] Ningún cuadro exportado toca la fila 0 de la celda (correr `test_animaciones_juego.py`).
+
+## Plantilla de agachar — boceto propio (2026-09-28)
+Sin referencia externa: pose diseñada a mano a partir de la agachada de `ciclos.SALTAR` (cuadro 0). Ciclo en
+`ciclos.AGACHAR`, pose en `poses.POSES["agachar"]`. 4 cuadros, `loop=False` (se agacha una vez y se queda; el
+motor sostiene el último cuadro mientras dure la acción, igual que en `saltar`), sin `offset_y` (los pies no se
+despegan del piso).
+
+- **`bob` final 7** (`[0, 3, 6, 7]`): con tope 4 (primera versión) el usuario lo vio "agachado muy poco". Con 7 la
+  cabeza baja ~8 px en lateral (40 px de celda) y ~6 en stardew, y sobre Clast (remera larga + piernas robóticas) se
+  lee bien. Con 9-11 el torso queda casi sobre los pies y se pierde la pierna. Sobre el muñeco desnudo, ver abajo.
+- **Probar primero con el muñeco base (`sprites_lib.muneco`, piel lisa, sin ropa) casi no sirve para juzgar una
+  pose con la rodilla muy doblada**: sin una prenda o componente que separe muslo de canilla, el contorno de las
+  dos cápsulas superpuestas se ve como un zigzag/garabato aunque la geometría (cadera por encima del tobillo,
+  huesos sin estirarse) sea correcta. Con la ficha real (Clast: `remera_larga_rota` tapa la cadera, piernas
+  `pierna_robotica` con `juntas` de color en la rodilla) la misma pose se lee bien. **Conclusión: para poses con
+  la pierna muy doblada, juzgar la legibilidad sobre un personaje vestido (o con junta marcada), no sobre el
+  muñeco desnudo.**
+- **El ángulo del pie (`pie_ang`) rompe el dibujo antes que `bob`**: en el muñeco desnudo, con `bob=0` fijo, ya
+  con `pie_ang=10` la rotación del pie se superpone visiblemente con la canilla. Mantener `pie_ang` chico (≤10)
+  para agachado quieto; ángulos grandes (20-30, como en `saltar`) son para cuadros de paso rápido, no para
+  sostener.
+- **Verificado en los dos estilos activos** (no solo el que use `--estilo` por defecto de `skins.py`, que es
+  `stardew`): en `lateral` se lee el doblez de rodilla de perfil; en `stardew` (cenital) se nota menos pero no
+  rompe. `sprites_lib/skins.py juego`/`demo` no tienen `--estilo` en la CLI (queda fijo en `stardew`); para
+  otro estilo, llamar `salida_juego(ruta, anim, estilo)` directamente en Python.
+
+### Checklist para un agachado nuevo
+- [ ] `bob` final ~7 (4 se ve poco; 9+ aplasta el cuerpo). Medir la fila más alta de cada cuadro para cuantificar.
+- [ ] `pie` casi fijo cerca del piso; dejar que la rodilla se doble sola vía IK al bajar la cadera (no achicar
+      `pie` en y además de subir `bob`: duplica el efecto).
+- [ ] `pie_ang` chico (≤10) si el cuadro se sostiene; ángulos grandes se ven mal sostenidos varios cuadros.
+- [ ] Revisar la pose sobre la ficha del personaje real (con ropa/junta), no solo sobre el muñeco desnudo.
+- [ ] `loop: false`, sin `offset_y` (no se despega del piso); `test_animaciones_juego.py` en verde.
+
+## Plantilla de golpear — boceto propio (2026-09-28)
+`ciclos.GOLPEAR` (6 cuadros, `loop=False`): preparación hacia atrás, golpe, extensión sostenida, retorno. Nuevo: un
+ciclo puede llevar `mano_b`, `pie_b` y `pie_ang_b` propios (antes el brazo/pierna B era la misma curva desfasada).
+
+- **Error: pega con el brazo equivocado.** Se asumió por lectura de código que `mano_a` es el brazo izquierdo (el de
+  metal de Clast) y no se comprobó en imagen cuál brazo sale en cada dirección. El usuario vio que pegaba con el otro.
+  Qué tenía que considerar:
+  1. Con una animación asimétrica (un brazo hace algo distinto al otro) **verificar en imagen, por dirección, cuál
+     extremidad es cuál** antes de exportar. Cuál es el brazo cercano cambia con la dirección (E/W) y el lado que
+     ve la cámara.
+  2. El personaje tiene un brazo con rol propio (Clast: izquierdo = prótesis completa, derecho = muñón sin
+     antebrazo). Un golpe con el brazo amputado no tiene mano: la ficha manda qué brazo puede golpear.
+  3. Revisar las **4 direcciones antes de exportar** (solo miré lateral E y la hoja recién después de escribir en
+     `output/`). En E el brazo lejano queda tapado por el torso: elegir dirección de lectura o brazo según eso.
+- **Checklist para animaciones asimétricas**: [ ] leer la ficha (qué brazo/pierna tiene qué rol) [ ] hoja de las 4
+  direcciones ampliada, con el cuadro de mayor extensión [ ] confirmar el brazo/pierna activo mirando el material
+  (metal vs piel) [ ] recién ahí exportar a `output/`.
+
+## Estilo `stardew8` — Stardew en 8 direcciones, sin volumen (2026-09-28)
+Mismo perfil que `stardew` (cenital 3/4, sombreado plano, contorno de color, celda 16×32) + las 4 diagonales
+(SE, NE, NW, SW), pensado para peleas en plano isométrico. `render3d.DIRECCIONES_CENITAL` ahora incluye las
+diagonales (vector ±0,7071). No está en `ACTIVOS`: `stardew` (4 dir.) sigue siendo el de las fichas y `output/`.
+- Primera prueba con `caminar_lpc` y la skin de Clast: las 8 direcciones se leen; las diagonales muestran bien
+  los dos hombros y la cara de 3/4. Ancho usado: hasta la columna 15 de 16 (SE/NE llegan a la 0): **sin margen**.
+  Si se agrega arma o brazo extendido (golpear) habrá que ensanchar la celda a 20-24 px.
+- Salida: `output/clast/caminar_lpc_8dir/` (`skins.py juego ... --estilo stardew8 --output`).
+- **Correcciones de `stardew8` tras la primera prueba (2026-09-28)**: (1) *Ojos en SE/SW*: con la fuerza de cara de los
+  perfiles (.55) la cara queda casi de frente y los dos ojos se ven iguales y las cejas forman una barra; se agregó
+  `proporciones["cara_diagonal"]=.2` (`cuerpo.fuerza_cara`): el ojo cercano queda entero y el lejano de costado.
+  (2) *Cabeza*: la caja giraba con la cámara y medía distinto por dirección; `cabeza_pantalla` (`cuerpo.giro_cabeza`,
+  `Escena.caja(giro=)`) la alinea a la pantalla: 11×12 px en las 8 direcciones (medido con la plantilla de zonas).
+  (3) *Ancho por animación*: `ciclos.<CICLO>["ancho"]={"stardew8": N}` (`poses.ancho`); se mide con
+  `python -m sprites_lib.muneco ancho --anim X --estilo stardew8` → caminar 20, saltar/agachar/quieto 18, golpear 24.
+  El pivote se calcula por animación (`armado.pivote(estilo, pose=anim)`).
+- **Plantilla de zonas** (`python -m sprites_lib.muneco zonas --anim X --estilo stardew8` → `salida/muneco/`): el muñeco con
+  un color por parte (derecha cálidos, izquierda fríos). Revisar SIEMPRE con ella antes de aplicar una skin.
+- **No se espeja**: las 8 direcciones se renderizan (Clast es asimétrico). Para gastar pocos tokens: medir en números
+  (bbox de cabeza, ancho necesario) y mirar una sola hoja con las 8 filas × 4 cuadros en vez de imágenes por dirección.
+- **Ajuste de diagonales con referencias (2026-09-28)** (`referencias/8dir/`: Witch CC-BY, TheNess CC0, Fry CC0; hoja
+  `comparativa.png`): las referencias angostan la cabeza ~2 px en 3/4, corren la cara hacia donde miran y dibujan un solo
+  ojo o el lejano de 1 px. En `stardew8`: `cabeza_diagonal=.85` (cabeza 11 px en diagonal contra 13 de frente/espalda,
+  medido con ojos y orejas incluidos), `cara_diagonal=0.0`, `cabeza_desvio` por diagonal (SE .9, NE -.2, SW -1.0, NW .1 px) →
+  desvío cabeza-torso final SE +.6, NE +.7, NW -.7, SW -.9 (simétrico). Medir con componentes (`tests_personaje.mascara`),
+  no por color: los colores cambian con el sombreado y dan anchos falsos.
+- El píxel verde en el borde de la cabeza en NE/NW **no es un ojo**: es la punta de los cables de la nuca de Clast.
+- **Error de los ojos (el usuario lo vio en captura, 2026-09-28)**: al girar la caja de la cabeza (`cabeza_pantalla`) los
+  anclas `cara`/`ojo_*` seguían calculados para la caja SIN girar y quedaban en los bordes de la silueta (un ojo en cada
+  costado, y un ojo asomando en NW). Corregido: `cuerpo.sobre_caja` proyecta cara y ojos sobre la caja real (girada y
+  angostada). Con eso `cara_diagonal` volvió a 0.0 (con -.3 solo se veía un ojo en el borde). Lección: **al cambiar la
+  forma de una pieza, revisar todo lo que se ancla a su superficie**, y **mirar la imagen ampliada de la cara por
+  dirección, no solo contar píxeles**: los números daban "bien" mientras los ojos estaban fuera de lugar.
+- **Ojos más separados (pedido del usuario, 2026-09-28)**: `sep_ojos_diagonal=.45` (antes .31 fijo) separa los ojos ~1 px más en
+  las diagonales (centros a ~3,7 px), y `cara_diagonal=.45` corre el ojo cercano ~1 px hacia adentro, lejos del borde de la
+  silueta. Los dos parámetros se compensan: subir la separación empuja el ojo cercano al borde, hay que subir también
+  `cara_diagonal`. Medir los centros con `tests_personaje.mascara(cuadro, "ojos@cara#ojo_derecho")`.
+
+## Cómo revisar una animación con zonas (sin mirar imágenes, 2026-09-28)
+- Comando: `.venv/bin/python -m sprites_lib.zonas --anim caminar_lpc --estilo stardew8 [--dirs S,E] [--cuadros 0,1]
+  [--skin skins/x.png | --ficha nombre] [--json] [--completo] [--png]` → `salida/zonas/<estilo>/<anim>.json` y `.md`
+  (el informe también sale por stdout). Por defecto usa el muñeco de zonas; `--png` da la plantilla de colores planos
+  por zona (una fila por dirección) solo para revisión humana.
+- Quien revisa lee el `.md`: por dirección, `ALERTAS` primero (ALTA > MEDIA > baja; alertas iguales en varios cuadros
+  van en una línea con la lista de cuadros y los valores), después la tabla de centros x,y por cuadro con el Δ al
+  siguiente (solo si hay alertas MEDIA/ALTA; si no, una línea por zona con Δ máximo y rango de px) y al final el resumen
+  entre direcciones (bbox y px por zona, separación de ojos y px de cara entre cada ojo y el borde). El JSON tiene todo
+  (px, bbox, centro por zona y cuadro, pivote, celda, alertas con valor y umbral). Umbrales: `zonas.UMBRALES`.
+- Cada píxel se clasifica por los buffers del render (componente/pieza/material), no por color: el sombreado y el
+  contorno cambian los colores. El contorno exterior va a la pieza vecina (nunca a un ojo o ceja).
+- Cómo leer las alertas: **ALTA** = casi seguro un error (ojo visible de espaldas, pivote que se mueve, lado cruzado,
+  una parte de la cabeza/torso que aparece o desaparece, algo cortado arriba). **MEDIA** = mirar (salto de centro de
+  cabeza/torso > 1 px, ojo pegado al borde de la silueta, separación de ojos fuera de rango, cabeza que cambia de
+  tamaño). **baja** = normal en muchos ciclos (extremidades que se tapan entre sí, px de manos/pies que cambian > 35 %,
+  contorno del pie tocando el borde de abajo): mirar solo si coincide con otra cosa.
+- Los umbrales están pensados para caminar/quieto: en saltar o agachar la cabeza SÍ se mueve más de 1 px en la celda
+  (ahí el salto de centro es esperable; lo que importa es que sea suave y que no aparezcan/desaparezcan partes).
+- Primera pasada con `caminar_lpc` en `stardew8` (sin corregir, para revisar): ojo izquierdo visible en NW (ALTA, los 8
+  cuadros); ojo a 0 px del borde de la cabeza en E, NW y W; torso_espalda/torso_frente que aparecen y desaparecen en
+  SE, NE, NW, SW; salto de 1,1-3,4 px de cabeza_resto/cabeza_frente/torso_espalda en SE, E, NE, NW, W; el cuello (3 px)
+  se tapa en la mitad de los cuadros con el rebote.
+- **Píxeles raros que el usuario vio en el GIF (2026-09-28)**: (1) luz verde de la sien en la skin de Clast: quedaba suelta en NE
+  y detrás de la oreja en E → se sacó de `pintar_clast.py`; (2) píxel blanco del ojo sobresaliendo de la silueta en E/W
+  (marcado como "falso positivo perfil" por la herramienta, pero SÍ era un defecto visible) → `cara_perfil=.9`
+  (`cuerpo.fuerza_cara`). Lección: una falsa "por diseño" hay que confirmarla mirando el GIF, no solo los números.
+  Detector de píxeles sueltos: 1 px opaco con 0–1 vecinos opacos (4-conexos); lo que queda son contornos de 1 px en manos/pies
+  (normales) y la nariz de perfil (E/W, y 17,10-11).
+
+## Modo pulido: ¿se ve BONITA? (2026-09-28)
+- Comando: `.venv/bin/python -m sprites_lib.pulido --anim caminar_lpc --estilo stardew8 --skin skins/clast.png`
+  (o `--ficha x`; sin personaje mide el muñeco de zonas y lo avisa) → `salida/zonas/<estilo>/<anim>[_skin]_pulido.json` y `.md`.
+  Reusa `zonas.analizar` (mismas zonas por píxel) y mide la imagen del personaje real. Umbrales: `pulido.UMBRALES_PULIDO`.
+- Mide tres familias: **movimiento** (recorrido de mano/pie en E/W contra LPC normalizado por el alto: mano 0,22·alto,
+  pie 0,26·alto, mano lejana 0,09·alto; oposición mano-pie del mismo lado por correlación; simetría p vs p+n/2 con lados
+  cambiados; cierre del loop; quiebres de 1 cuadro y aceleraciones > 1,25 × la máxima de LPC; rebote de la coronilla),
+  **limpieza** (píxel suelto, espina, rasgo que sobresale = ojo/boca con ≥2 lados en contorno exterior o fondo, relleno
+  que toca el fondo, agujero, mancha llamativa de ≤3 px lejos de TODO su entorno, parpadeo de un color, paleta por
+  dirección) y **espejo** (E↔W, SE↔SW, NE↔NW, S y N consigo mismas).
+- **Regla de espejo comprobada**: x' = 2·pivote_x − x y cuadro (p + desfase) % n. En caminar_lpc da 0-1 px de diferencia
+  de alfa en E↔W, S y N (sin el desfase, 60-70 px). Las diagonales difieren 4-7 px solo en la cabeza porque
+  `cabeza_desvio` no es espejo exacto (SE .9 / SW −1.0, NE −.2 / NW .1): falsa `desvio_de_estilo`.
+- Criterio de mancha (medido): un tono de transición (pelo→piel, sombreado) queda a ≤ 37 del segmento RGB entre dos
+  vecinos; los acentos reales (luz verde, blanco del ojo, raya de metal) a ≥ 88 → `entre_min` 50. Una mancha sobre la
+  cabeza o en el borde de la silueta es REVISAR; dentro de brazos/piernas es leve (suele ser un detalle de la skin).
+- Los dos defectos que vio el usuario, reproducidos: `cara_perfil` .55 → **MAL** `rasgo_fuera` (el blanco del ojo tiene
+  3 de 4 lados en el contorno, E/W todos los cuadros); luz verde en la sien → **REVISAR** `mancha` en E (@5,10, 2 px,
+  8/8) y NE (@12,11, 8/8).
+- Estado actual (Clast, caminar_lpc, stardew8): movimiento OK, espejo OK, limpieza REVISAR: boca a 2 lados del contorno
+  en SE c0/1/4/5 (no en SW: otra vez el `cabeza_desvio` asimétrico), un píxel de pelo oscuro #2a2218 entre canas en NE,
+  y la mano lejana en E/W casi no se mueve (0,6 px contra 2,4 de LPC, leve).
+- Qué NO mide: si una mancha es un detalle a propósito o una mota (solo la prioriza), la expresión, el "peso" del
+  paso ni el timing (fps). El umbral de amplitud (±35 %) es dudoso: LPC es otro cuerpo (46 px, cabeza 45 %).
+
+## Fry (referencia 8dir, CC0) vs nuestro stardew8 — análisis de detalles (2026-09-29)
+- **Formato**: `referencias/8dir/fry_40x64/player_full_animation.png` = 240×448, celdas 40×64, 6 cuadros × 7 filas:
+  0 caminar S, 1 caminar lado, 2 caminar N, 3 giros (S→lado→N), 4-6 quieto S/lado/N. **Solo 3 vistas dibujadas (S, lado, N)**;
+  no trae diagonales (el resto se espeja): no sirve para medir 3/4, sí para detalle y proporciones.
+- **Tamaño**: Fry ocupa 63 px de alto × 38 de ancho (con capa) en celda 40×64; nosotros 29 × 15 en celda 20×32.
+  Fry es ~2.2× más alto y ~4.5× más área. Cabeza de Fry ~14 px de ancho (≈3 cabezas de alto, hombros 26-36 px de
+  ancho = 2-2.6× la cabeza); la nuestra 13 px de ancho en 29 de alto (≈2.2 cabezas, torso 9-11 px < cabeza: chibi extremo).
+  Si se compara, escalar Fry por 0.46 (no ×0.5 exacto) y ojo: a 20×32 no entran sus detalles finos.
+- **Paleta**: Fry usa **14 colores en total** (rampas de 3 tonos por material, brillos saturados en amarillo, contorno de
+  color oscuro tipo selout, nada de negro). Nuestro render tiene **70 colores** en 8 direcciones → más "ruido" que Fry.
+- **Sombra en el piso**: elipse semitransparente (alfa 153) bajo los pies. Nosotros no tenemos (alfa solo 0/255).
+- **Silueta**: el pelo sale en picos y rompe el óvalo de la cabeza; la capa es una masa grande con vetas de 2 tonos;
+  brillos puntuales en botas y hombreras. Nuestra cabeza es un bloque liso con contorno parejo.
+- **Rebote**: en caminar S el borde superior cambia 1 px entre cuadros (0/1).
+- **Anatomía de Fry por vista (idle, celda 40×64, medida por color)**:
+  | | S (frente) | Lado | N (espalda) |
+  |---|---|---|---|
+  | Cabeza (pelo+cara) | x14-27 (14 px), y0-18 (~19 px = 30% del alto) | x10-27 (**18 px**), y0-19 | x13-27 (15 px), y0-15: solo pelo, sin cara ni cuello |
+  | Cara | pelo y0-9, visor/piel y10-18: la cara es la mitad de abajo de la cabeza | cara pegada al frente (x10-21), el pelo sobresale 6 px hacia atrás | ninguna |
+  | Cuerpo (ancho total) | 38 px: capa a los costados + brazos azules por fuera (x3-36) | 27-33 px: la capa cae por detrás | 39 px: la capa lo tapa todo, del brazo solo asoman las puntas (y17-27) |
+  | Piernas | ~16 px visibles (y45-60), botas separadas | botas en fila, una tapando la otra | casi ocultas por la capa (y54-56) |
+  Conclusión: al girar, **cambia cuánto se ve de cada parte** (frente: cara + brazos + botas; lado: cabeza más ancha
+  por el pelo, cuerpo más angosto; espalda: solo pelo + masa de tela), no las proporciones. La cabeza es ~30% del alto
+  (la nuestra ~41%), con más de la mitad ocupada por el pelo.
+- **Paleta reducida en stardew8 (2026-09-29)**: `estilos.ESTILOS["stardew8"]["render"]["paleta_max"] = 28` y
+  `paleta.reducir_paleta` (une colores parecidos en Lab, ponderado por píxeles, conserva siempre el más usado). Clast pasó de 70 a
+  28 colores en las 8 direcciones. 28 casi no se distingue; con 20 se apagan los ojos y sube el blanco de la cara en NE. Sin sombra.
+- **Boceto `fry8` (2026-09-29)**: estilo derivado de stardew8 (`adulto_px=58`, celda 40×64, `cabeza_frac=.30`, `hombros_frac=.16`,
+  `piernas_frac=.27`, `paleta_max=16`). Alto real 63 px = igual que Fry, pero la cabeza sale de 23 px de ancho (Fry 14) y el
+  cuerpo de 31-34 (Fry 38). La skin de 32×32 estirada ~2× deja los ojos como puntos sueltos: el detalle de cara no sale de ahí.
+- **Iteración de `fry8` con números (2026-09-29)**: se corrió `zonas` (con la skin de Clast) y se midió cabeza/torso/brazos por
+  dirección en vez de mirar imágenes. Alertas 104 → 16 (0 altas). Cambios y por qué:
+  - cabeza 25×24 → 19×21 (Fry: 14 de ancho): `cabeza_ancho .72`; cuerpo "flaco" (torso 17, brazos a 31) → torso 21, brazos 35:
+    `cuerpo_ancho 1.3` + `hombros_frac .125` (con .16 los brazos quedaban flotando, separados del torso: medir el hueco
+    entre bbox de brazo y torso, tiene que ser ≤ 0).
+  - rebote 2 px → 1 px (`bob_escala .5`: el rebote escala con el alto y Fry rebota 1 px); paso `.55` (con el cuerpo más ancho
+    los pies cruzaban la línea central en las diagonales: paso ≈ .7 / cuerpo_ancho); celda 48×64 (con 40 las manos tocaban el
+    borde) y `adulto_px` 54 (con 58 la cabeza tocaba el borde de arriba).
+  - **ojos**: los de stardew (3 píxeles sueltos: pestaña, blanco, iris) a 54 px se ven como puntos. Modo `ojos: "fry"` = 2×2
+    (pestaña oscura, blanco afuera, iris adentro), cejas de 3 px seguidos; en diagonales el ojo LEJANO va de 1 px de ancho.
+    Separación en S/N `sep_ojos .55` (con .31 los ojos se pegaban: uno de 3 px y otro de 2 px = asimétricos); en diagonales
+    `.33` (con .45+ el ojo lejano tocaba el borde; con .40 desaparecía en SE/SW). Detector: los dos ojos con el mismo px en S/N.
+  - `zonas`: los umbrales en px (`ESCALABLES`) se escalan por alto del personaje respecto de stardew8 (fry8 ×2.08); stardew8 no cambia.
+- **Pendiente en fry8**: las cejas/ojos dejan puntos sueltos en la frente porque la skin de 32×32 se estira ~2×: hace falta skin
+  64×64. Quedan 4 alertas MEDIA: salto de 2.4 px del centro de `torso_frente` en S (el brazo tapa y destapa; umbral 2.08).
+
+## Procesos del kit: estilo → animación → skin (2026-09-29)
+
+Los pasos completos están en `docs/procesos/{estilo,animacion,skin}.md` y el diseño en
+`docs/superpowers/specs/2026-09-29-procesos-estilo-animacion-skin-design.md`. Comandos:
+
+- `.venv/bin/python -m sprites_lib.proceso_estilo medir|validar|aprobar <estilo>`
+- `.venv/bin/python -m sprites_lib.proceso_anim smoke|validar|aprobar <anim> --estilo <estilo>`
+- `.venv/bin/python -m sprites_lib.proceso_skin smoke|aprobar|lote <nombre>`
+
+Cada proceso itera en autonomía hasta que el gate determinista (zonas, pulido, determinismo, deriva, plantilla)
+da VERDE (tope 3 vueltas propias); `aprobar` es el único paso humano y congela en `aprobados/`.
+
+## Contrato numérico del muñeco (`proporciones`, calibrado el 2026-09-29)
+`proporciones.medir(estilo)` renderiza la ficha mínima (pose `neutra`, todas las direcciones) y mide el cuerpo
+(`buf["solido"]`, sin contorno): alto desde el pivote (`suelo`), cabeza, piernas y anchos. `comparar` contrasta
+la primera dirección con el perfil del estilo. Valores medidos (alto px / cabezas / piernas% / ancho cabeza px):
+
+| estilo | alto (esp.) | cabezas (esp. 1/frac) | piernas (esp. perfil) | ancho cabeza (esp.) |
+|---|---|---|---|---|
+| volumen | 37 (36) | 2.64 (3.33) | 48.6% (41%) | 14 (12.8) |
+| stardew | 27 (26) | 2.08 (2.78) | 33.3% (29%) | 13 (11.4) |
+| lateral | 33 (33) | 2.36 (2.50) | 33.3% (32%) | 14 (15.2) |
+| lpc | 43 (43) | 2.15 (2.22) | 27.9% (30%) | 20 (21.4) |
+| stardew8 | 27 (26) | 2.08 (2.78) | 33.3% (29%) | 13 (11.4) |
+| fry8 | 55 (54) | 2.75 (3.33) | 30.9% (27%) | 17 (18.2) |
+
+- **Hallazgo (por qué `TOL_REL=.35`, no .10)**: en las vistas 3/4 (cenital e iso) la profundidad se proyecta
+  sobre la pantalla (`ky=.5`) y la silueta de la cabeza y de las piernas mide 15-25% más que su tamaño vertical;
+  el perfil guarda fracciones del mundo (`cabeza_frac`, `piernas_frac`), no de la silueta. En lateral/LPC la
+  diferencia es 3-7%. El alto desde el pivote sale consistente (+1 px por redondeo; 0 px de variación entre
+  direcciones). Tolerancias elegidas: `TOL_PX=2` (peor desvío 1.6 px) y `TOL_REL=.35` (peor desvío 25.2%, en
+  stardew/stardew8). Ningún estilo legítimo queda fuera del doble de la tolerancia.
+- **Caso límite del esqueleto**: `saltar` cuadro 2 recoge las piernas en el pico (tobillo **por encima** de la
+  cadera; decisión de diseño documentada en la sección de la plantilla de salto). `test_esqueleto` mantiene la
+  aserción `cadera > tobillo` y saltea los cuadros en el aire, que el propio ciclo declara con `offset_y != 0`.

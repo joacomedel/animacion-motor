@@ -39,7 +39,10 @@ ESTILOS = {
         tonos=dict(sombra=(.66, (70, 40, 120), .25), luz=(1.22, (255, 236, 160), .2)),
         ojos="stardew",
         referencia=dict(ruta="referencias/stardew/abigail.png", celda=(16, 32), recorte=(0, 0, 64, 128),
-                        calibrada=True),   # control Abigail vs Wizard (CRITERIOS_ANIMACION.md)
+                        calibrada=True,    # control Abigail vs Wizard (CRITERIOS_ANIMACION.md)
+                        # sujeto de la comparación de estilo: la ficha del mago (vestida y con componentes);
+                        # el muñeco desnudo no tiene el detalle (mechones, ropa) que miden las métricas
+                        especimen="personajes/fichas/mago.yaml"),
         paleta="saturada y cálida; 3-4 tonos por material con corrimiento de tono (sombras hacia violeta, "
                "luces hacia amarillo); contorno = tono más oscuro del mismo material, nunca negro puro "
                "(salvo materiales negros); 20-30 colores por cuadro",
@@ -70,10 +73,30 @@ ESTILOS = {
     ),
 }
 
+# mismo look que stardew (cenital 3/4, sombreado plano, contorno de color) pero con las 4 diagonales: 8 direcciones
+ESTILOS["stardew8"] = {**ESTILOS["stardew"],
+                       "proporciones": {**ESTILOS["stardew"]["proporciones"], "cara_diagonal": .45, "sep_ojos_diagonal": .45, "ojos_umbral": .05, "cara_perfil": .9, "sin_boca_diagonal": True, "bob_px": True, "cabeza_pantalla": True,
+                                     "cabeza_diagonal": .85,
+                                     "cabeza_desvio": {"SE": 0.9, "NE": -0.2, "SW": -1.0, "NW": 0.1}},
+                       "direcciones": ["S", "SE", "E", "NE", "N", "NW", "W", "SW"],
+                       # Fry (CC0) usa 14 colores en toda su hoja; el render daba ~70. 28 casi no se distingue (20 pierde ojos)
+                       "render": {**ESTILOS["stardew"]["render"], "paleta_max": 28},
+                       "descripcion": "Stardew Valley en 8 direcciones (sin volumen): igual que stardew + diagonales."}
+
+# boceto tipo Fry (CC0): personaje grande (~58 px), cabeza ~30%, cuerpo ancho, pocos colores; misma cámara que stardew8
+ESTILOS["fry8"] = {**ESTILOS["stardew8"],
+                   "proporciones": {k: v for k, v in ESTILOS["stardew8"]["proporciones"].items() if k != "paso"}
+                   | {"cabeza_frac": .30, "hombros_frac": .125, "piernas_frac": .27,
+                                                                                    "cabeza_ancho": .72, "cuerpo_ancho": 1.3, "bob_escala": .5, "paso": .55,
+                                                                                    "sep_ojos": .55, "sep_ojos_diagonal": .33},
+                   "render": {**ESTILOS["stardew8"]["render"], "paleta_max": 16},
+                   "referencia": None, "ojos": "fry",
+                   "descripcion": "Boceto tipo Fry (referencias/8dir/fry_40x64): grande, cabeza ~30%, 16 colores."}
+
 # estilos que se generan por defecto ("--estilo todos"); volumen queda disponible pero el usuario prefiere stardew
 ACTIVOS = ["stardew", "lateral"]
 # estilos que no son del juego: solo sirven para verificar plantillas contra su referencia (no se validan en fichas)
-VERIFICACION = ["lpc"]
+VERIFICACION = ["lpc", "fry8"]     # fry8: boceto, todavía sin componentes declarados
 
 _UZ = {"iso": .92, "cenital": .92, "lateral": 1.0}
 

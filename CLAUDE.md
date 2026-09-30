@@ -26,6 +26,7 @@
 | Skills | `.claude/skills/`: `sprite-personaje`, `sprite-referencia`, `sprite-analizar`, `sprite-estilo`, `sprite-2d-lateral`, `sprite-isometrico`, `pixel-art-video` |
 | Librería común | `sprites_lib/`: `ciclos` (movimientos medidos), `rig` (IK), `pixel2d` (capas lateral), `render3d` (motor 3D: iso 8 direcciones o cenital 4), `estilos` (perfiles de look: volumen, stardew), `referencia` (cortar sheets), `analizar` (medir), `exportar` |
 | Personajes | fichas en `personajes/fichas/*.yaml` → `personajes/generar.py` (boceto/validar/hoja/tests/aprobar); aprobados en `personajes/aprobados/`. `personajes/mago_*.py` = versión anterior sin ficha |
+| Procesos | `.venv/bin/python -m sprites_lib.proceso_estilo` / `proceso_anim` / `proceso_skin` (pasos y gates en `docs/procesos/`); aprobar es el único paso humano; artefactos congelados en `aprobados/` |
 | Salida del juego | `salida/<personaje>/<anim>/` |
 | Referencias descargadas | `referencias/` (y `sprites_x/`: Mega Man X separado en 14 animaciones) |
 | Experimentos anteriores | `mago/`, `el_llamado/`, `prueba/` (no usar como base; la versión vigente está en `personajes/`) |

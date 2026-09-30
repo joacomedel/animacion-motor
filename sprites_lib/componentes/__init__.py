@@ -11,7 +11,7 @@ REGISTRO = {}
 class Componente:
     tipo = ""
     anclas_validas = ()             # vacío = cualquiera del vocabulario
-    estilos = ("stardew", "volumen", "lateral")
+    estilos = ("stardew", "stardew8", "volumen", "lateral")
     params_defecto = {}
     params_material = ()            # parámetros cuyo valor tiene que ser un material de la paleta (o None)
     material_defecto = None         # material si la ficha no indica uno

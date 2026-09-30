@@ -43,3 +43,35 @@ def paleta_estilo(paleta_ficha, estilo):
     if "piel" in paleta_ficha and "mano" not in paleta_ficha:
         out["mano"] = tonos(_mezclar(hex_rgb(paleta_ficha["piel"]["base"]), (255, 255, 255), .12), regla)
     return out
+
+
+def _lab(c):
+    import numpy as np
+    v = np.array(c) / 255.
+    v = np.where(v > .04045, ((v + .055) / 1.055) ** 2.4, v / 12.92)
+    x = np.array([[.4124, .3576, .1805], [.2126, .7152, .0722], [.0193, .1192, .9505]]) @ v / np.array([.9505, 1, 1.089])
+    f = np.where(x > .008856, np.cbrt(x), 7.787 * x + 16 / 116)
+    return np.array([116 * f[1] - 16, 500 * (f[0] - f[1]), 200 * (f[1] - f[2])])
+
+
+def reducir_paleta(por_dir, n):
+    """Deja a lo sumo `n` colores en TODAS las direcciones y cuadros a la vez ({dir: [imágenes RGBA]}, in situ).
+    Junta de a pares los colores más parecidos (distancia Lab, ponderada por cantidad de píxeles) y conserva
+    siempre el más usado del par: nunca inventa un color nuevo. Referencia: Fry (CC0) usa 14 en toda su hoja."""
+    import collections
+    cnt = collections.Counter(p[:3] for fs in por_dir.values() for im in fs for p in im.getdata() if p[3] > 0)
+    if len(cnt) <= n:
+        return por_dir
+    lab = {k: _lab(k) for k in cnt}
+    rep = {k: k for k in cnt}
+    while len(cnt) > n:
+        ks = list(cnt)
+        w, a, b = min((cnt[a] * cnt[b] / (cnt[a] + cnt[b]) * float(((lab[a] - lab[b]) ** 2).sum()), a, b)
+                      for i, a in enumerate(ks) for b in ks[i + 1:])
+        keep, drop = (a, b) if cnt[a] >= cnt[b] else (b, a)
+        cnt[keep] += cnt.pop(drop)
+        rep = {k: (keep if v == drop else v) for k, v in rep.items()}
+    for fs in por_dir.values():
+        for im in fs:
+            im.putdata([(*rep[p[:3]], p[3]) if p[3] > 0 else p for p in im.getdata()])
+    return por_dir

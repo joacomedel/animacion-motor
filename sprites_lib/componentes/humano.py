@@ -3,7 +3,7 @@ aplicadas: puño como pieza propia y más grande que el antebrazo, cabeza cuadra
 cara corrida hacia la cámara (se lee de perfil), ojos de 2 px en Stardew."""
 import numpy as np
 
-from ..cuerpo import centro_cara, lado_de, masc
+from ..cuerpo import centro_cara, fuerza_cara, giro_cabeza, radios_cabeza, lado_de, masc
 from ..render3d import v
 from . import Componente, entrar, registrar
 
@@ -23,7 +23,7 @@ class CabezaHumana(Componente):
 
     def dibujar(self, esc, ctx, spec):
         entrar(esc, ctx, spec)
-        c = centro_cara(ctx.cam_local, ctx.est["proporciones"].get("cara_hacia_camara", .9))
+        c = centro_cara(ctx.cam_local, fuerza_cara(ctx.est["proporciones"], ctx.cam_local))
         cabello = spec["parametros"]["cabello"]
         corto = cabello == "corto"
 
@@ -47,7 +47,7 @@ class CabezaHumana(Componente):
             return m
 
         if ctx.est["proporciones"]["forma_cabeza"] == "caja":
-            esc.caja(ctx.a["cabeza"], ctx.anat.cabeza, mat, n=3.2)
+            esc.caja(ctx.a["cabeza"], radios_cabeza(ctx.est["proporciones"], ctx.mira, ctx.anat.cabeza), mat, n=3.2, giro=giro_cabeza(ctx.est["proporciones"], ctx.mira))
         else:
             esc.elipsoide(ctx.a["cabeza"], ctx.anat.cabeza, mat)
         if cabello == "cresta":
@@ -87,26 +87,47 @@ class Ojos(Componente):
         iris = pal[p["iris"]][1] if p["iris"] else (44, 34, 48)
         izq, der = ctx.a["ojo_izquierdo"], ctx.a["ojo_derecho"]
         perp = (izq - der) / (np.linalg.norm(izq - der) + 1e-9)
+        cara = {n: float((e - ctx.a["cabeza"]) @ ctx.cam_local) for n, e in (("ojo_izquierdo", izq), ("ojo_derecho", der))}
+        lejano = min(cara, key=cara.get) if len(ctx.mira) == 2 else None      # diagonal: el ojo lejano se ve de canto (1 px)
         for nombre, e, lado in (("ojo_izquierdo", izq, 1), ("ojo_derecho", der, -1)):
             if p["solo"] and nombre != p["solo"]:
                 continue
+            umbral = ctx.est["proporciones"].get("ojos_umbral")
+            if umbral is not None:      # ojo que mira de canto (casi de espaldas): no se dibuja, asomaba 1 px en NE/NW
+                n = e - ctx.a["cabeza"]
+                if float(n @ ctx.cam_local) / (np.linalg.norm(n) + 1e-9) < umbral:
+                    continue
             esc.componente = f'{spec["id"]}#{nombre}'      # cada ojo es una parte: se mide por separado
             if ctx.est["ojos"] == "stardew":
                 esc.detalle(e + v(0, 0, 1.0 * s), oscuro)              # pestaña
                 esc.detalle(e, BLANCO)
                 esc.detalle(e - perp * lado * .9 * s, iris)             # iris hacia el centro de la cara
+            elif ctx.est["ojos"] == "fry":                                 # 2×2 px: pestaña oscura, blanco afuera, iris adentro
+                adentro = perp * lado * 1.0 * s
+                esc.detalle(e + v(0, 0, 1.0 * s), oscuro)
+                esc.detalle(e, BLANCO)
+                if nombre != lejano:
+                    esc.detalle(e + v(0, 0, 1.0 * s) - adentro, oscuro)
+                    esc.detalle(e - adentro, iris)
             else:
                 esc.detalle(e, BLANCO)
                 esc.detalle(e - perp * lado * .6 * s, oscuro)
-        esc.componente = f'rostro@{spec["ancla"]}'     # cejas, nariz y boca aparte: las líneas guía miden los ojos
-        esc.detalle(ctx.a["cara"] + v(0, 0, -ctx.anat.cabeza[2] * .55), _oscuro(pal["piel"][0], .8))   # boca
-        esc.detalle(ctx.a["cara"] + v(.3 * s, 0, -ctx.anat.cabeza[2] * .3), pal["piel"][0])           # sombra de nariz
+        # cejas, nariz y boca aparte: las líneas guía miden los ojos. Cada rasgo es una parte con nombre propio
+        # ('rostro@cara#boca', ...) solo en el buffer de componentes: la imagen no cambia (lo usa sprites_lib.zonas)
+        rostro = f'rostro@{spec["ancla"]}'
+        if not (ctx.est["proporciones"].get("sin_boca_diagonal") and len(ctx.mira) == 2):
+            # en las diagonales de 8 direcciones la boca cae sobre el contorno de la cabeza y se confunde con él
+            esc.componente = rostro + "#boca"
+            esc.detalle(ctx.a["cara"] + v(0, 0, -ctx.anat.cabeza[2] * .55), _oscuro(pal["piel"][0], .8))   # boca
+            esc.componente = rostro + "#nariz"
+            esc.detalle(ctx.a["cara"] + v(.3 * s, 0, -ctx.anat.cabeza[2] * .3), pal["piel"][0])           # sombra de nariz
         ceja = pal["pelo"][0] if "pelo" in pal else _oscuro(pal["piel"][0], .6)
         for nombre, e, lado in (("ojo_izquierdo", izq, 1), ("ojo_derecho", der, -1)):
             if p["solo"] and nombre != p["solo"]:
                 continue
-            for k in (0, 1):                                                                       # cejas de 2 px
-                esc.detalle(e + v(0, 0, 2.0 * s) - perp * lado * k * .9 * s, ceja)
+            esc.componente = rostro + ("#ceja_izquierda" if nombre == "ojo_izquierdo" else "#ceja_derecha")
+            for k in ((0, 1) if ctx.est["ojos"] != "fry" else (-.5, .5, 1.5)):                    # cejas de 2 px (fry: 3 px seguidos)
+                esc.detalle(e + v(0, 0, (2.0 if ctx.est["ojos"] != "fry" else 2.6) * s) - perp * lado * k * (.9 if ctx.est["ojos"] != "fry" else 1.0) * s, ceja)
 
 
 @registrar

@@ -10,16 +10,18 @@ from .tests_personaje import Resultado
 DIR = os.path.join("personajes", "aprobados")
 
 
-def carpeta(nombre, estilo):
-    return os.path.join(DIR, nombre, estilo)
+def carpeta(nombre, estilo, raiz=None):
+    """Carpeta de las fotos de control: `<raiz>/<nombre>/<estilo>`; con `raiz=None` usa `DIR`
+    (`personajes/aprobados`); las animaciones pasan `raiz="aprobados/animaciones"`."""
+    return os.path.join(DIR if raiz is None else raiz, nombre, estilo)
 
 
 def _archivo(c):
     return f"{c.pose}_{c.mira}_{c.indice}.png"
 
 
-def guardar(nombre, estilo, todo):
-    out = carpeta(nombre, estilo)
+def guardar(nombre, estilo, todo, raiz=None):
+    out = carpeta(nombre, estilo, raiz)
     os.makedirs(out, exist_ok=True)
     for frs in todo.values():
         for c in frs:
@@ -39,8 +41,9 @@ def _diferencia(antes, ahora, ruta, zoom=6):
     hoja.save(ruta)
 
 
-def comparar(nombre, estilo, todo, carpeta_dif):
-    base = carpeta(nombre, estilo)
+def comparar(nombre, estilo, todo, carpeta_dif, raiz=None):
+    """Compara los cuadros con los congelados en `raiz`; sin carpeta aprobada queda omitido."""
+    base = carpeta(nombre, estilo, raiz)
     if not os.path.isdir(base):
         return Resultado("fotos de control", True, "todavía no hay poses aprobadas: omitido", omitido=True)
     fallas = []
