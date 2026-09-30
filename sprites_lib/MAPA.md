@@ -252,11 +252,14 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `aprobar(anim, estilo, skin=SKIN_DEFECTO, excepcion=None)` Corre el gate completo (incluida la comparación con los cuadros de control ya congelados: un cambio de
 - `main(argv=None)` CLI del proceso de animación: devuelve 0 VERDE, 1 ROJO y 2 error de uso o nombre desconocido.
 
-### `proceso_skin` — Proceso de skin: smoke de una skin pintada (carga 32×32, zonas, pulido y determinismo).
+### `proceso_skin` — Proceso de skin: smoke, aprobar y lote de una skin pintada.
 - `check_carga(ruta)` La skin carga con `skins.cargar` y mide 32×32 (la medida la valida el propio cargador); cualquier falla de
 - `correr_gate(ruta, anim='quieto', estilo='stardew')` Veredicto de la skin en esa pose: carga 32×32, zonas y pulido de su ficha, y determinismo del render de esa
 - `smoke(nombre, anim='quieto', estilo='stardew')` Corre el gate de la skin y imprime el informe; devuelve 0 VERDE / 1 ROJO.
-- `main(argv=None)` CLI del proceso de skin: devuelve 0 VERDE, 1 ROJO y 2 error de uso o skin inexistente.
+- `fuentes_skin(nombre)` Fuentes de la skin para congelar/derivar: el PNG y, si existe, el script que la pinta
+- `aprobar(nombre, estilo='stardew', excepcion=None)` Corre el gate de `smoke` y, si está VERDE o hay `excepcion`, congela la skin en `aprobados/skins/<nombre>/`
+- `lote(nombre, estilo='stardew', raiz='output')` Exporta en formato del juego todas las animaciones aprobadas del estilo con esta skin.
+- `main(argv=None)` CLI del proceso de skin: devuelve 0 VERDE, 1 ROJO y 2 error de uso, nombre inválido o skin inexistente.
 
 ### `componentes` — Biblioteca de componentes: cada pieza de un personaje (cabeza, brazo robótico, pulsera...) sabe dibujarse
 - clase `Componente`  · métodos: dibujar
