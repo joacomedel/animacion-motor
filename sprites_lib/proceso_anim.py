@@ -37,8 +37,14 @@ def _opciones(resto):
     return op
 
 
+def detalle_checks(v):
+    """Una línea por check con su `detalle`, para ver el estado de cada gate aunque el veredicto sea VERDE."""
+    return "\n".join(f"- {r.regla}: {r.detalle}" for r in v.checks)
+
+
 def smoke(anim, estilo, direccion=None, skin=SKIN_DEFECTO):
-    """Gate de humo de una animación: una dirección con esa skin; imprime el informe y devuelve 0 VERDE / 1 ROJO."""
+    """Gate de humo de una animación: una dirección con esa skin; imprime el informe y el detalle de cada check,
+    y devuelve 0 VERDE / 1 ROJO."""
     ficha = skins.ficha(skin)
     dirs = [direccion or ESTILOS[estilo]["direcciones"][0]]
     v = gates.correr([
@@ -46,6 +52,7 @@ def smoke(anim, estilo, direccion=None, skin=SKIN_DEFECTO):
         lambda: gates.check_pulido(anim, estilo, ficha=ficha, dirs=dirs),
     ])
     print(gates.informe(v))
+    print(detalle_checks(v))
     return 0 if v.verde else 1
 
 

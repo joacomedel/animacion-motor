@@ -231,7 +231,7 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `check_determinismo(estilo, pose='quieto', mira=None, veces=2)` Renderiza la ficha mínima `veces` veces en el mismo (pose, mira) y compara los píxeles entre corridas.
 - `check_deriva(estado_dict, fuentes, regla='deriva')` Compara las fuentes actuales contra las aprobadas; sin aprobación previa el check queda omitido (pasa).
 - `check_zonas(anim, estilo, ficha=None, dirs=None)` Gate de zonas: ninguna alerta MEDIA/ALTA por revisar (sin `fp`), contando las de borde solo si el sólido
-- `check_pulido(anim, estilo, ficha=None, dirs=None)` Gate de pulido: ningún hallazgo MAL por revisar (sin `fp`) en movimiento, limpieza ni espejo; los REVISAR
+- `check_pulido(anim, estilo, ficha=None, dirs=None)` Gate de pulido: ningún hallazgo MAL por revisar (sin `fp`) en movimiento, limpieza ni espejo. El detalle
 
 ### `proceso_estilo` — Proceso de estilo: medir, validar y congelar el perfil de un estilo.
 - `fuentes_actuales(estilo)` Fuentes del estilo para el hash de deriva: perfil completo y escala (hash estable por claves ordenadas).
@@ -243,7 +243,8 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `main(argv=None)` CLI del proceso de estilo: devuelve 0 VERDE, 1 ROJO y 2 error de uso o estilo desconocido.
 
 ### `proceso_anim` — Proceso de animación: smoke de una animación sobre una skin, con los gates universales.
-- `smoke(anim, estilo, direccion=None, skin=SKIN_DEFECTO)` Gate de humo de una animación: una dirección con esa skin; imprime el informe y devuelve 0 VERDE / 1 ROJO.
+- `detalle_checks(v)` Una línea por check con su `detalle`, para ver el estado de cada gate aunque el veredicto sea VERDE.
+- `smoke(anim, estilo, direccion=None, skin=SKIN_DEFECTO)` Gate de humo de una animación: una dirección con esa skin; imprime el informe y el detalle de cada check,
 - `main(argv=None)` CLI del proceso de animación: devuelve 0 VERDE, 1 ROJO y 2 error de uso o nombre desconocido.
 
 ### `componentes` — Biblioteca de componentes: cada pieza de un personaje (cabeza, brazo robótico, pulsera...) sabe dibujarse

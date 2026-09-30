@@ -73,14 +73,24 @@ def check_deriva(estado_dict, fuentes, regla="deriva"):
     return Resultado(regla, ok=False, detalle=f"cambió: {', '.join(claves)}", evidencia=evidencia)
 
 
+def _donde(x):
+    return x["dir"] + ("" if x["cuadro"] is None else f" c{x['cuadro']}")
+
+
 def _texto_alerta(a):
-    donde = a["dir"] + ("" if a["cuadro"] is None else f" c{a['cuadro']}")
-    return f"{donde} {a['zona']}: {a['texto']}"
+    return f"{_donde(a)} {a['zona']}: {a['texto']}"
 
 
 def _texto_hallazgo(h):
-    donde = h["dir"] + ("" if h["cuadro"] is None else f" c{h['cuadro']}")
-    return f"{h['familia']}/{h['tipo']} {donde} {h['zona']}: {h['texto']}"
+    return f"{h['familia']}/{h['tipo']} {_donde(h)} {h['zona']}: {h['texto']}"
+
+
+def _revisar_resumen(revisar, tope=6):
+    """Lista compacta de hallazgos REVISAR (`dir` [cuadro] zona/tipo), recortada a `tope` con '+N' si hay más."""
+    if not revisar:
+        return ""
+    items = ", ".join(f"{_donde(h)} {h['zona']}/{h['tipo']}" for h in revisar[:tope])
+    return f" · REVISAR: {items}" + (f" +{len(revisar) - tope}" if len(revisar) > tope else "")
 
 
 def _borde_cortado(res, alerta):
@@ -108,12 +118,13 @@ def check_zonas(anim, estilo, ficha=None, dirs=None):
 
 
 def check_pulido(anim, estilo, ficha=None, dirs=None):
-    """Gate de pulido: ningún hallazgo MAL por revisar (sin `fp`) en movimiento, limpieza ni espejo; los REVISAR
-    quedan listados como evidencia para el informe."""
+    """Gate de pulido: ningún hallazgo MAL por revisar (sin `fp`) en movimiento, limpieza ni espejo. El detalle
+    lleva el conteo de MAL y los REVISAR listados (hasta 6, el resto como '+N'); los textos largos van a la
+    evidencia."""
     pul = pulido.analizar(anim=anim, estilo=estilo, ficha=ficha, dirs=dirs)
     reales = [h for h in pul["hallazgos"] if h["fp"] is None]
     mal = [h for h in reales if h["sev"] == 3]
     revisar = [h for h in reales if h["sev"] == 2]
     return Resultado(regla=f"pulido {anim}/{estilo}", ok=not mal,
-                     detalle=f"{len(mal)} MAL, {len(revisar)} REVISAR",
+                     detalle=f"{len(mal)} MAL" + _revisar_resumen(revisar),
                      evidencia=[_texto_hallazgo(h) for h in mal + revisar])
