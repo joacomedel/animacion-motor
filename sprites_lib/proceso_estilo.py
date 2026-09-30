@@ -21,7 +21,7 @@ import tempfile
 
 from PIL import Image
 
-from . import armado, comparar_estilo, estado, gates, lado_a_lado, proporciones, skins
+from . import armado, comparar_estilo, estado, ficha, gates, lado_a_lado, proporciones, skins
 from .escala import TAMANOS
 from .estilos import ESTILOS
 from .poses import POSES
@@ -63,10 +63,22 @@ def _metricas_referencia(ref):
 
 
 def _especimen(estilo):
-    """Ficha del personaje vestido declarado en `referencia.especimen` (None si falta o no está el archivo)."""
+    """Ficha del personaje vestido declarado en `referencia.especimen`, o `(None, ruta)` si no está disponible.
+
+    `.yaml`/`.yml` (o el nombre de una ficha de `personajes/fichas/`) se carga con `ficha.cargar` (incluye
+    componentes geométricos); un `.png` se rinde con `skins.ficha` (piel pintada sobre el cuerpo base).
+    """
     ref = ESTILOS[estilo].get("referencia") or {}
     ruta = ref.get("especimen")
-    return (skins.ficha(ruta), ruta) if ruta and os.path.exists(ruta) else (None, ruta)
+    if not ruta:
+        return None, ruta
+    if ruta.endswith((".yaml", ".yml")):
+        return (ficha.cargar(ruta), ruta) if os.path.exists(ruta) else (None, ruta)
+    if ruta.endswith(".png"):
+        return (skins.ficha(ruta), ruta) if os.path.exists(ruta) else (None, ruta)
+    if os.path.exists(os.path.join("personajes", "fichas", f"{ruta}.yaml")):
+        return ficha.cargar(ruta), ruta
+    return None, ruta
 
 
 def check_referencia(estilo):
