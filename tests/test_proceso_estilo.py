@@ -35,3 +35,19 @@ def test_estilo_desconocido_da_2(tmp_path, monkeypatch):
 def test_sin_referencia_calibrada_omite():
     r = proceso_estilo.check_referencia("lpc")
     assert r.ok and r.omitido
+
+
+def test_referencia_sin_especimen_omite(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    r = proceso_estilo.check_referencia("stardew")
+    assert r.ok and r.omitido
+
+
+def test_especimen_faltante_omite(tmp_path, monkeypatch):
+    from sprites_lib import estilos
+    ref_real = os.path.abspath("referencias/stardew/abigail.png")     # antes del chdir: la referencia existe
+    monkeypatch.chdir(tmp_path)
+    ref = dict(estilos.ESTILOS["stardew"]["referencia"], ruta=ref_real)
+    monkeypatch.setitem(estilos.ESTILOS["stardew"], "referencia", ref)
+    r = proceso_estilo.check_referencia("stardew")
+    assert r.ok and r.omitido and "especimen" in r.detalle

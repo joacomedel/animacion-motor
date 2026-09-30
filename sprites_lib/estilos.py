@@ -39,7 +39,10 @@ ESTILOS = {
         tonos=dict(sombra=(.66, (70, 40, 120), .25), luz=(1.22, (255, 236, 160), .2)),
         ojos="stardew",
         referencia=dict(ruta="referencias/stardew/abigail.png", celda=(16, 32), recorte=(0, 0, 64, 128),
-                        calibrada=True),   # control Abigail vs Wizard (CRITERIOS_ANIMACION.md)
+                        calibrada=True,    # control Abigail vs Wizard (CRITERIOS_ANIMACION.md)
+                        # sujeto de la comparación de estilo: un personaje vestido; el muñeco desnudo no tiene
+                        # el detalle dibujado (mechones, ropa) que miden las métricas de comparar_estilo
+                        especimen="skins/mago.png"),
         paleta="saturada y cálida; 3-4 tonos por material con corrimiento de tono (sombras hacia violeta, "
                "luces hacia amarillo); contorno = tono más oscuro del mismo material, nunca negro puro "
                "(salvo materiales negros); 20-30 colores por cuadro",

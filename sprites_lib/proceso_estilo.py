@@ -1,9 +1,11 @@
-"""Proceso de estilo: medir el muñeco base contra su referencia, validar el perfil y congelarlo al aprobarlo.
+"""Proceso de estilo: medir, validar y congelar el perfil de un estilo.
 
 El gate de un estilo (fuente: `estilos.ESTILOS[estilo]` + `escala.TAMANOS[estilo]`) corre el contrato numérico del
 muñeco, el determinismo del render, la comparación con la referencia local (si está calibrada) y la deriva contra
-la última aprobación. Aprobar congela `aprobados/estilos/<estilo>/` (`control.png`, `metricas.json`, `estado.json`
-— este último al final, como marca del congelado) y propone `docs/estilos/<estilo>.md` si todavía no existe.
+la última aprobación. La comparación de estilo mide el **espécimen vestido** declarado en `referencia.especimen`
+(con `skins.ficha`): el muñeco desnudo no tiene el detalle dibujado que esas métricas miden. Aprobar congela
+`aprobados/estilos/<estilo>/` (`control.png`, `metricas.json`, `estado.json` — este último al final, como marca del
+congelado) y propone `docs/estilos/<estilo>.md` si todavía no existe.
 
 Uso:
   .venv/bin/python -m sprites_lib.proceso_estilo medir <estilo>      → métricas de la referencia y del muñeco (no escribe)
@@ -19,7 +21,7 @@ import tempfile
 
 from PIL import Image
 
-from . import armado, comparar_estilo, estado, gates, lado_a_lado, proporciones
+from . import armado, comparar_estilo, estado, gates, lado_a_lado, proporciones, skins
 from .escala import TAMANOS
 from .estilos import ESTILOS
 from .poses import POSES
@@ -37,9 +39,9 @@ def fuentes_actuales(estilo):
     return {"perfil": estado.hash_obj(ESTILOS[estilo]), "escala": estado.hash_obj(TAMANOS[estilo])}
 
 
-def _tira_muneco(estilo, pose="quieto"):
-    """Tira RGBA con el muñeco base en todas las direcciones y cuadros de la pose (referencia propia del gate)."""
-    frames = [armado.render_cuadro(armado.FICHA_MINIMA, estilo, pose, p, m).img
+def _tira(ficha, estilo, pose="quieto"):
+    """Tira RGBA de una ficha en todas las direcciones y cuadros de la pose (el render propio a medir)."""
+    frames = [armado.render_cuadro(ficha, estilo, pose, p, m).img
               for m in ESTILOS[estilo]["direcciones"] for p in range(POSES[pose]["n"])]
     cw, ch = frames[0].size
     tira = Image.new("RGBA", (cw * len(frames), ch), (0, 0, 0, 0))
@@ -60,19 +62,32 @@ def _metricas_referencia(ref):
                                     tuple(ref["recorte"]) if ref.get("recorte") else None)[0]
 
 
+def _especimen(estilo):
+    """Ficha del personaje vestido declarado en `referencia.especimen` (None si falta o no está el archivo)."""
+    ref = ESTILOS[estilo].get("referencia") or {}
+    ruta = ref.get("especimen")
+    return (skins.ficha(ruta), ruta) if ruta and os.path.exists(ruta) else (None, ruta)
+
+
 def check_referencia(estilo):
-    """Resultado de comparar el muñeco base con la referencia calibrada del estilo (omitido si no hay datos)."""
+    """Compara la referencia calibrada con el espécimen vestido del estilo (omitido si falta algún dato)."""
     ref = ESTILOS[estilo].get("referencia")
     if not ref or not ref.get("calibrada"):
         return gates.Resultado("estilo vs referencia", True, "sin referencia calibrada: omitido", omitido=True)
     if not os.path.exists(ref["ruta"]):
         return gates.Resultado("estilo vs referencia", True, f"no está {ref['ruta']}: omitido", omitido=True)
-    tira, cw, ch = _tira_muneco(estilo)
+    ficha, ruta_esp = _especimen(estilo)
+    if ficha is None:
+        return gates.Resultado("estilo vs referencia", True,
+                               "sin espécimen del estilo: comparar con un personaje vestido y declararlo en "
+                               "referencia.especimen", omitido=True)
+    tira, cw, ch = _tira(ficha, estilo)
     fallas = [f for f in comparar_estilo.comparar_detalle(_metricas_referencia(ref), _metricas_tira(tira, (cw, ch)))
               if f["bloqueante"]]
-    evidencia = [f"{f['metrica']}: referencia {f['referencia']:.2f}, muñeco {f['propio']:.2f}" for f in fallas]
-    detalle = (f"{len(fallas)} métricas bloqueantes fuera de tolerancia contra {ref['ruta']}" if fallas else
-               f"el muñeco coincide con {ref['ruta']} en todas las métricas bloqueantes")
+    evidencia = [f"{f['metrica']}: referencia {f['referencia']:.2f}, espécimen {f['propio']:.2f}" for f in fallas]
+    base = f"espécimen {ruta_esp} vs {ref['ruta']}"
+    detalle = (f"{base}: {len(fallas)} métricas bloqueantes fuera de tolerancia" if fallas else
+               f"{base}: coincide en todas las métricas bloqueantes")
     return gates.Resultado("estilo vs referencia", not fallas, detalle, evidencia)
 
 
@@ -195,7 +210,8 @@ def aprobar(estilo, excepcion=None):
         print(f"\nROJO con excepción: {excepcion}")
     carpeta = _carpeta(estilo)
     os.makedirs(carpeta, exist_ok=True)
-    tira, cw, ch = _tira_muneco(estilo)
+    ficha, _ = _especimen(estilo)                     # el control muestra al mismo sujeto que valida el gate
+    tira, cw, ch = _tira(ficha or armado.FICHA_MINIMA, estilo)
     medidas = proporciones.medir(estilo)
     _control(estilo, tira, cw, ch, carpeta)
     _metricas_json(estilo, v, tira, (cw, ch), medidas, carpeta)

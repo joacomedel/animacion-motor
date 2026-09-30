@@ -231,9 +231,9 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `check_determinismo(estilo, pose='quieto', mira=None, veces=2)` Renderiza la ficha mínima `veces` veces en el mismo (pose, mira) y compara los píxeles entre corridas.
 - `check_deriva(estado_dict, fuentes, regla='deriva')` Compara las fuentes actuales contra las aprobadas; sin aprobación previa el check queda omitido (pasa).
 
-### `proceso_estilo` — Proceso de estilo: medir el muñeco base contra su referencia, validar el perfil y congelarlo al aprobarlo.
+### `proceso_estilo` — Proceso de estilo: medir, validar y congelar el perfil de un estilo.
 - `fuentes_actuales(estilo)` Fuentes del estilo para el hash de deriva: perfil completo y escala (hash estable por claves ordenadas).
-- `check_referencia(estilo)` Resultado de comparar el muñeco base con la referencia calibrada del estilo (omitido si no hay datos).
+- `check_referencia(estilo)` Compara la referencia calibrada con el espécimen vestido del estilo (omitido si falta algún dato).
 - `correr_gate(estilo)` Veredicto del estilo: contrato del muñeco, determinismo, referencia calibrada y deriva de las fuentes.
 - `medir(estilo)` Imprime las métricas de la referencia (si hay) y las del muñeco; no escribe nada.
 - `validar(estilo)` Imprime el informe del gate; devuelve 0 si es VERDE y 1 si es ROJO.
