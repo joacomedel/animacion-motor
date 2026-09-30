@@ -173,16 +173,30 @@ INFORMATIVAS = {"borde_negro", "tonos_mat", "colores", "recorte"}   # recorte: d
 RELATIVA = {"cluster", "colores"}
 
 
-def comparar(ref, mio):
-    print(f"{'métrica':12s} {'referencia':>11s} {'mío':>8s}   estado")
-    fallas = []
+def comparar_detalle(ref, mio):
+    """Compara las métricas una por una y devuelve la lista estructurada (sin imprimir).
+
+    Cada fila: `metrica`, `referencia`, `propio`, `ok` (dentro de `TOL`) y `bloqueante` (fuera de tolerancia y
+    no informativa). Las informativas se informan pero no bloquean; el resto bloquea.
+    """
+    filas = []
     for k in ref:
         r, v = ref[k], mio[k]
         lim = TOL[k] * (r if k in RELATIVA else 1)
         ok = abs(v - r) <= lim
-        estado = "OK" if ok else ("difiere (informativa)" if k in INFORMATIVAS else "DIFIERE")
+        filas.append(dict(metrica=k, referencia=float(r), propio=float(v), ok=bool(ok),
+                          bloqueante=bool(not ok and k not in INFORMATIVAS)))
+    return filas
+
+
+def comparar(ref, mio):
+    print(f"{'métrica':12s} {'referencia':>11s} {'mío':>8s}   estado")
+    fallas = []
+    for f in comparar_detalle(ref, mio):
+        k, r, v = f["metrica"], f["referencia"], f["propio"]
+        estado = "OK" if f["ok"] else ("difiere (informativa)" if not f["bloqueante"] else "DIFIERE")
         print(f"{k:12s} {r:11.2f} {v:8.2f}   {estado}")
-        if not ok and k not in INFORMATIVAS:
+        if f["bloqueante"]:
             fallas.append((k, r, v))
     if fallas:
         print("\nDiagnóstico y cómo corregirlo:")

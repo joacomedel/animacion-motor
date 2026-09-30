@@ -135,6 +135,7 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 ### `comparar_estilo` — Comparar el estilo de un sprite propio contra una referencia con métricas objetivas.
 - `metricas_cuadro(a)`
 - `metricas(ruta, celda, recorte=None)`
+- `comparar_detalle(ref, mio)` Compara las métricas una por una y devuelve la lista estructurada (sin imprimir).
 - `comparar(ref, mio)`
 
 ### `hoja_modelo` — Hoja de modelo: todas las direcciones alineadas por pose, con líneas guía (coronilla, ojos, hombros, cintura,
@@ -229,6 +230,15 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `guardar(v, ruta)` Escribe el veredicto en `ruta` como JSON (`verde`, `informe` legible y un objeto por check); devuelve la ruta.
 - `check_determinismo(estilo, pose='quieto', mira=None, veces=2)` Renderiza la ficha mínima `veces` veces en el mismo (pose, mira) y compara los píxeles entre corridas.
 - `check_deriva(estado_dict, fuentes, regla='deriva')` Compara las fuentes actuales contra las aprobadas; sin aprobación previa el check queda omitido (pasa).
+
+### `proceso_estilo` — Proceso de estilo: medir el muñeco base contra su referencia, validar el perfil y congelarlo al aprobarlo.
+- `fuentes_actuales(estilo)` Fuentes del estilo para el hash de deriva: perfil completo y escala (hash estable por claves ordenadas).
+- `check_referencia(estilo)` Resultado de comparar el muñeco base con la referencia calibrada del estilo (omitido si no hay datos).
+- `correr_gate(estilo)` Veredicto del estilo: contrato del muñeco, determinismo, referencia calibrada y deriva de las fuentes.
+- `medir(estilo)` Imprime las métricas de la referencia (si hay) y las del muñeco; no escribe nada.
+- `validar(estilo)` Imprime el informe del gate; devuelve 0 si es VERDE y 1 si es ROJO.
+- `aprobar(estilo, excepcion=None)` Congela el estilo (control, métricas, doc si falta y `estado.json` último); ROJO sin excepción no escribe.
+- `main(argv=None)` CLI del proceso de estilo: devuelve 0 VERDE, 1 ROJO y 2 error de uso o estilo desconocido.
 
 ### `componentes` — Biblioteca de componentes: cada pieza de un personaje (cabeza, brazo robótico, pulsera...) sabe dibujarse
 - clase `Componente`  · métodos: dibujar
