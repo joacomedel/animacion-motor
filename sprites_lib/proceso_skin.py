@@ -195,6 +195,14 @@ def lote(nombre, estilo="stardew", raiz="output"):
     except (ValueError, OSError) as e:
         print(f"skin inválida: {e}", file=sys.stderr)
         return 1
+    estado_skin = estado.leer(os.path.join(RAIZ_APROBADOS, nombre))
+    if estado_skin:
+        r = gates.check_deriva(estado_skin, fuentes_skin(nombre))
+        if not r.ok:
+            print(f"la skin cambió desde su aprobación: re-validar y re-aprobar ({r.detalle})", file=sys.stderr)
+            return 1
+    else:
+        print("advertencia: skin sin aprobar: se exporta igual", file=sys.stderr)
     filas, fallan = [], 0
     for item in aprobadas:
         anim = item["nombre"]

@@ -52,7 +52,7 @@ def test_lote_sin_aprobadas_avisa_y_da_1(tmp_path, monkeypatch, capsys):
     assert "no hay animaciones aprobadas" in capsys.readouterr().out.lower()
 
 
-def test_lote_exporta(tmp_path, monkeypatch):
+def test_lote_exporta(tmp_path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
     from sprites_lib import estado
     from sprites_lib.poses import POSES
@@ -60,6 +60,20 @@ def test_lote_exporta(tmp_path, monkeypatch):
     estado.escribir(str(a), "anim/quieto/stardew", {"ciclo": estado.hash_obj(POSES["quieto"])}, "metricas.json")
     assert proceso_skin.main(["lote", "mago", "--raiz", str(tmp_path / "output")]) == 0
     assert (tmp_path / "output" / "mago" / "quieto" / "quieto.png").exists()
+    assert "skin sin aprobar" in capsys.readouterr().err
+
+
+def test_lote_skin_derivada_da_1(tmp_path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    from sprites_lib import estado
+    from sprites_lib.poses import POSES
+    a = tmp_path / "aprobados" / "animaciones" / "quieto" / "stardew"
+    estado.escribir(str(a), "anim/quieto/stardew", {"ciclo": estado.hash_obj(POSES["quieto"])}, "metricas.json")
+    estado.escribir(str(tmp_path / "aprobados" / "skins" / "mago"), "mago", {"skin": "sha256:viejo"}, "metricas.json")
+    out = tmp_path / "output"
+    assert proceso_skin.main(["lote", "mago", "--raiz", str(out)]) == 1
+    assert "la skin cambió desde su aprobación" in capsys.readouterr().err
+    assert not (out / "mago" / "quieto" / "quieto.png").exists()
 
 
 def test_lote_skin_rota_avisa_y_da_1(tmp_path, monkeypatch, capsys):

@@ -1,5 +1,8 @@
 import json
 import os
+
+import pytest
+
 from sprites_lib import proceso_estilo
 
 
@@ -41,6 +44,14 @@ def test_referencia_sin_especimen_omite(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     r = proceso_estilo.check_referencia("stardew")
     assert r.ok and r.omitido
+
+
+def test_referencia_compara_especimen():
+    if not os.path.exists("referencias/stardew/abigail.png"):
+        pytest.skip("falta referencias/stardew/abigail.png (gitignored): no hay referencia que comparar")
+    r = proceso_estilo.check_referencia("stardew")
+    assert r.ok and not r.omitido
+    assert "espécimen" in r.detalle
 
 
 def test_especimen_faltante_omite(tmp_path, monkeypatch):

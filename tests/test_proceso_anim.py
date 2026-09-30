@@ -1,4 +1,6 @@
 import numpy as np
+import pytest
+from PIL import Image
 
 from sprites_lib import gates, proceso_anim
 
@@ -129,3 +131,19 @@ def test_nombre_invalido_rechazado(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     assert proceso_anim.main(["aprobar", "../afuera", "--estilo", "stardew"]) == 2
     assert not (tmp_path.parent / "afuera").exists()
+
+
+@pytest.mark.parametrize("cmd", ["smoke", "validar", "aprobar"])
+def test_skin_invalida_da_2_sin_traceback(tmp_path, cmd, capsys):
+    chica = tmp_path / "chica.png"
+    Image.new("RGBA", (16, 16)).save(chica)
+    assert proceso_anim.main([cmd, "quieto", "--estilo", "stardew", "--skin", str(chica)]) == 2
+    err = capsys.readouterr().err
+    assert "error: skin inválida" in err and "32×32" in err
+
+
+def test_skin_que_no_es_imagen_da_2(tmp_path, capsys):
+    archivo = tmp_path / "no_es_imagen.png"
+    archivo.write_text("esto no es un PNG")
+    assert proceso_anim.main(["smoke", "quieto", "--estilo", "stardew", "--skin", str(archivo)]) == 2
+    assert "error: skin inválida" in capsys.readouterr().err

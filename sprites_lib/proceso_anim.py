@@ -226,8 +226,13 @@ def main(argv=None):
     if estilo not in ESTILOS:
         print(f"estilo desconocido: {estilo!r}; disponibles: {', '.join(ESTILOS)}", file=sys.stderr)
         return 2
-    if not os.path.exists(op["skin"]):
+    if not os.path.isfile(op["skin"]):
         print(f"no está la skin: {op['skin']}", file=sys.stderr)
+        return 2
+    try:
+        skins.cargar(op["skin"])
+    except (ValueError, OSError) as e:
+        print(f"error: skin inválida: {op['skin']} ({e})", file=sys.stderr)
         return 2
     if cmd == "smoke":
         if op["dir"] is not None and op["dir"] not in ESTILOS[estilo]["direcciones"]:
