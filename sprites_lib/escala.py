@@ -7,6 +7,10 @@ TAMANOS = {
     # adulto_px: alto en pantalla de un adulto (pies → coronilla, sin pelo parado)
     "stardew": dict(adulto_px=26, pie_desde_abajo=2,
                     celdas={"nino": (16, 32), "adulto": (16, 32), "grande": (32, 48), "gigante": (32, 64)}),
+    "stardew8": dict(adulto_px=26, pie_desde_abajo=2,
+                     celdas={"nino": (16, 32), "adulto": (16, 32), "grande": (32, 48), "gigante": (32, 64)}),
+    "fry8": dict(adulto_px=54, pie_desde_abajo=4,
+                 celdas={"nino": (40, 48), "adulto": (48, 64), "grande": (56, 76), "gigante": (72, 96)}),
     "volumen": dict(adulto_px=36, pie_desde_abajo=8,
                     celdas={"nino": (56, 60), "adulto": (56, 60), "grande": (72, 76), "gigante": (88, 96)}),
     "lateral": dict(adulto_px=33, pie_desde_abajo=2,
@@ -34,8 +38,11 @@ def alto_objetivo_px(estilo, clase="adulto"):
     return round(t["adulto_px"] * CLASES[clase])
 
 
-def celda(estilo, clase="adulto"):
+def celda(estilo, clase="adulto", ancho=None):
+    """ancho: ancho propio de una animación (ver poses.ancho); el alto y los pies no cambian."""
     t = _t(estilo)
     alto_objetivo_px(estilo, clase)                 # valida la clase
     cw, ch = t["celdas"][clase]
+    if ancho:
+        cw = ancho
     return dict(cw=cw, ch=ch, gx=cw // 2, gy=ch - t["pie_desde_abajo"])

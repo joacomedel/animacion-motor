@@ -37,7 +37,7 @@ def revision(frames, ruta, zoom=5, columnas=5):
     return ruta
 
 
-def exportar(frames, nombre, carpeta, fps=12, pivote=None, zoom=4, extra=None):
+def exportar(frames, nombre, carpeta, fps=12, pivote=None, zoom=4, extra=None, loop=True):
     os.makedirs(carpeta, exist_ok=True)
     cw, ch = frames[0].size
     tira = Image.new("RGBA", (cw * len(frames), ch), (0, 0, 0, 0))
@@ -49,7 +49,7 @@ def exportar(frames, nombre, carpeta, fps=12, pivote=None, zoom=4, extra=None):
         "frames": [{"filename": f"{nombre}_{i}", "frame": {"x": i * cw, "y": 0, "w": cw, "h": ch},
                     "duration": int(1000 / fps)} for i in range(len(frames))],
         "meta": {"image": nombre + ".png", "size": {"w": cw * len(frames), "h": ch},
-                 "cell": {"w": cw, "h": ch}, "fps": fps, "loop": True,
+                 "cell": {"w": cw, "h": ch}, "fps": fps, "loop": loop,
                  "pivot": {"x": pivote[0], "y": pivote[1]} if pivote else None, **(extra or {})},
     }
     with open(base + ".json", "w") as fh:
@@ -59,7 +59,7 @@ def exportar(frames, nombre, carpeta, fps=12, pivote=None, zoom=4, extra=None):
     return base
 
 
-def exportar_direcciones(por_dir, nombre, carpeta, fps=12, pivote=None, zoom=3):
+def exportar_direcciones(por_dir, nombre, carpeta, fps=12, pivote=None, zoom=3, loop=True, extra=None, cuadros=False):
     """por_dir: {"SE": [frames], "E": [...], ...} → hoja con una fila por dirección + JSON + GIF por dirección."""
     os.makedirs(carpeta, exist_ok=True)
     dirs = list(por_dir)
@@ -75,15 +75,18 @@ def exportar_direcciones(por_dir, nombre, carpeta, fps=12, pivote=None, zoom=3):
             frames_meta.append({"filename": key, "frame": {"x": i * cw, "y": r * ch, "w": cw, "h": ch},
                                 "duration": int(1000 / fps)})
             anims[dname].append(key)
+            if cuadros:
+                os.makedirs(os.path.join(carpeta, "cuadros"), exist_ok=True)
+                f.save(os.path.join(carpeta, "cuadros", key + ".png"))
         _gif(por_dir[dname], os.path.join(carpeta, f"{nombre}_{dname}.gif"), fps, zoom)
     base = os.path.join(carpeta, nombre)
     hoja.save(base + ".png")
     with open(base + ".json", "w") as fh:
         json.dump({"frames": frames_meta,
                    "meta": {"image": nombre + ".png", "size": {"w": cw * n, "h": ch * len(dirs)},
-                            "cell": {"w": cw, "h": ch}, "fps": fps, "loop": True,
+                            "cell": {"w": cw, "h": ch}, "fps": fps, "loop": loop,
                             "pivot": {"x": pivote[0], "y": pivote[1]} if pivote else None,
-                            "animations": anims}}, fh, indent=1)
+                            "animations": anims, **(extra or {})}}, fh, indent=1)
     # vista general: todas las direcciones en un GIF
     todos = []
     for i in range(n):

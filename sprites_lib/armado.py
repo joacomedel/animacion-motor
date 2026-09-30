@@ -6,7 +6,7 @@ from .cuerpo import anatomia, anclas_ausentes, posar
 from .escala import celda
 from .estilos import ESTILOS, crear_camara
 from .paleta import paleta_estilo
-from .poses import cuadros
+from .poses import POSES, ancho as anchura, cuadros
 from .render3d import Escena
 
 BASE_HUMANO = [("cabeza_humana", "cabeza"), ("ojos", "cara"), ("torso_humano", "torso"),
@@ -67,15 +67,19 @@ class Cuadro:
     bob: int
 
 
-def render_cuadro(ficha, estilo, pose, p, mira):
+def render_cuadro(ficha, estilo, pose, p, mira, ancho=None):
     cu = ficha["cuerpo"]
     clase = cu.get("clase_altura", "adulto")
     anat = anatomia(estilo, clase, cu.get("complexion", "normal"))
-    cam = crear_camara(estilo, mira, celda(estilo, clase))
+    cam = crear_camara(estilo, mira, celda(estilo, clase, ancho or anchura(pose, estilo)))
     est = ESTILOS[estilo]
     pal = paleta_estilo(ficha["paleta"], est)
     ps = cuadros(pose)[p]
-    a = posar(anat, ps, cam.cam_local)
+    if cu.get("brazo_activo") == "derecho" and "mano_b" in POSES[pose]:
+        # animación asimétrica (golpear): el ciclo está escrito para el brazo izquierdo; se espeja el lado activo
+        ps = {**ps, "mano_a": ps["mano_b"], "mano_b": ps["mano_a"], "pie_a": ps["pie_b"], "pie_b": ps["pie_a"],
+              "ang_a": ps["ang_b"], "ang_b": ps["ang_a"]}
+    a = posar(anat, ps, cam.cam_local, mira)
     aus = frozenset(anclas_ausentes(cu.get("ausentes")))
     esc = Escena(cam, pal)
     specs = expandir(ficha)
@@ -95,3 +99,17 @@ def render_todo(ficha, estilo, poses=("neutra", "quieto")):
         for mira in ESTILOS[estilo]["direcciones"]:
             out[(pn, mira)] = [render_cuadro(ficha, estilo, pn, p, mira) for p in range(len(cuadros(pn)))]
     return out
+
+
+FICHA_MINIMA = {"cuerpo": {"base": "humano", "clase_altura": "adulto", "complexion": "normal", "cabello": "calvo"},
+                 "paleta": {"piel": {"base": "#f9d5ba"}}, "componentes": []}
+
+
+def pivote(estilo, clase_altura="adulto", pose="quieto"):
+    """Punto de los pies (piso) dentro de la celda: el mismo para cualquier pose/dirección/personaje de ese
+    estilo (el ancla 'suelo' es el origen del mundo, no se mueve con la pose). Para el JSON de exportación."""
+    f = {**FICHA_MINIMA, "cuerpo": {**FICHA_MINIMA["cuerpo"], "clase_altura": clase_altura}}
+    mira = ESTILOS[estilo]["direcciones"][0]
+    c = render_cuadro(f, estilo, pose, 0, mira)
+    x, y, _ = c.anclas_px["suelo"]
+    return round(x), round(y)

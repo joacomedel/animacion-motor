@@ -9,6 +9,8 @@ Flujo: ficha YAML → `ficha.cargar` → `armado.render_cuadro` (cuerpo base + c
 | stardew | cenital | S E N W | 26 | 16×32 | sí |
 | lateral | lateral | E W | 33 | 40×40 | sí |
 | lpc | lateral | E W | 43 | 64×64 | no |
+| stardew8 | cenital | S SE E NE N NW W SW | 26 | 16×32 | no |
+| fry8 | cenital | S SE E NE N NW W SW | 54 | 48×64 | no |
 
 ## Anclas
 antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, cadera_derecha, cadera_izquierda, cara, cintura, codo_derecho, codo_izquierdo, coronilla, cuello, frente, hombro_derecho, hombro_izquierdo, mano_derecha, mano_izquierda, muneca_derecha, muneca_izquierda, nuca, ojo_derecho, ojo_izquierdo, pecho, pie_derecho, pie_izquierdo, pierna_derecha, pierna_izquierda, rodilla_derecha, rodilla_izquierda, sien_derecha, sien_izquierda, suelo, tobillo_derecho, tobillo_izquierdo, torso
@@ -43,12 +45,13 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 ### `escala` — Escala del juego: el mismo personaje mide lo mismo en todos los estilos de su clase, y todas las
 - clase `EscalaError`
 - `alto_objetivo_px(estilo, clase='adulto')`
-- `celda(estilo, clase='adulto')`
+- `celda(estilo, clase='adulto', ancho=None)` ancho: ancho propio de una animación (ver poses.ancho); el alto y los pies no cambian.
 
 ### `paleta` — Paleta de un personaje por estilo: la ficha da solo el tono base de cada material; el estilo deriva
 - `hex_rgb(h)`
 - `tonos(base, regla, emisivo=False)` (sombra, base, luz). Los emisivos (runas, visor) no se oscurecen: brillan igual en todos lados.
 - `paleta_estilo(paleta_ficha, estilo)` {material: (sombra, base, luz)}. Agrega '<material>_b' (variante un poco más oscura para texturas:
+- `reducir_paleta(por_dir, n)` Deja a lo sumo `n` colores en TODAS las direcciones y cuadros a la vez ({dir: [imágenes RGBA]}, in situ).
 
 ### `estilos` — Perfiles de estilo: cómo se "ve" un sprite, independiente de qué personaje es y de cómo se mueve.
 - `uz(estilo)` Cuántos px de pantalla ocupa 1 unidad de altura del mundo en ese estilo.
@@ -59,16 +62,24 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `masc(lado)`
 - clase `Anatomia`
 - `anatomia(estilo, clase='adulto', complexion='normal')`
+- `fuerza_cara(prop, cam_local)` Cuánto se corre la cara hacia la cámara. Los estilos de 8 direcciones pueden dar una fuerza propia a las
+- `giro_cabeza(prop, mira)` Ángulo con que se gira la caja de la cabeza para que su silueta mida lo mismo en todas las direcciones
+- `radios_cabeza(prop, mira, radios)` Radios de la caja de la cabeza. 'cabeza_diagonal' (< 1) angosta la cabeza en las 4 diagonales, como los juegos
+- `desvio_cabeza(prop, mira)` Vector local (adelante, izquierda) que corre la cabeza en pantalla 'cabeza_desvio[mira]' px hacia un costado
+- `sobre_caja(hc, d, radios, giro, n=3.2, k=1.02)` Punto de la superficie de la caja de la cabeza (superelipsoide de radios 'radios' girada 'giro' alrededor de la
 - `centro_cara(cam_local, fuerza=0.9)` Trampa de Stardew: la cara se corre hacia la cámara. De frente queda adelante; de perfil, sobre el costado
 - `anclas_ausentes(lista)` Anclas que no existen: las nombradas y, para un segmento, todo menos su raíz (sin antebrazo queda el codo).
-- `posar(anat, ps, cam_local)` Posiciones 3D (ejes locales) de todas las anclas para una pose (formato de ciclos.pose / poses.cuadros).
+- `posar(anat, ps, cam_local, mira=None)` Posiciones 3D (ejes locales) de todas las anclas para una pose (formato de ciclos.pose / poses.cuadros).
 
 ### `poses` — Poses clave como datos (mismo formato que los ciclos: rig lateral, piso y=34, cadera x=18).
 - `cuadros(nombre)`
 - `fps(nombre)`
+- `loop(nombre)` Si la animación se repite (caminar, quieto) o se juega una sola vez (saltar). Depende de la animación,
+- `offset_y(nombre)` Cuánto tiene que levantar el motor el sprite por cuadro (px de juego, negativo = arriba) o None si el
+- `ancho(nombre, estilo)` Ancho de celda propio de la animación en ese estilo (px) o None si usa el del estilo. Cada animación ocupa lo
 
 ### `ciclos` — Ciclos de movimiento reutilizables, en coordenadas del "rig lateral".
-- `mano(ciclo, p)` Posición de la mano del brazo A en el cuadro p (coordenadas del rig lateral).
+- `mano(ciclo, p, clave='mano')` Posición de la mano del brazo A en el cuadro p (coordenadas del rig lateral).
 - `pose(ciclo, p)` Todo lo que cambia por cuadro, para las extremidades A (cercana) y B (lejana).
 
 ### `rig` — Cinemática inversa de dos huesos (cadera→rodilla→tobillo, hombro→codo→mano).
@@ -88,8 +99,9 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 ### `armado` — Armado: ficha → lista de componentes (cuerpo base + los de la ficha) → escena → cuadros renderizados.
 - `expandir(ficha)` Specs finales, una por (tipo, ancla): cuerpo base (salvo sustituciones o componentes propios del mismo
 - clase `Cuadro`
-- `render_cuadro(ficha, estilo, pose, p, mira)`
+- `render_cuadro(ficha, estilo, pose, p, mira, ancho=None)`
 - `render_todo(ficha, estilo, poses=('neutra', 'quieto'))`
+- `pivote(estilo, clase_altura='adulto', pose='quieto')` Punto de los pies (piso) dentro de la celda: el mismo para cualquier pose/dirección/personaje de ese
 
 ### `ficha` — Fichas de personaje: cargar el YAML y validarlo antes de generar nada. Los errores dicen qué está mal y,
 - clase `FichaInvalida`
@@ -131,8 +143,8 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 
 ### `exportar` — Exportación genérica de animaciones (sirve para cualquier motor).
 - `revision(frames, ruta, zoom=5, columnas=5)`
-- `exportar(frames, nombre, carpeta, fps=12, pivote=None, zoom=4, extra=None)`
-- `exportar_direcciones(por_dir, nombre, carpeta, fps=12, pivote=None, zoom=3)` por_dir: {"SE": [frames], "E": [...], ...} → hoja con una fila por dirección + JSON + GIF por dirección.
+- `exportar(frames, nombre, carpeta, fps=12, pivote=None, zoom=4, extra=None, loop=True)`
+- `exportar_direcciones(por_dir, nombre, carpeta, fps=12, pivote=None, zoom=3, loop=True, extra=None, cuadros=False)` por_dir: {"SE": [frames], "E": [...], ...} → hoja con una fila por dirección + JSON + GIF por dirección.
 
 ### `referencia` — Separar sprite sheets de referencia en animaciones.
 - `color_fondo(a)`
@@ -162,9 +174,40 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `cargar(ruta)`
 - `u_de(d, ref=0.0)` Ángulo alrededor del eje vertical → u (0.5 = hacia ref, que por defecto es adelante).
 - `desde_colores(colores, ruta)` Skin simple a partir de colores (como la skin por defecto de Minecraft): pelo arriba y atrás, remera con
+- `plantilla_zonas(ruta='skins/zonas.png')` Skin de zonas: cada parte del cuerpo de un color distinto (la cara y el frente del torso, aparte).
 - `ficha(ruta, nombre=None)` Ficha mínima para renderizar una skin con el pipeline de siempre (render_cuadro, tests, exportar).
 - `guia(ruta, zoom=16)` PNG ampliado con cada zona rotulada y el frente marcado: la plantilla para pintar una skin a mano.
-- `demo(ruta, anim='caminar_lpc', estilo='stardew')`
+- `demo(ruta, anim='caminar_lpc', estilo='stardew')` Vista previa rápida (una skin cualquiera): salida/skins/<nombre>/<anim>*
+- `salida_juego(ruta, anim='caminar_lpc', estilo='stardew', raiz='salida', cuadros=False)` Salida final del juego (convención del proyecto): salida/<personaje>/<anim>/<anim>*. Sirve para
+
+### `muneco` — Muñeco base: sin skin ni ficha de personaje, solo para ver y probar un ciclo/pose antes de aplicarlo a alguien
+- `demo(anim='caminar_lpc', estilo='stardew')`
+- `ancho_necesario(anim='caminar_lpc', estilo='stardew8', margen=1)` Ancho de celda (par) que necesita la animación: se renderiza en una celda enorme con el muñeco y se mide cuánto
+- `grilla(anim='caminar_lpc', estilo='stardew8', ruta=None, zoom=6, cuadros=None)` Plantilla de zonas: una fila por dirección, una columna por cuadro (skins/zonas.png), para revisar a ojo.
+
+### `zonas` — Zonas del cuerpo por cuadro: dónde está cada parte (cabeza, cada ojo, cada brazo...) y cómo cambia de un cuadro
+- `ficha_plantilla()`
+- `clasificar(cuadro, ficha, estilo, plantilla=None)` Mapa de zonas del cuadro: array (alto, ancho) con el índice en ZONAS (-1 = transparente) y la máscara del
+- `medir(zm)` {zona: {px, bbox [x0,y0,x1,y1], centro [x,y]} | None} para todas las ZONAS ('otro' incluido).
+- `analizar(anim='caminar_lpc', estilo='stardew8', dirs=None, cuadros=None, ficha=None)` Dict con las zonas por dirección y cuadro, las alertas y los datos del resumen. ficha=None: muñeco de zonas.
+- `marcar_falsas(out, res)` Agrega a cada alerta el campo 'fp' (None = por revisar; texto = falsa conocida y por qué). Las falsas NO se
+- `alertas(res, extra)`
+- `informe(res, completo=False)` Texto compacto para un LLM: por dirección, ALERTAS primero (agrupadas por zona y tipo) y la tabla de centros
+- `para_json(res)`
+- `imagen(zm, anillo=None)` PNG RGBA de un mapa de zonas: cada zona con su color plano de COLORES (el contorno exterior, más oscuro).
+- `png(res, ruta, zoom=6)` Una fila por dirección, una columna por cuadro, con los colores planos de zona.
+- `main(argv=None)`
+
+### `pulido` — Modo pulido: lo que hace que una animación se vea BONITA (no solo bien construida), medido en números y texto.
+- `referencia_lpc(ruta='referencias/caminar/lpc_E_huesos.json')` Amplitud del balanceo en la referencia LPC de perfil (E), relativa al alto del personaje (piso − coronilla):
+- `movimiento(res, zres_alertas, desfase)`
+- `limpieza(res, ficha, estilo, zres_alertas)`
+- `espejo(res, estilo, desfase, asimetrica=False)` asimetrica: la animación mueve distinto los lados A y B (el ciclo trae 'mano_b'/'pie_b', p. ej. golpear): el
+- `analizar(anim='caminar_lpc', estilo='stardew8', dirs=None, ficha=None)` Hallazgos de pulido (movimiento, limpieza, espejo) + medidas + resumen. ficha=None: muñeco de zonas.
+- `resumen(pul)`
+- `informe(pul, max_por_grupo=6, max_leves=3)`
+- `para_json(pul)`
+- `main(argv=None)`
 
 ### `componentes` — Biblioteca de componentes: cada pieza de un personaje (cabeza, brazo robótico, pulsera...) sabe dibujarse
 - clase `Componente`  · métodos: dibujar

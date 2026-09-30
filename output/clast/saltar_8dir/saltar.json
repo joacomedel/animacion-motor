@@ -1,0 +1,575 @@
+{
+ "frames": [
+  {
+   "filename": "saltar_S_0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_S_1",
+   "frame": {
+    "x": 18,
+    "y": 0,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_S_2",
+   "frame": {
+    "x": 36,
+    "y": 0,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_S_3",
+   "frame": {
+    "x": 54,
+    "y": 0,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_S_4",
+   "frame": {
+    "x": 72,
+    "y": 0,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_S_5",
+   "frame": {
+    "x": 90,
+    "y": 0,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_SE_0",
+   "frame": {
+    "x": 0,
+    "y": 32,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_SE_1",
+   "frame": {
+    "x": 18,
+    "y": 32,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_SE_2",
+   "frame": {
+    "x": 36,
+    "y": 32,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_SE_3",
+   "frame": {
+    "x": 54,
+    "y": 32,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_SE_4",
+   "frame": {
+    "x": 72,
+    "y": 32,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_SE_5",
+   "frame": {
+    "x": 90,
+    "y": 32,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_E_0",
+   "frame": {
+    "x": 0,
+    "y": 64,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_E_1",
+   "frame": {
+    "x": 18,
+    "y": 64,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_E_2",
+   "frame": {
+    "x": 36,
+    "y": 64,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_E_3",
+   "frame": {
+    "x": 54,
+    "y": 64,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_E_4",
+   "frame": {
+    "x": 72,
+    "y": 64,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_E_5",
+   "frame": {
+    "x": 90,
+    "y": 64,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_NE_0",
+   "frame": {
+    "x": 0,
+    "y": 96,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_NE_1",
+   "frame": {
+    "x": 18,
+    "y": 96,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_NE_2",
+   "frame": {
+    "x": 36,
+    "y": 96,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_NE_3",
+   "frame": {
+    "x": 54,
+    "y": 96,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_NE_4",
+   "frame": {
+    "x": 72,
+    "y": 96,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_NE_5",
+   "frame": {
+    "x": 90,
+    "y": 96,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_N_0",
+   "frame": {
+    "x": 0,
+    "y": 128,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_N_1",
+   "frame": {
+    "x": 18,
+    "y": 128,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_N_2",
+   "frame": {
+    "x": 36,
+    "y": 128,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_N_3",
+   "frame": {
+    "x": 54,
+    "y": 128,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_N_4",
+   "frame": {
+    "x": 72,
+    "y": 128,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_N_5",
+   "frame": {
+    "x": 90,
+    "y": 128,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_NW_0",
+   "frame": {
+    "x": 0,
+    "y": 160,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_NW_1",
+   "frame": {
+    "x": 18,
+    "y": 160,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_NW_2",
+   "frame": {
+    "x": 36,
+    "y": 160,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_NW_3",
+   "frame": {
+    "x": 54,
+    "y": 160,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_NW_4",
+   "frame": {
+    "x": 72,
+    "y": 160,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_NW_5",
+   "frame": {
+    "x": 90,
+    "y": 160,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_W_0",
+   "frame": {
+    "x": 0,
+    "y": 192,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_W_1",
+   "frame": {
+    "x": 18,
+    "y": 192,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_W_2",
+   "frame": {
+    "x": 36,
+    "y": 192,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_W_3",
+   "frame": {
+    "x": 54,
+    "y": 192,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_W_4",
+   "frame": {
+    "x": 72,
+    "y": 192,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_W_5",
+   "frame": {
+    "x": 90,
+    "y": 192,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_SW_0",
+   "frame": {
+    "x": 0,
+    "y": 224,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_SW_1",
+   "frame": {
+    "x": 18,
+    "y": 224,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_SW_2",
+   "frame": {
+    "x": 36,
+    "y": 224,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_SW_3",
+   "frame": {
+    "x": 54,
+    "y": 224,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_SW_4",
+   "frame": {
+    "x": 72,
+    "y": 224,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "saltar_SW_5",
+   "frame": {
+    "x": 90,
+    "y": 224,
+    "w": 18,
+    "h": 32
+   },
+   "duration": 100
+  }
+ ],
+ "meta": {
+  "image": "saltar.png",
+  "size": {
+   "w": 108,
+   "h": 256
+  },
+  "cell": {
+   "w": 18,
+   "h": 32
+  },
+  "fps": 10,
+  "loop": false,
+  "pivot": {
+   "x": 9,
+   "y": 30
+  },
+  "animations": {
+   "S": [
+    "saltar_S_0",
+    "saltar_S_1",
+    "saltar_S_2",
+    "saltar_S_3",
+    "saltar_S_4",
+    "saltar_S_5"
+   ],
+   "SE": [
+    "saltar_SE_0",
+    "saltar_SE_1",
+    "saltar_SE_2",
+    "saltar_SE_3",
+    "saltar_SE_4",
+    "saltar_SE_5"
+   ],
+   "E": [
+    "saltar_E_0",
+    "saltar_E_1",
+    "saltar_E_2",
+    "saltar_E_3",
+    "saltar_E_4",
+    "saltar_E_5"
+   ],
+   "NE": [
+    "saltar_NE_0",
+    "saltar_NE_1",
+    "saltar_NE_2",
+    "saltar_NE_3",
+    "saltar_NE_4",
+    "saltar_NE_5"
+   ],
+   "N": [
+    "saltar_N_0",
+    "saltar_N_1",
+    "saltar_N_2",
+    "saltar_N_3",
+    "saltar_N_4",
+    "saltar_N_5"
+   ],
+   "NW": [
+    "saltar_NW_0",
+    "saltar_NW_1",
+    "saltar_NW_2",
+    "saltar_NW_3",
+    "saltar_NW_4",
+    "saltar_NW_5"
+   ],
+   "W": [
+    "saltar_W_0",
+    "saltar_W_1",
+    "saltar_W_2",
+    "saltar_W_3",
+    "saltar_W_4",
+    "saltar_W_5"
+   ],
+   "SW": [
+    "saltar_SW_0",
+    "saltar_SW_1",
+    "saltar_SW_2",
+    "saltar_SW_3",
+    "saltar_SW_4",
+    "saltar_SW_5"
+   ]
+  },
+  "offset_y": [
+   0,
+   -4,
+   -8,
+   -4,
+   0,
+   0
+  ]
+ }
+}

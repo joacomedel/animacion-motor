@@ -5,7 +5,7 @@ import math
 
 import numpy as np
 
-from ..cuerpo import centro_cara, lado_de, masc
+from ..cuerpo import centro_cara, fuerza_cara, giro_cabeza, radios_cabeza, lado_de, masc
 from ..render3d import v
 from ..skins import cargar, material, u_de, CARA
 from . import Componente, entrar, registrar
@@ -23,13 +23,13 @@ class CabezaSkin(Componente):
 
     def dibujar(self, esc, ctx, spec):
         sk, A = _skin(spec), ctx.anat
-        c = centro_cara(ctx.cam_local, ctx.est["proporciones"].get("cara_hacia_camara", .9))
+        c = centro_cara(ctx.cam_local, fuerza_cara(ctx.est["proporciones"], ctx.cam_local))
         ref = math.atan2(c[1], c[0])
         mat = lambda d: sk.zona("cabeza", u_de(d, ref), (1 - d[..., 2]) / 2)
         piel = material(sk.color(*CARA))
         entrar(esc, ctx, spec)
         if ctx.est["proporciones"]["forma_cabeza"] == "caja":
-            esc.caja(ctx.a["cabeza"], A.cabeza, mat, n=3.2)
+            esc.caja(ctx.a["cabeza"], radios_cabeza(ctx.est["proporciones"], ctx.mira, A.cabeza), mat, n=3.2, giro=giro_cabeza(ctx.est["proporciones"], ctx.mira))
         else:
             esc.elipsoide(ctx.a["cabeza"], A.cabeza, mat)
         esc.esfera(ctx.a["cabeza"] + v(A.cabeza[0] * .98, 0, -A.cabeza[2] * .3), .55 * ctx.escala(), piel)   # nariz

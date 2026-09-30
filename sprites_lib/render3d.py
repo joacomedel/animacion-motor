@@ -44,7 +44,9 @@ class Camara:
         return self.gx + self.sc * (a + b), self.gy + self.sc * .5 * (a - b) - self.uz * u, w @ self.cam
 
 
-DIRECCIONES_CENITAL = {"S": (0, 1), "E": (1, 0), "N": (0, -1), "W": (-1, 0)}
+_D = .7071067811865476
+DIRECCIONES_CENITAL = {"S": (0, 1), "E": (1, 0), "N": (0, -1), "W": (-1, 0),
+                       "SE": (_D, _D), "NE": (_D, -_D), "NW": (-_D, -_D), "SW": (-_D, _D)}
 
 
 class CamaraCenital:
@@ -162,7 +164,7 @@ class Escena:
         self._add(np.asarray(c) + d * radios, nrm, mat if isinstance(mat, str) else mat(d),
                   None if conservar is None else conservar(d))
 
-    def caja(self, c, radios, mat, n=3.0, conservar=None):
+    def caja(self, c, radios, mat, n=3.0, conservar=None, giro=0.0):
         """Superelipsoide: n=2 es un elipsoide; n=3-4 es una caja redondeada. Las siluetas con lados rectos se
         leen como dibujadas a mano; las esferas perfectas "gritan 3D"."""
         radios = np.asarray(radios, float)
@@ -170,7 +172,12 @@ class Escena:
         q = np.sign(d) * np.abs(d) ** (2.0 / n)
         nrm = np.sign(d) * np.abs(d) ** (2.0 - 2.0 / n) / radios
         nrm /= np.linalg.norm(nrm, axis=-1, keepdims=True) + 1e-9
-        self._add(np.asarray(c) + q * radios, nrm, mat if isinstance(mat, str) else mat(d),
+        pts = q * radios
+        if giro:      # gira la caja alrededor de la vertical; el material sigue viendo la dirección real (d girada)
+            cs, sn = math.cos(giro), math.sin(giro)
+            R = np.array([[cs, -sn, 0], [sn, cs, 0], [0, 0, 1.0]])
+            pts, nrm, d = pts @ R.T, nrm @ R.T, d @ R.T
+        self._add(np.asarray(c) + pts, nrm, mat if isinstance(mat, str) else mat(d),
                   None if conservar is None else conservar(d))
 
     def capsula(self, a, b, r, mat, tapas=True):

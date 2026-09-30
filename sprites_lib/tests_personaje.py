@@ -89,7 +89,7 @@ def ancla_visible(cuadro, ancla, tol=None):
     k = cuadro.buf["comp"][iy, ix]
     visto = cuadro.buf["comp_nombres"][k] if k >= 0 else ""
     base = visto.split("#", 1)[0]
-    return (not anfitriones or visto in anfitriones or base in anfitriones or visto.endswith(f"@{ancla}")
+    return (not anfitriones or visto in anfitriones or base in anfitriones or base.endswith(f"@{ancla}")
             or visto.endswith(f"#{ancla}"))           # la parte que dibuja ese ancla (p. ej. ...#ojo_izquierdo)
 
 

@@ -1,0 +1,743 @@
+{
+ "frames": [
+  {
+   "filename": "caminar_lpc_S_0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_S_1",
+   "frame": {
+    "x": 20,
+    "y": 0,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_S_2",
+   "frame": {
+    "x": 40,
+    "y": 0,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_S_3",
+   "frame": {
+    "x": 60,
+    "y": 0,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_S_4",
+   "frame": {
+    "x": 80,
+    "y": 0,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_S_5",
+   "frame": {
+    "x": 100,
+    "y": 0,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_S_6",
+   "frame": {
+    "x": 120,
+    "y": 0,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_S_7",
+   "frame": {
+    "x": 140,
+    "y": 0,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SE_0",
+   "frame": {
+    "x": 0,
+    "y": 32,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SE_1",
+   "frame": {
+    "x": 20,
+    "y": 32,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SE_2",
+   "frame": {
+    "x": 40,
+    "y": 32,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SE_3",
+   "frame": {
+    "x": 60,
+    "y": 32,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SE_4",
+   "frame": {
+    "x": 80,
+    "y": 32,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SE_5",
+   "frame": {
+    "x": 100,
+    "y": 32,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SE_6",
+   "frame": {
+    "x": 120,
+    "y": 32,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SE_7",
+   "frame": {
+    "x": 140,
+    "y": 32,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_E_0",
+   "frame": {
+    "x": 0,
+    "y": 64,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_E_1",
+   "frame": {
+    "x": 20,
+    "y": 64,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_E_2",
+   "frame": {
+    "x": 40,
+    "y": 64,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_E_3",
+   "frame": {
+    "x": 60,
+    "y": 64,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_E_4",
+   "frame": {
+    "x": 80,
+    "y": 64,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_E_5",
+   "frame": {
+    "x": 100,
+    "y": 64,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_E_6",
+   "frame": {
+    "x": 120,
+    "y": 64,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_E_7",
+   "frame": {
+    "x": 140,
+    "y": 64,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NE_0",
+   "frame": {
+    "x": 0,
+    "y": 96,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NE_1",
+   "frame": {
+    "x": 20,
+    "y": 96,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NE_2",
+   "frame": {
+    "x": 40,
+    "y": 96,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NE_3",
+   "frame": {
+    "x": 60,
+    "y": 96,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NE_4",
+   "frame": {
+    "x": 80,
+    "y": 96,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NE_5",
+   "frame": {
+    "x": 100,
+    "y": 96,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NE_6",
+   "frame": {
+    "x": 120,
+    "y": 96,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NE_7",
+   "frame": {
+    "x": 140,
+    "y": 96,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_N_0",
+   "frame": {
+    "x": 0,
+    "y": 128,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_N_1",
+   "frame": {
+    "x": 20,
+    "y": 128,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_N_2",
+   "frame": {
+    "x": 40,
+    "y": 128,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_N_3",
+   "frame": {
+    "x": 60,
+    "y": 128,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_N_4",
+   "frame": {
+    "x": 80,
+    "y": 128,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_N_5",
+   "frame": {
+    "x": 100,
+    "y": 128,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_N_6",
+   "frame": {
+    "x": 120,
+    "y": 128,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_N_7",
+   "frame": {
+    "x": 140,
+    "y": 128,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NW_0",
+   "frame": {
+    "x": 0,
+    "y": 160,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NW_1",
+   "frame": {
+    "x": 20,
+    "y": 160,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NW_2",
+   "frame": {
+    "x": 40,
+    "y": 160,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NW_3",
+   "frame": {
+    "x": 60,
+    "y": 160,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NW_4",
+   "frame": {
+    "x": 80,
+    "y": 160,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NW_5",
+   "frame": {
+    "x": 100,
+    "y": 160,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NW_6",
+   "frame": {
+    "x": 120,
+    "y": 160,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_NW_7",
+   "frame": {
+    "x": 140,
+    "y": 160,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_W_0",
+   "frame": {
+    "x": 0,
+    "y": 192,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_W_1",
+   "frame": {
+    "x": 20,
+    "y": 192,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_W_2",
+   "frame": {
+    "x": 40,
+    "y": 192,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_W_3",
+   "frame": {
+    "x": 60,
+    "y": 192,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_W_4",
+   "frame": {
+    "x": 80,
+    "y": 192,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_W_5",
+   "frame": {
+    "x": 100,
+    "y": 192,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_W_6",
+   "frame": {
+    "x": 120,
+    "y": 192,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_W_7",
+   "frame": {
+    "x": 140,
+    "y": 192,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SW_0",
+   "frame": {
+    "x": 0,
+    "y": 224,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SW_1",
+   "frame": {
+    "x": 20,
+    "y": 224,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SW_2",
+   "frame": {
+    "x": 40,
+    "y": 224,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SW_3",
+   "frame": {
+    "x": 60,
+    "y": 224,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SW_4",
+   "frame": {
+    "x": 80,
+    "y": 224,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SW_5",
+   "frame": {
+    "x": 100,
+    "y": 224,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SW_6",
+   "frame": {
+    "x": 120,
+    "y": 224,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  },
+  {
+   "filename": "caminar_lpc_SW_7",
+   "frame": {
+    "x": 140,
+    "y": 224,
+    "w": 20,
+    "h": 32
+   },
+   "duration": 100
+  }
+ ],
+ "meta": {
+  "image": "caminar_lpc.png",
+  "size": {
+   "w": 160,
+   "h": 256
+  },
+  "cell": {
+   "w": 20,
+   "h": 32
+  },
+  "fps": 10,
+  "loop": true,
+  "pivot": {
+   "x": 10,
+   "y": 30
+  },
+  "animations": {
+   "S": [
+    "caminar_lpc_S_0",
+    "caminar_lpc_S_1",
+    "caminar_lpc_S_2",
+    "caminar_lpc_S_3",
+    "caminar_lpc_S_4",
+    "caminar_lpc_S_5",
+    "caminar_lpc_S_6",
+    "caminar_lpc_S_7"
+   ],
+   "SE": [
+    "caminar_lpc_SE_0",
+    "caminar_lpc_SE_1",
+    "caminar_lpc_SE_2",
+    "caminar_lpc_SE_3",
+    "caminar_lpc_SE_4",
+    "caminar_lpc_SE_5",
+    "caminar_lpc_SE_6",
+    "caminar_lpc_SE_7"
+   ],
+   "E": [
+    "caminar_lpc_E_0",
+    "caminar_lpc_E_1",
+    "caminar_lpc_E_2",
+    "caminar_lpc_E_3",
+    "caminar_lpc_E_4",
+    "caminar_lpc_E_5",
+    "caminar_lpc_E_6",
+    "caminar_lpc_E_7"
+   ],
+   "NE": [
+    "caminar_lpc_NE_0",
+    "caminar_lpc_NE_1",
+    "caminar_lpc_NE_2",
+    "caminar_lpc_NE_3",
+    "caminar_lpc_NE_4",
+    "caminar_lpc_NE_5",
+    "caminar_lpc_NE_6",
+    "caminar_lpc_NE_7"
+   ],
+   "N": [
+    "caminar_lpc_N_0",
+    "caminar_lpc_N_1",
+    "caminar_lpc_N_2",
+    "caminar_lpc_N_3",
+    "caminar_lpc_N_4",
+    "caminar_lpc_N_5",
+    "caminar_lpc_N_6",
+    "caminar_lpc_N_7"
+   ],
+   "NW": [
+    "caminar_lpc_NW_0",
+    "caminar_lpc_NW_1",
+    "caminar_lpc_NW_2",
+    "caminar_lpc_NW_3",
+    "caminar_lpc_NW_4",
+    "caminar_lpc_NW_5",
+    "caminar_lpc_NW_6",
+    "caminar_lpc_NW_7"
+   ],
+   "W": [
+    "caminar_lpc_W_0",
+    "caminar_lpc_W_1",
+    "caminar_lpc_W_2",
+    "caminar_lpc_W_3",
+    "caminar_lpc_W_4",
+    "caminar_lpc_W_5",
+    "caminar_lpc_W_6",
+    "caminar_lpc_W_7"
+   ],
+   "SW": [
+    "caminar_lpc_SW_0",
+    "caminar_lpc_SW_1",
+    "caminar_lpc_SW_2",
+    "caminar_lpc_SW_3",
+    "caminar_lpc_SW_4",
+    "caminar_lpc_SW_5",
+    "caminar_lpc_SW_6",
+    "caminar_lpc_SW_7"
+   ]
+  }
+ }
+}

@@ -88,7 +88,9 @@ def anatomia(estilo, clase="adulto", complexion="normal"):
     alto_px = alto_objetivo_px(estilo, clase)
     H = alto_px / uz(estilo)
     cab = H * pr["cabeza_frac"]
-    cabeza = (cab * .49, cab * .53 * ancho, cab * .5)
+    ca = pr.get("cabeza_ancho", 1.0)          # fry8: cabeza más angosta que la del chibi (Fry: 14 px en 63)
+    cabeza = (cab * .49 * ca, cab * .53 * ancho * ca, cab * .5)
+    ancho = ancho * pr.get("cuerpo_ancho", 1.0)   # fry8: hombros y torso más anchos (la caja de la cabeza ya no usa este)
     cuello_u = H - cab * .98
     hombro_u = cuello_u - H * .02
     cadera_u = H * pr["piernas_frac"]
@@ -108,6 +110,59 @@ def anatomia(estilo, clase="adulto", complexion="normal"):
         r_antebrazo=H * .033 * grosor, r_mano=H * .046 * grosor, r_pie=r_pie,
         escala_rig=(muslo + canilla) / 14.0, bajar_punos=pr["bajar_punos"] * H / 37, paso=pr.get("paso", 1.0),
     )
+
+
+def fuerza_cara(prop, cam_local):
+    """Cuánto se corre la cara hacia la cámara. Los estilos de 8 direcciones pueden dar una fuerza propia a las
+    diagonales ('cara_diagonal'): con la de los perfiles los dos ojos quedan iguales y se ve un 3/4 aplastado."""
+    f = prop.get("cara_hacia_camara", .9)
+    if "cara_perfil" in prop and abs(cam_local[0]) < 1e-6 and abs(cam_local[1]) > 1e-6:      # E / W
+        return prop["cara_perfil"]
+    if "cara_diagonal" in prop and abs(abs(cam_local[0]) - abs(cam_local[1])) < 1e-6 and abs(cam_local[0]) > 1e-6:
+        return prop["cara_diagonal"]
+    return f
+
+
+def giro_cabeza(prop, mira):
+    """Ángulo con que se gira la caja de la cabeza para que su silueta mida lo mismo en todas las direcciones
+    (look Stardew: la cabeza es un bloque alineado a la pantalla). 0 si el estilo no lo pide."""
+    if not prop.get("cabeza_pantalla"):
+        return 0.0
+    from .render3d import DIRECCIONES_CENITAL
+    fx, fy = DIRECCIONES_CENITAL[mira]
+    return math.atan2(-fx, fy)
+
+
+def radios_cabeza(prop, mira, radios):
+    """Radios de la caja de la cabeza. 'cabeza_diagonal' (< 1) angosta la cabeza en las 4 diagonales, como los juegos
+    de 8 direcciones (de frente y de espalda es ancha, en 3/4 se angosta)."""
+    k = prop.get("cabeza_diagonal", 1.0)
+    if k != 1.0 and len(mira) == 2:
+        rf, rl, rz = radios
+        return (rf, rl * k, rz)
+    return radios
+
+
+def desvio_cabeza(prop, mira):
+    """Vector local (adelante, izquierda) que corre la cabeza en pantalla 'cabeza_desvio[mira]' px hacia un costado
+    (+ = derecha de la pantalla). Sirve para que la cabeza se apoye sobre el torso igual en SE/NE/SW/NW."""
+    from .render3d import DIRECCIONES_CENITAL
+    dx = prop.get("cabeza_desvio", {}).get(mira, 0.0)
+    if not dx:
+        return np.zeros(3)
+    fx, fy = DIRECCIONES_CENITAL[mira]
+    return np.array([dx * fx, dx * fy, 0.0])
+
+
+def sobre_caja(hc, d, radios, giro, n=3.2, k=1.02):
+    """Punto de la superficie de la caja de la cabeza (superelipsoide de radios 'radios' girada 'giro' alrededor de la
+    vertical) en la dirección d desde el centro hc. Los ojos se apoyan ahí: si no, con la caja girada quedan flotando
+    en el borde de la silueta."""
+    cs, sn = math.cos(giro), math.sin(giro)
+    R = np.array([[cs, -sn, 0], [sn, cs, 0], [0, 0, 1.0]])
+    u = R.T @ np.asarray(d, float)
+    t = 1.0 / (np.sum(np.abs(u / np.asarray(radios)) ** n) ** (1.0 / n) + 1e-12)
+    return hc + k * (R @ (t * u))
 
 
 def centro_cara(cam_local, fuerza=.9):
@@ -130,11 +185,16 @@ def anclas_ausentes(lista):
     return out
 
 
-def posar(anat, ps, cam_local):
+def posar(anat, ps, cam_local, mira=None):
     """Posiciones 3D (ejes locales) de todas las anclas para una pose (formato de ciclos.pose / poses.cuadros)."""
     A, k = anat, anat.escala_rig
-    esc = A.H / 28.0
+    esc = A.H / 28.0 * ESTILOS[A.estilo]["proporciones"].get("bob_escala", 1.0)
     sube = -ps["bob"] * .9 * esc
+    if ESTILOS[A.estilo]["proporciones"].get("bob_px"):
+        # rebote en píxeles ENTEROS: con fracciones (p. ej. 0,84 px) la cabeza, los ojos y las cejas caen en filas
+        # distintas según el cuadro y "parpadean"
+        px = round(ps["bob"] * .9 * esc * uz(A.estilo))
+        sube = -px / uz(A.estilo)
     a = {"suelo": v(0, 0, 0)}
     cad_c = v(0, 0, A.cadera_u + sube)
     for lado, s in LADOS.items():
@@ -157,14 +217,25 @@ def posar(anat, ps, cam_local):
         a[f"muneca_{lado}"], a[f"mano_{lado}"] = codo + (mano - codo) * .8, mano
     rf, rl, rz = A.cabeza
     hc = v(.1 * esc, 0, A.cabeza_u + sube)
-    c = centro_cara(cam_local, ESTILOS[A.estilo]["proporciones"].get("cara_hacia_camara", .9))
+    if mira:
+        hc = hc + desvio_cabeza(ESTILOS[A.estilo]["proporciones"], mira)
+    c = centro_cara(cam_local, fuerza_cara(ESTILOS[A.estilo]["proporciones"], cam_local))
     perp = np.array([-c[1], c[0], 0.0])                    # hacia la izquierda del personaje, sobre la cara
     cara = hc + np.array([c[0] * rf, c[1] * rl, 0.0]) * 1.02
+    prop = ESTILOS[A.estilo]["proporciones"]
+    sep = prop.get("sep_ojos_diagonal", .31) if mira and len(mira) == 2 else (prop.get("sep_ojos", .31) if mira in ("S", "N") else .31)   # separación de los ojos (fracción de rl)
+    ojo_i = cara + perp * rl * sep + v(0, 0, -rz * .24)
+    ojo_d = cara - perp * rl * sep + v(0, 0, -rz * .24)
+    if mira and prop.get("cabeza_pantalla"):        # caja girada: apoyar cara y ojos sobre la caja real
+        rad, g = radios_cabeza(prop, mira, A.cabeza), giro_cabeza(prop, mira)
+        base = np.array([c[0] * rf, c[1] * rl, 0.0])
+        cara = sobre_caja(hc, base, rad, g)
+        ojo_i = sobre_caja(hc, base + perp * rl * sep + v(0, 0, -rz * .24), rad, g)
+        ojo_d = sobre_caja(hc, base - perp * rl * sep + v(0, 0, -rz * .24), rad, g)
     a.update(
         cabeza=hc, coronilla=hc + v(0, 0, rz), cara=cara,
         frente=hc + np.array([c[0] * rf, c[1] * rl, 0.0]) + v(0, 0, rz * .36),
-        ojo_izquierdo=cara + perp * rl * .31 + v(0, 0, -rz * .24),
-        ojo_derecho=cara - perp * rl * .31 + v(0, 0, -rz * .24),
+        ojo_izquierdo=ojo_i, ojo_derecho=ojo_d,
         sien_derecha=hc + v(rf * .25, -rl * .97, rz * .25), sien_izquierda=hc + v(rf * .25, rl * .97, rz * .25),
         nuca=hc + v(-rf * .9, 0, -rz * .2),
         cuello=v(0, 0, A.cuello_u + sube), torso=v(-.2 * esc, 0, A.pecho_u + sube),
