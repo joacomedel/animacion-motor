@@ -457,6 +457,18 @@ diagonales (vector ±0,7071). No está en `ACTIVOS`: `stardew` (4 dir.) sigue si
 - **Pendiente en fry8**: las cejas/ojos dejan puntos sueltos en la frente porque la skin de 32×32 se estira ~2×: hace falta skin
   64×64. Quedan 4 alertas MEDIA: salto de 2.4 px del centro de `torso_frente` en S (el brazo tapa y destapa; umbral 2.08).
 
+## Procesos del kit: estilo → animación → skin (2026-09-29)
+
+Los pasos completos están en `docs/procesos/{estilo,animacion,skin}.md` y el diseño en
+`docs/superpowers/specs/2026-09-29-procesos-estilo-animacion-skin-design.md`. Comandos:
+
+- `.venv/bin/python -m sprites_lib.proceso_estilo medir|validar|aprobar <estilo>`
+- `.venv/bin/python -m sprites_lib.proceso_anim smoke|validar|aprobar <anim> --estilo <estilo>`
+- `.venv/bin/python -m sprites_lib.proceso_skin smoke|aprobar|lote <nombre>`
+
+Cada proceso itera en autonomía hasta que el gate determinista (zonas, pulido, determinismo, deriva, plantilla)
+da VERDE (tope 3 vueltas propias); `aprobar` es el único paso humano y congela en `aprobados/`.
+
 ## Contrato numérico del muñeco (`proporciones`, calibrado el 2026-09-29)
 `proporciones.medir(estilo)` renderiza la ficha mínima (pose `neutra`, todas las direcciones) y mide el cuerpo
 (`buf["solido"]`, sin contorno): alto desde el pivote (`suelo`), cabeza, piernas y anchos. `comparar` contrasta
