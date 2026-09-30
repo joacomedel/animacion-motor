@@ -86,7 +86,12 @@ def _lado_opuesto(z):
 
 
 # ------------------------------------------------------------------ referencia LPC
-def referencia_lpc(ruta="referencias/caminar/lpc_E_huesos.json"):
+# asset del kit: se resuelve contra la raíz del paquete (no contra el cwd), como el default de skins de proceso_anim
+REF_LPC = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                       "referencias", "caminar", "lpc_E_huesos.json")
+
+
+def referencia_lpc(ruta=REF_LPC):
     """Amplitud del balanceo en la referencia LPC de perfil (E), relativa al alto del personaje (piso − coronilla):
     rango de x de la mano cercana y del tobillo cercano sobre los 8 cuadros del ciclo (c1..c8)."""
     with open(ruta) as fh:

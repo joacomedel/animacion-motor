@@ -142,9 +142,9 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `hoja(ficha, estilo, todo, resultados, ruta)`
 
 ### `fotos_control` — Fotos de control: las poses aprobadas por el usuario quedan congeladas (versionadas en git). Si un cambio
-- `carpeta(nombre, estilo)`
-- `guardar(nombre, estilo, todo)`
-- `comparar(nombre, estilo, todo, carpeta_dif)`
+- `carpeta(nombre, estilo, raiz=None)` Carpeta de las fotos de control: `<raiz>/<nombre>/<estilo>`; con `raiz=None` usa `DIR`
+- `guardar(nombre, estilo, todo, raiz=None)`
+- `comparar(nombre, estilo, todo, carpeta_dif, raiz=None)` Compara los cuadros con los congelados en `raiz`; sin carpeta aprobada queda omitido.
 
 ### `exportar` — Exportación genérica de animaciones (sirve para cualquier motor).
 - `revision(frames, ruta, zoom=5, columnas=5)`
@@ -204,7 +204,7 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `main(argv=None)`
 
 ### `pulido` — Modo pulido: lo que hace que una animación se vea BONITA (no solo bien construida), medido en números y texto.
-- `referencia_lpc(ruta='referencias/caminar/lpc_E_huesos.json')` Amplitud del balanceo en la referencia LPC de perfil (E), relativa al alto del personaje (piso − coronilla):
+- `referencia_lpc(ruta=REF_LPC)` Amplitud del balanceo en la referencia LPC de perfil (E), relativa al alto del personaje (piso − coronilla):
 - `movimiento(res, zres_alertas, desfase)`
 - `limpieza(res, ficha, estilo, zres_alertas)`
 - `espejo(res, estilo, desfase, asimetrica=False)` asimetrica: la animación mueve distinto los lados A y B (el ciclo trae 'mano_b'/'pie_b', p. ej. golpear): el
@@ -242,9 +242,14 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `aprobar(estilo, excepcion=None)` Congela el estilo (control, métricas, doc si falta y `estado.json` último); ROJO sin excepción no escribe.
 - `main(argv=None)` CLI del proceso de estilo: devuelve 0 VERDE, 1 ROJO y 2 error de uso o estilo desconocido.
 
-### `proceso_anim` — Proceso de animación: smoke de una animación sobre una skin, con los gates universales.
+### `proceso_anim` — Proceso de animación: smoke, validar y aprobar una animación sobre una skin, con los gates universales.
 - `detalle_checks(v)` Una línea por check con su `detalle`, para ver el estado de cada gate aunque el veredicto sea VERDE.
 - `smoke(anim, estilo, direccion=None, skin=SKIN_DEFECTO)` Gate de humo de una animación: una dirección con esa skin; imprime el informe y el detalle de cada check,
+- `fuentes_actuales(anim)` Fuentes de la animación para el hash de deriva: el ciclo entero (hash estable por claves ordenadas).
+- `check_plantilla(anim)` Compara el ciclo contra su referencia (`REFERENCIAS`): exige error medio de huesos ≤ `TOL_MEDIO` px; el
+- `correr_gate(anim, estilo, ficha, todo=None, control=True)` Veredicto de la animación: zonas y pulido en todas las direcciones, determinismo, deriva del ciclo,
+- `validar(anim, estilo, skin=SKIN_DEFECTO)` Renderiza todas las direcciones y corre el gate completo; imprime informe y detalle; 0 VERDE / 1 ROJO.
+- `aprobar(anim, estilo, skin=SKIN_DEFECTO, excepcion=None)` Corre el gate y, si está VERDE (o hay `excepcion`), congela control/métricas/estado y exporta la fuente;
 - `main(argv=None)` CLI del proceso de animación: devuelve 0 VERDE, 1 ROJO y 2 error de uso o nombre desconocido.
 
 ### `componentes` — Biblioteca de componentes: cada pieza de un personaje (cabeza, brazo robótico, pulsera...) sabe dibujarse

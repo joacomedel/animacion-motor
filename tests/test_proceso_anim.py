@@ -82,3 +82,29 @@ def test_detalle_checks_una_linea_por_check():
     v = gates.correr([lambda: gates.Resultado("a", True, "detalle a"),
                       lambda: gates.Resultado("b", True, "detalle b")])
     assert proceso_anim.detalle_checks(v) == "- a: detalle a\n- b: detalle b"
+
+
+def test_aprobar_congela_y_exporta(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    assert proceso_anim.main(["aprobar", "quieto", "--estilo", "stardew"]) == 0
+    carpeta = tmp_path / "aprobados" / "animaciones" / "quieto" / "stardew"
+    assert (carpeta / "estado.json").exists()
+    assert list(carpeta.glob("*.png")), "faltan cuadros de control"
+    assert (tmp_path / "salida" / "animaciones" / "quieto" / "stardew" / "quieto.png").exists()
+
+
+def test_validar_con_control_ok(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    assert proceso_anim.main(["aprobar", "quieto", "--estilo", "stardew"]) == 0
+    assert proceso_anim.main(["validar", "quieto", "--estilo", "stardew"]) == 0
+
+
+def test_validar_sin_control_ok(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    assert proceso_anim.main(["validar", "quieto", "--estilo", "stardew"]) == 0
+
+
+def test_nombre_invalido_rechazado(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    assert proceso_anim.main(["aprobar", "../afuera", "--estilo", "stardew"]) == 2
+    assert not (tmp_path.parent / "afuera").exists()
