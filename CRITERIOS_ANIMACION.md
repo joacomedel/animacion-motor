@@ -456,3 +456,27 @@ diagonales (vector ±0,7071). No está en `ACTIVOS`: `stardew` (4 dir.) sigue si
   - `zonas`: los umbrales en px (`ESCALABLES`) se escalan por alto del personaje respecto de stardew8 (fry8 ×2.08); stardew8 no cambia.
 - **Pendiente en fry8**: las cejas/ojos dejan puntos sueltos en la frente porque la skin de 32×32 se estira ~2×: hace falta skin
   64×64. Quedan 4 alertas MEDIA: salto de 2.4 px del centro de `torso_frente` en S (el brazo tapa y destapa; umbral 2.08).
+
+## Contrato numérico del muñeco (`proporciones`, calibrado el 2026-09-29)
+`proporciones.medir(estilo)` renderiza la ficha mínima (pose `neutra`, todas las direcciones) y mide el cuerpo
+(`buf["solido"]`, sin contorno): alto desde el pivote (`suelo`), cabeza, piernas y anchos. `comparar` contrasta
+la primera dirección con el perfil del estilo. Valores medidos (alto px / cabezas / piernas% / ancho cabeza px):
+
+| estilo | alto (esp.) | cabezas (esp. 1/frac) | piernas (esp. perfil) | ancho cabeza (esp.) |
+|---|---|---|---|---|
+| volumen | 37 (36) | 2.64 (3.33) | 48.6% (41%) | 14 (12.8) |
+| stardew | 27 (26) | 2.08 (2.78) | 33.3% (29%) | 13 (11.4) |
+| lateral | 33 (33) | 2.36 (2.50) | 33.3% (32%) | 14 (15.2) |
+| lpc | 43 (43) | 2.15 (2.22) | 27.9% (30%) | 20 (21.4) |
+| stardew8 | 27 (26) | 2.08 (2.78) | 33.3% (29%) | 13 (11.4) |
+| fry8 | 55 (54) | 2.75 (3.33) | 30.9% (27%) | 17 (18.2) |
+
+- **Hallazgo (por qué `TOL_REL=.35`, no .10)**: en las vistas 3/4 (cenital e iso) la profundidad se proyecta
+  sobre la pantalla (`ky=.5`) y la silueta de la cabeza y de las piernas mide 15-25% más que su tamaño vertical;
+  el perfil guarda fracciones del mundo (`cabeza_frac`, `piernas_frac`), no de la silueta. En lateral/LPC la
+  diferencia es 3-7%. El alto desde el pivote sale consistente (+1 px por redondeo; 0 px de variación entre
+  direcciones). Tolerancias elegidas: `TOL_PX=2` (peor desvío 1.6 px) y `TOL_REL=.35` (peor desvío 25.2%, en
+  stardew/stardew8). Ningún estilo legítimo queda fuera del doble de la tolerancia.
+- **Caso límite del esqueleto**: `saltar` cuadro 2 recoge las piernas en el pico (tobillo **por encima** de la
+  cadera; decisión de diseño documentada en la sección de la plantilla de salto). `test_esqueleto` mantiene la
+  aserción `cadera > tobillo` y saltea los cuadros en el aire, que el propio ciclo declara con `offset_y != 0`.

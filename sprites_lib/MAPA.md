@@ -128,6 +128,10 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `correr_tests(ficha, estilo, todo, carpeta)`
 - `informe_md(ficha, estilo, resultados)`
 
+### `proporciones` — Contrato numérico del muñeco por estilo: mide el render real y lo compara con el perfil.
+- `medir(estilo, clase='adulto')` Medidas del render real (píxeles) en todas las direcciones: resumen de la primera + `por_direccion`.
+- `comparar(estilo, clase='adulto')` Compara el resumen contra el perfil del estilo; `Resultado` con el detalle de cada desvío.
+
 ### `comparar_estilo` — Comparar el estilo de un sprite propio contra una referencia con métricas objetivas.
 - `metricas_cuadro(a)`
 - `metricas(ruta, celda, recorte=None)`
