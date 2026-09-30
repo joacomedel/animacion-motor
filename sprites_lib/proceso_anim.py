@@ -120,21 +120,19 @@ def check_plantilla(anim):
                             for f in res["filas"]])
 
 
-def correr_gate(anim, estilo, ficha, todo=None, control=True):
+def correr_gate(anim, estilo, ficha, todo=None):
     """Veredicto de la animación: zonas y pulido en todas las direcciones, determinismo, deriva del ciclo,
-    plantilla contra la referencia y (con `control`) comparación con las fotos congeladas."""
+    plantilla contra la referencia y comparación con las fotos de control congeladas (omitida si no hay)."""
     if todo is None:
         todo = _todo(anim, estilo, ficha)
-    checks = [
+    return gates.correr([
         lambda: gates.check_zonas(anim, estilo, ficha=ficha),
         lambda: gates.check_pulido(anim, estilo, ficha=ficha),
         lambda: gates.check_determinismo(estilo, pose=anim),
         lambda: gates.check_deriva(estado.leer(_carpeta(anim, estilo)), fuentes_actuales(anim)),
         lambda: check_plantilla(anim),
-    ]
-    if control:
-        checks.append(lambda: fotos_control.comparar(anim, estilo, todo, _dif(anim, estilo), raiz=RAIZ_APROBADOS))
-    return gates.correr(checks)
+        lambda: fotos_control.comparar(anim, estilo, todo, _dif(anim, estilo), raiz=RAIZ_APROBADOS),
+    ])
 
 
 def validar(anim, estilo, skin=SKIN_DEFECTO):
@@ -171,11 +169,12 @@ def _exportar(anim, estilo, todo):
 
 
 def aprobar(anim, estilo, skin=SKIN_DEFECTO, excepcion=None):
-    """Corre el gate y, si está VERDE (o hay `excepcion`), congela control/métricas/estado y exporta la fuente;
-    ROJO sin excepción no escribe nada. `estado.json` queda último, como marca del congelado."""
+    """Corre el gate completo (incluida la comparación con los cuadros de control ya congelados: un cambio de
+    render sin cambio de fuente da ROJO) y, si está VERDE o hay `excepcion`, congela control/métricas/estado y
+    exporta la fuente; ROJO sin excepción no escribe nada. `estado.json` queda último, como marca del congelado."""
     ficha = skins.ficha(skin)
     todo = _todo(anim, estilo, ficha)
-    v = correr_gate(anim, estilo, ficha, todo=todo, control=False)
+    v = correr_gate(anim, estilo, ficha, todo=todo)
     print(gates.informe(v))
     print(detalle_checks(v))
     if not v.verde and not excepcion:

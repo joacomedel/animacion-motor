@@ -247,9 +247,9 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `smoke(anim, estilo, direccion=None, skin=SKIN_DEFECTO)` Gate de humo de una animación: una dirección con esa skin; imprime el informe y el detalle de cada check,
 - `fuentes_actuales(anim)` Fuentes de la animación para el hash de deriva: el ciclo entero (hash estable por claves ordenadas).
 - `check_plantilla(anim)` Compara el ciclo contra su referencia (`REFERENCIAS`): exige error medio de huesos ≤ `TOL_MEDIO` px; el
-- `correr_gate(anim, estilo, ficha, todo=None, control=True)` Veredicto de la animación: zonas y pulido en todas las direcciones, determinismo, deriva del ciclo,
+- `correr_gate(anim, estilo, ficha, todo=None)` Veredicto de la animación: zonas y pulido en todas las direcciones, determinismo, deriva del ciclo,
 - `validar(anim, estilo, skin=SKIN_DEFECTO)` Renderiza todas las direcciones y corre el gate completo; imprime informe y detalle; 0 VERDE / 1 ROJO.
-- `aprobar(anim, estilo, skin=SKIN_DEFECTO, excepcion=None)` Corre el gate y, si está VERDE (o hay `excepcion`), congela control/métricas/estado y exporta la fuente;
+- `aprobar(anim, estilo, skin=SKIN_DEFECTO, excepcion=None)` Corre el gate completo (incluida la comparación con los cuadros de control ya congelados: un cambio de
 - `main(argv=None)` CLI del proceso de animación: devuelve 0 VERDE, 1 ROJO y 2 error de uso o nombre desconocido.
 
 ### `componentes` — Biblioteca de componentes: cada pieza de un personaje (cabeza, brazo robótico, pulsera...) sabe dibujarse

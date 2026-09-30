@@ -104,6 +104,27 @@ def test_validar_sin_control_ok(tmp_path, monkeypatch):
     assert proceso_anim.main(["validar", "quieto", "--estilo", "stardew"]) == 0
 
 
+def test_aprobar_con_control_cambiado_no_congela(tmp_path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    assert proceso_anim.main(["aprobar", "quieto", "--estilo", "stardew"]) == 0
+    carpeta = tmp_path / "aprobados" / "animaciones" / "quieto" / "stardew"
+    export = tmp_path / "salida" / "animaciones" / "quieto" / "stardew" / "quieto.png"
+    export.unlink()
+    original = proceso_anim._todo
+
+    def tocado(anim, estilo, ficha):
+        todo = original(anim, estilo, ficha)
+        todo["S"][0].img.putpixel((5, 5), (255, 0, 0, 255))     # cambia el render sin tocar el ciclo
+        return todo
+
+    monkeypatch.setattr(proceso_anim, "_todo", tocado)
+    assert proceso_anim.main(["aprobar", "quieto", "--estilo", "stardew"]) == 1
+    assert "fotos de control" in capsys.readouterr().out
+    assert not export.exists() and (carpeta / "estado.json").exists()
+    assert proceso_anim.main(["aprobar", "quieto", "--estilo", "stardew", "--excepcion", "render nuevo"]) == 0
+    assert export.exists()
+
+
 def test_nombre_invalido_rechazado(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     assert proceso_anim.main(["aprobar", "../afuera", "--estilo", "stardew"]) == 2
