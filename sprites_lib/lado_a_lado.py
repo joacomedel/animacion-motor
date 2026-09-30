@@ -4,11 +4,12 @@ Uso:
   .venv/bin/python -m sprites_lib.lado_a_lado <salida.png> <ref.png>:<x>,<y>,<w>,<h> <mio.png>:<x>,<y>,<w>,<h> [...]
     Cada argumento es imagen:recorte. Se dibujan en orden, ampliados ×14 (o --zoom N), sobre un fondo medio
     (ni blanco ni negro, para ver bien los contornos).
-Ejemplo (frente, perfil y espalda de Abigail vs el mago):
+Ejemplo (frente, perfil y espalda de Abigail vs el propio sprite):
   .venv/bin/python -m sprites_lib.lado_a_lado /tmp/cmp.png \
-     referencias/stardew/abigail.png:0,0,16,32   salida/mago_stardew/caminar/caminar.png:0,0,16,32 \
-     referencias/stardew/abigail.png:16,32,16,32 salida/mago_stardew/caminar/caminar.png:16,32,16,32
+     referencias/stardew/abigail.png:0,0,16,32   salida/<personaje>/caminar/caminar.png:0,0,16,32 \
+     referencias/stardew/abigail.png:16,32,16,32 salida/<personaje>/caminar/caminar.png:16,32,16,32
 """
+
 import sys
 
 from PIL import Image
@@ -36,7 +37,10 @@ if __name__ == "__main__":
     a = sys.argv[1:]
     z = 14
     if "--zoom" in a:
-        i = a.index("--zoom"); z = int(a[i + 1]); a = a[:i] + a[i + 2:]
+        i = a.index("--zoom")
+        z = int(a[i + 1])
+        a = a[:i] + a[i + 2 :]
     if len(a) < 2:
-        print(__doc__); sys.exit(0)
+        print(__doc__)
+        sys.exit(0)
     print(lado_a_lado(a[0], a[1:], z))

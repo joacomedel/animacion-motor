@@ -27,4 +27,4 @@ Diseño: `docs/superpowers/specs/2026-09-29-procesos-estilo-animacion-skin-desig
 - El lote exporta a `output/<nombre>/<anim>/` y escribe el informe `salida/zonas/lote_<nombre>.md`
   (`--raiz` cambia la raíz de entrega).
 
-Elenco (mago, clast): mismo pipeline por ficha + componentes, con el gate extra `tests_personaje`.
+Elenco: mismo pipeline por ficha + componentes, con el gate extra `tests_personaje`.
