@@ -1,0 +1,79 @@
+# Ficha del mago de las runas — migrada desde personajes/mago_*.py (2026-09-27)
+identidad:
+  nombre: "Mago de las runas"
+  concepto: >
+    Hechicero viajero que mezcla magia antigua con tecnología rúnica. Tranquilo y sabio,
+    pero ágil: corre en vez de volar.
+  rol: jugable
+  silueta_clave: "rastas blancas largas + túnica abierta"
+
+cuerpo:
+  base: humano
+  clase_altura: adulto
+  complexion: normal
+  piel: morena
+  cabello: corto
+
+paleta:
+  piel:     {base: "#8c5638", por_que: "tez morena"}
+  pelo:     {base: "#e2e2f0", por_que: "rastas blancas: edad y sabiduría"}
+  tunica:   {base: "#5c2c96", por_que: "violeta = magia en todo el juego"}
+  camisa:   {base: "#362e62", por_que: "interior oscuro: hace resaltar el ribete"}
+  oro:      {base: "#e2aa34", por_que: "metal de sus amuletos; contrasta con el violeta"}
+  runa:     {base: "#5af0e6", emisivo: true, por_que: "energía rúnica: el único color que brilla"}
+  pantalon: {base: "#42366e", por_que: "se separa de la túnica sin competir"}
+  bota:     {base: "#62392a", por_que: "cuero de viaje"}
+
+componentes:
+  - tipo: rastas
+    ancla: cabeza
+    material: pelo
+    parametros: {cantidad: 6, largo: hombros, cuentas: runa}
+    por_que: "rasgo principal de su silueta"
+    reglas: [siempre_visible]
+  - tipo: vincha
+    ancla: frente
+    material: oro
+    parametros: {gema: runa}
+    por_que: "amuleto que canaliza las runas"
+    reglas: [visible_si_ancla_visible]
+  - tipo: pulsera
+    ancla: muneca_derecha
+    material: oro
+    por_que: "regalo de su maestro; nunca se la saca"
+    reglas: [visible_si_ancla_visible]
+  - tipo: tatuaje_runas
+    ancla: [brazo_izquierdo, brazo_derecho]
+    material: runa
+    por_que: "runas tatuadas: su magia vive en el cuerpo"
+    reglas: [visible_si_ancla_visible, simetrico]
+  - tipo: tunica_abierta
+    ancla: torso
+    material: tunica
+    parametros: {interior: camisa, ribete: oro, faldon: hasta_rodilla}
+    por_que: "abierta para correr; el ribete dorado la distingue de lejos"
+  - tipo: pierna_humana
+    ancla: [pierna_izquierda, pierna_derecha]
+    material: pantalon
+    parametros: {calzado: bota}
+    por_que: "pantalón de viaje"
+  - tipo: botas
+    ancla: [pie_izquierdo, pie_derecho]
+    material: bota
+    parametros: {suela: runa}
+    por_que: "suelas rúnicas: deja huellas de luz"
+    reglas: [simetrico]
+  - tipo: ojos
+    ancla: cara
+    parametros: {iris: runa}
+    por_que: "ojos cian: la magia se le nota en la mirada"
+
+reglas_globales:
+  - paleta_identica_entre_direcciones
+  - lineas_guia
+  - nada_recortado
+  - tamano_de_clase
+  - cara_visible_en: [S, E, W, SE, SW]
+  - distinto_de: [clast]
+
+creditos: []

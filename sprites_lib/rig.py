@@ -7,10 +7,11 @@ def ik(a, b, l1, l2, bend):
     bend=+1 dobla hacia x+ (rodilla adelante), -1 hacia x- (codo atrás)."""
     ax, ay = a
     dx, dy = b[0] - ax, b[1] - ay
-    d = max(1e-3, min(math.hypot(dx, dy), l1 + l2 - 1e-3))
+    dist = max(1e-9, math.hypot(dx, dy))
+    d = max(1e-3, min(dist, l1 + l2 - 1e-3))       # si el objetivo no se alcanza, el brazo queda estirado hacia él
     k = (l1 * l1 - l2 * l2 + d * d) / (2 * d)
     h = math.sqrt(max(0, l1 * l1 - k * k))
-    ux, uy = dx / d, dy / d
+    ux, uy = dx / dist, dy / dist                    # dirección con la distancia real (antes usaba la recortada)
     px, py = ax + ux * k, ay + uy * k
     c1 = (px - uy * h, py + ux * h)
     c2 = (px + uy * h, py - ux * h)

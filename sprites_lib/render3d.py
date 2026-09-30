@@ -9,6 +9,7 @@ Flujo: Escena(camara) → primitivas (esfera, elipsoide, cápsula, faldón) con 
 El render hace z-buffer, 3 tonos por material según la luz, contorno interior (entre piezas y por salto de
 profundidad), detalles de 1 px visibles y contorno exterior.
 """
+import functools
 import math
 
 import numpy as np
@@ -71,6 +72,20 @@ class CamaraCenital:
         return self.gx + X, self.gy + self.ky * Y - self.kz * u, w @ self.cam
 
 
+DIRECCIONES_LATERAL = ("E", "W")
+
+
+class CamaraLateral(CamaraCenital):
+    """Vista de costado ortográfica (plataformas): sin inclinación; x = adelante, y = −arriba.
+    Es una cámara cenital con ky = 0: la profundidad es el eje sur (el lado derecho del personaje queda más
+    cerca mirando al E)."""
+
+    def __init__(self, mira="E", cw=40, ch=40, gx=20, gy=38, kz=1.0, luz=(-.35, .55, .8)):
+        if mira not in DIRECCIONES_LATERAL:
+            raise ValueError(f"la vista lateral solo admite E o W, no {mira!r}")
+        super().__init__(mira, cw=cw, ch=ch, gx=gx, gy=gy, ky=0.0, kz=kz, luz=luz)
+
+
 def _oscurecer(c, k):
     return tuple(int(v * k) for v in c)
 
@@ -86,20 +101,34 @@ def _mover(a, dy, dx, relleno):
 
 
 def _esfera_dirs(r, paso=.3):
-    n = max(8, int(2 * math.pi * r / paso))
+    return _dirs_n(max(8, int(2 * math.pi * r / paso)))
+
+
+@functools.lru_cache(maxsize=None)
+def _dirs_n(n):
+    """Direcciones de una esfera con n meridianos. Cacheado (se pide miles de veces por hoja); solo lectura."""
     th, ph = np.meshgrid(np.linspace(0, math.pi, n // 2 + 1), np.linspace(0, 2 * math.pi, n, endpoint=False))
-    return np.stack([np.sin(th) * np.cos(ph), np.sin(th) * np.sin(ph), np.cos(th)], -1)
+    d = np.stack([np.sin(th) * np.cos(ph), np.sin(th) * np.sin(ph), np.cos(th)], -1)
+    d.setflags(write=False)
+    return d
 
 
 class Escena:
-    """Acumula puntos de superficie (posición, normal, material, pieza) en ejes locales."""
+    """Acumula puntos de superficie (posición, normal, material, pieza, componente) en ejes locales."""
 
     def __init__(self, camara, paleta):
         self.cam, self.pal = camara, paleta
         self.mats = list(paleta)
-        self.P, self.Nn, self.M, self.K = [], [], [], []
+        self.P, self.Nn, self.M, self.K, self.C = [], [], [], [], []
         self.pieza = 0          # cambiarlo antes de agregar cada parte: da contorno entre piezas distintas
-        self.detalles = []      # (punto local, color RGB) de 1 px
+        self.componente = ""    # qué componente de la ficha está dibujando (buffer de componente)
+        self.comp_nombres = [""]
+        self.detalles = []      # (punto local, color RGB, componente) de 1 px
+
+    def _cid(self):
+        if self.componente not in self.comp_nombres:
+            self.comp_nombres.append(self.componente)
+        return self.comp_nombres.index(self.componente)
 
     def _mid(self, mat, shape):
         if isinstance(mat, str):
@@ -110,25 +139,30 @@ class Escena:
             out[nombres == nm] = self.mats.index(nm)
         return out
 
-    def _add(self, pts, nrm, mat):
+    def _add(self, pts, nrm, mat, mascara=None):
         pts, nrm = pts.reshape(-1, 3), nrm.reshape(-1, 3)
         m = self._mid(mat, pts.shape[:1]) if isinstance(mat, str) else self._mid(mat, None).reshape(-1)
+        if mascara is not None:
+            k = np.asarray(mascara, bool).reshape(-1)
+            pts, nrm, m = pts[k], nrm[k], m[k]
         self.P.append(pts); self.Nn.append(nrm); self.M.append(m)
-        self.K.append(np.full(len(pts), self.pieza))
+        self.K.append(np.full(len(pts), self.pieza)); self.C.append(np.full(len(pts), self._cid()))
 
     # -------------------------------------------------------------- primitivas
-    def esfera(self, c, r, mat):
-        """mat: nombre, o función(dirs)->array de nombres (p. ej. cara/pelo/vincha sobre la cabeza)."""
+    def esfera(self, c, r, mat, conservar=None):
+        """mat: nombre, o función(dirs)->array de nombres. conservar(dirs)->bool deja solo una parte."""
         d = _esfera_dirs(r)
-        self._add(np.asarray(c) + r * d, d, mat if isinstance(mat, str) else mat(d))
+        self._add(np.asarray(c) + r * d, d, mat if isinstance(mat, str) else mat(d),
+                  None if conservar is None else conservar(d))
 
-    def elipsoide(self, c, radios, mat):
+    def elipsoide(self, c, radios, mat, conservar=None):
         radios = np.asarray(radios, float)
         d = _esfera_dirs(radios.max())
         nrm = d / radios; nrm /= np.linalg.norm(nrm, axis=-1, keepdims=True)
-        self._add(np.asarray(c) + d * radios, nrm, mat if isinstance(mat, str) else mat(d))
+        self._add(np.asarray(c) + d * radios, nrm, mat if isinstance(mat, str) else mat(d),
+                  None if conservar is None else conservar(d))
 
-    def caja(self, c, radios, mat, n=3.0):
+    def caja(self, c, radios, mat, n=3.0, conservar=None):
         """Superelipsoide: n=2 es un elipsoide; n=3-4 es una caja redondeada. Las siluetas con lados rectos se
         leen como dibujadas a mano; las esferas perfectas "gritan 3D"."""
         radios = np.asarray(radios, float)
@@ -136,9 +170,11 @@ class Escena:
         q = np.sign(d) * np.abs(d) ** (2.0 / n)
         nrm = np.sign(d) * np.abs(d) ** (2.0 - 2.0 / n) / radios
         nrm /= np.linalg.norm(nrm, axis=-1, keepdims=True) + 1e-9
-        self._add(np.asarray(c) + q * radios, nrm, mat if isinstance(mat, str) else mat(d))
+        self._add(np.asarray(c) + q * radios, nrm, mat if isinstance(mat, str) else mat(d),
+                  None if conservar is None else conservar(d))
 
     def capsula(self, a, b, r, mat, tapas=True):
+        """mat: nombre, o función(dirs, t)->array de nombres (t∈[0,1] de a hacia b; las tapas usan t=0 y t=1)."""
         a, b = np.asarray(a, float), np.asarray(b, float)
         ax = b - a; L = np.linalg.norm(ax) + 1e-9; ax /= L
         e1 = np.cross(ax, [0, 0, 1.0])
@@ -148,46 +184,56 @@ class Escena:
         t, ang = np.meshgrid(np.linspace(0, L, int(L / .3) + 2),
                              np.linspace(0, 2 * math.pi, max(8, int(2 * math.pi * r / .3)), endpoint=False))
         d = np.cos(ang)[..., None] * e1 + np.sin(ang)[..., None] * e2
-        self._add(a + t[..., None] * ax + r * d, d, mat)
+        self._add(a + t[..., None] * ax + r * d, d, mat if isinstance(mat, str) else mat(d, t / L))
         if tapas:
-            self.esfera(a, r, mat); self.esfera(b, r, mat)
+            if isinstance(mat, str):
+                self.esfera(a, r, mat); self.esfera(b, r, mat)
+            else:
+                self.esfera(a, r, lambda dd: mat(dd, np.zeros(dd.shape[:-1])))
+                self.esfera(b, r, lambda dd: mat(dd, np.ones(dd.shape[:-1])))
 
-    def faldon(self, arriba, abajo, r1, r2, mat, conservar=lambda d: d[..., 0] < .35):
-        """Tronco de cono (túnica, capa, falda). conservar(dirs) decide qué ángulos existen:
-        por defecto está abierto adelante para que se vean las piernas."""
+    def faldon(self, arriba, abajo, r1, r2, mat, conservar=lambda d: d[..., 0] < .35, recorte=None):
+        """Tronco de cono (túnica, capa, falda). conservar(dirs) decide qué ángulos existen (por defecto abierto
+        adelante); recorte(dirs, t) saca partes según la altura t∈[0,1] (jirones, dobladillo irregular)."""
         arriba, abajo = np.asarray(arriba, float), np.asarray(abajo, float)
         t, ang = np.meshgrid(np.linspace(0, 1, 26), np.linspace(0, 2 * math.pi, 64, endpoint=False))
         d = np.stack([np.cos(ang), np.sin(ang), np.zeros_like(ang)], -1)
         c = arriba + t[..., None] * (abajo - arriba)
         r = (r1 + (r2 - r1) * t)[..., None]
-        m = conservar(d)
+        m = np.asarray(conservar(d), bool)
+        if recorte is not None:
+            m = m & np.asarray(recorte(d, t), bool)
         nrm = d + np.array([0, 0, .35]); nrm /= np.linalg.norm(nrm, axis=-1, keepdims=True)
         mats = mat if isinstance(mat, str) else mat(d, t)[m]   # mat(d, t): pliegues por ángulo/altura
         self._add((c + r * d)[m], nrm[m], mats)
 
     def detalle(self, p, col):
-        self.detalles.append((np.asarray(p, float), col))
+        self._cid()                     # un componente que solo aporta detalles también existe en el buffer
+        self.detalles.append((np.asarray(p, float), tuple(int(x) for x in col), self.componente))
 
     # -------------------------------------------------------------- render
-    def render(self, contorno=(16, 10, 24), salto=3.2, salto_pieza=.8, estilo=None):
+    def render(self, contorno=(16, 10, 24), salto=3.2, salto_pieza=.8, estilo=None, buffers=False):
         """estilo (ver sprites_lib/estilos.py): umbrales de tonos, contorno 'negro'|'color'
-        (el tono más oscuro del material vecino) e interior 'negro'|'color'|'ninguno'."""
+        (el tono más oscuro del material vecino), interior 'negro'|'color'|'ninguno', sombreado 'luz'|'borde'.
+        buffers=True devuelve además (depth, mat, pieza, comp, solido, comp_nombres, colores_detalle)."""
         est = dict(umbrales=(.28, .66), contorno="negro", interior="negro", oscurecer=.55, sombreado="luz")
         est.update(estilo or {})
         cw, ch = self.cam.cw, self.cam.ch
-        P = np.concatenate(self.P); Nn = np.concatenate(self.Nn)
-        M = np.concatenate(self.M); K = np.concatenate(self.K)
-        x, y, d = self.cam.proyectar(P)
-        xi, yi = np.round(x).astype(int), np.round(y).astype(int)
-        ok = (xi >= 0) & (xi < cw) & (yi >= 0) & (yi < ch)
-        xi, yi, d, Nn, M, K = xi[ok], yi[ok], d[ok], Nn[ok], M[ok], K[ok]
-        o = np.argsort(d)                                 # lo más cercano a cámara queda último y gana
-        xi, yi, d, Nn, M, K = xi[o], yi[o], d[o], Nn[o], M[o], K[o]
         depth = np.full((ch, cw), -1e9); mat = np.full((ch, cw), -1); pieza = np.full((ch, cw), -1)
-        lam = np.zeros((ch, cw))
-        depth[yi, xi] = d; mat[yi, xi] = M; pieza[yi, xi] = K
-        lam[yi, xi] = np.clip(self.cam.a_mundo(Nn) @ self.cam.luz, 0, 1)
+        comp = np.full((ch, cw), -1); lam = np.zeros((ch, cw))
         img = np.zeros((ch, cw, 4), np.uint8)
+        colores_detalle = set()
+        if self.P:
+            P = np.concatenate(self.P); Nn = np.concatenate(self.Nn)
+            M = np.concatenate(self.M); K = np.concatenate(self.K); C = np.concatenate(self.C)
+            x, y, d = self.cam.proyectar(P)
+            xi, yi = np.round(x).astype(int), np.round(y).astype(int)
+            ok = (xi >= 0) & (xi < cw) & (yi >= 0) & (yi < ch)
+            xi, yi, d, Nn, M, K, C = (arr[ok] for arr in (xi, yi, d, Nn, M, K, C))
+            o = np.argsort(d, kind="stable")              # lo más cercano a cámara queda último y gana
+            xi, yi, d, Nn, M, K, C = (arr[o] for arr in (xi, yi, d, Nn, M, K, C))
+            depth[yi, xi] = d; mat[yi, xi] = M; pieza[yi, xi] = K; comp[yi, xi] = C
+            lam[yi, xi] = np.clip(self.cam.a_mundo(Nn) @ self.cam.luz, 0, 1)
         nivel = None
         if est["sombreado"] == "borde":
             # como lo haría un artista: tono base plano; luz en el borde superior/izquierdo de cada pieza y
@@ -199,13 +245,13 @@ class Escena:
             nivel[luz_b & ~som_b] = 2
             nivel[som_b & ~luz_b] = 0
             nivel[lam < est["umbrales"][0]] = 0
+        u1, u2 = est["umbrales"]
         for k, nm in enumerate(self.mats):
             tonos = self.pal[nm]
             if nivel is not None:
                 for lvl in range(3):
                     img[(mat == k) & (nivel == lvl)] = (*tonos[lvl], 255)
                 continue
-            u1, u2 = est["umbrales"]
             for lvl, (lo, hi) in enumerate(((-1, u1), (u1, u2), (u2, 2))):
                 img[(mat == k) & (lam > lo) & (lam <= hi)] = (*tonos[lvl], 255)
         solido = mat >= 0
@@ -220,11 +266,13 @@ class Escena:
         elif est["interior"] == "color":                  # línea con el tono oscuro de la pieza de atrás
             for k, nm in enumerate(self.mats):
                 img[interior & (mat == k)] = (*_oscurecer(self.pal[nm][0], .8), 255)
-        for p, col in self.detalles:
+        for p, col, cn in self.detalles:
             px, py, pd = self.cam.proyectar(p)
             ix, iy = int(round(float(px))), int(round(float(py)))
             if 0 <= ix < cw and 0 <= iy < ch and solido[iy, ix] and pd >= depth[iy, ix] - 1.3:
                 img[iy, ix] = (*col, 255)
+                comp[iy, ix] = self.comp_nombres.index(cn) if cn in self.comp_nombres else comp[iy, ix]
+                colores_detalle.add(col)
         grow = solido.copy()
         for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0)):
             grow |= _mover(solido, dy, dx, False)
@@ -238,7 +286,11 @@ class Escena:
                 img[anillo & (vecino == k)] = (*_oscurecer(self.pal[nm][0], est["oscurecer"]), 255)
         else:
             img[anillo] = (*contorno, 255)
-        return Image.fromarray(img, "RGBA")
+        im = Image.fromarray(img, "RGBA")
+        if not buffers:
+            return im
+        return im, dict(depth=depth, mat=mat, pieza=pieza, comp=comp, solido=solido,
+                        comp_nombres=list(self.comp_nombres), colores_detalle=colores_detalle)
 
 
 def ik_sagital(a, b, l1, l2, doblez):
@@ -246,6 +298,22 @@ def ik_sagital(a, b, l1, l2, doblez):
     from .rig import ik
     k = ik((a[0], -a[2]), (b[0], -b[2]), l1, l2, doblez)
     return v(k[0], a[1], -k[1])
+
+
+def ik_3d(a, b, l1, l2, polo):
+    """IK de dos huesos en 3D: la articulación intermedia se dobla hacia 'polo' (p. ej. (1,0,0) rodilla adelante,
+    (-1,0,0) codo atrás). A diferencia de ik_sagital, respeta desplazamientos laterales (brazos abiertos)."""
+    a, b, polo = np.asarray(a, float), np.asarray(b, float), np.asarray(polo, float)
+    eje = b - a
+    dist = max(1e-9, float(np.linalg.norm(eje)))
+    u = eje / dist
+    d = max(1e-3, min(dist, l1 + l2 - 1e-3))
+    k = (l1 * l1 - l2 * l2 + d * d) / (2 * d)
+    h = math.sqrt(max(0.0, l1 * l1 - k * k))
+    p = polo - (polo @ u) * u
+    n = np.linalg.norm(p)
+    p = p / n if n > 1e-9 else np.array([0.0, 0.0, 0.0])
+    return a + u * k + p * h
 
 
 def sombra(camara, rx=10.0, ry=4.6, col=(10, 8, 18, 210)):

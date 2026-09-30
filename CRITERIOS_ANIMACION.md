@@ -180,3 +180,27 @@ con métricas (`sprites_lib/comparar_estilo.py`) y una comparación visual ×14 
   abajo) aparecía en la fila de arriba. Se reemplazó por un desplazamiento sin vuelta en `render3d` y `pixel2d`.
 - **Trampa de perfil**: de costado, la cara queda de canto y solo se ve pelo. Stardew corre la cara hacia el lado
   visible. Implementado: centro de la cara = normalizar(adelante + 0.9·hacia_cámara).
+
+## Plantilla de caminar — LPC (medida el 2026-09-27)
+Fuente: cuerpo base masculino de LPC (`referencias/caminar/`, CC-BY-SA/GPL: **solo referencia de movimiento**, no se
+copian píxeles). Celda 64×64, 9 cuadros (0 parado + 8 de ciclo), filas N W S E, vista 3/4 con cabeza chibi (45 % del
+alto, 46 px en total). Marcas por cuadro en `referencias/caminar/lpc_E_huesos.json`; ciclo en `ciclos.CAMINAR_LPC`.
+
+- **Cómo se midió**: cada cuadro pasado a mapa de colores en texto (una letra por color) → coordenadas exactas sin
+  gastar imágenes. Cercano/lejano se separan por tono: LPC pinta más oscuras las extremidades lejanas. Rodillas y
+  codos no se marcan: salen de la IK, igual que en nuestro muñeco.
+- **Estructura**: 8 cuadros, desfase 4 (segunda mitad = primera con las piernas cambiadas). Baja 1 px al apoyar
+  (cuadros 0 y 4), pie en el piso 6 de 8 cuadros, levanta ~2 px al cruzar, paso ≈ 0,85 del largo de pierna, mano ±5 px
+  opuesta a la pierna. LPC no es simétrico en los cruces: la plantilla promedia las dos mitades.
+- **Verificación** (`python -m sprites_lib.comparar_plantilla`, test `test_comparar_plantilla`): el muñeco en el estilo
+  `lpc` (solo verificación: mismo alto y celda) se mide contra la referencia: huesos (error medio ≤ 2 px) y silueta
+  (IoU, informativa ≥ 0,65; las proporciones son nuestras, más finas que LPC).
+- **Errores corregidos al replicarlo**:
+  1. La cámara cenital separa verticalmente los lados cercano/lejano (hombros 6 px, caderas 3 px); en el perfil de LPC
+     los dos pies pisan la misma línea → para comparar de perfil usar cámara lateral.
+  2. El muñeco medía 3 px más que `adulto_px`: el contorno y el pie redondo suman altura bajo el piso y arriba.
+     Compensado en el estilo `lpc` (alto 43, pie a 5 px del borde). Revisar si pasa lo mismo en stardew.
+  3. La mano no sigue un seno: va rápido hacia atrás en el cruce → mano medida cuadro a cuadro (`mano.xy`).
+  4. `escala_rig` no es 1: una unidad del rig mide 0,82 px en `lpc`. Convertir las medidas con ese factor.
+- **Trampa de LPC que no copiamos**: el hombro cercano está 4 px atrás del centro del torso y el lejano 4 px adelante,
+  por eso el brazo lejano "sale del pecho". Nuestros hombros van en su lugar: la mano lejana queda fuera de la meta.
