@@ -228,7 +228,7 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - `correr(checks)` Ejecuta cada check (callable sin argumentos); si uno explota, ese check queda rojo con la excepción.
 - `informe(v)` Texto legible: primera línea `VERDE (n/m)` o `ROJO (k fallan)`, y después cada fallo con hasta 5 evidencias.
 - `guardar(v, ruta)` Escribe el veredicto en `ruta` como JSON (`verde`, `informe` legible y un objeto por check); devuelve la ruta.
-- `check_determinismo(estilo, pose='quieto', mira=None, veces=2)` Renderiza la ficha mínima `veces` veces en el mismo (pose, mira) y compara los píxeles entre corridas.
+- `check_determinismo(estilo, pose='quieto', mira=None, veces=2, ficha=None)` Renderiza `veces` veces en el mismo (pose, mira) y compara los píxeles entre corridas. La ficha es la del
 - `check_deriva(estado_dict, fuentes, regla='deriva')` Compara las fuentes actuales contra las aprobadas; sin aprobación previa el check queda omitido (pasa).
 - `check_zonas(anim, estilo, ficha=None, dirs=None)` Gate de zonas: ninguna alerta MEDIA/ALTA por revisar (sin `fp`), contando las de borde solo si el sólido
 - `check_pulido(anim, estilo, ficha=None, dirs=None)` Gate de pulido: ningún hallazgo MAL por revisar (sin `fp`) en movimiento, limpieza ni espejo. El detalle
@@ -254,7 +254,7 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 
 ### `proceso_skin` — Proceso de skin: smoke de una skin pintada (carga 32×32, zonas, pulido y determinismo).
 - `check_carga(ruta)` La skin carga con `skins.cargar` y mide 32×32 (la medida la valida el propio cargador); cualquier falla de
-- `correr_gate(ruta, anim='quieto', estilo='stardew')` Veredicto de la skin en esa pose: carga 32×32, zonas y pulido de su ficha, y determinismo del render.
+- `correr_gate(ruta, anim='quieto', estilo='stardew')` Veredicto de la skin en esa pose: carga 32×32, zonas y pulido de su ficha, y determinismo del render de esa
 - `smoke(nombre, anim='quieto', estilo='stardew')` Corre el gate de la skin y imprime el informe; devuelve 0 VERDE / 1 ROJO.
 - `main(argv=None)` CLI del proceso de skin: devuelve 0 VERDE, 1 ROJO y 2 error de uso o skin inexistente.
 

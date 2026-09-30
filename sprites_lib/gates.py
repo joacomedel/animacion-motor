@@ -48,12 +48,16 @@ def guardar(v, ruta):
     return ruta
 
 
-def check_determinismo(estilo, pose="quieto", mira=None, veces=2):
-    """Renderiza la ficha mínima `veces` veces en el mismo (pose, mira) y compara los píxeles entre corridas."""
+def check_determinismo(estilo, pose="quieto", mira=None, veces=2, ficha=None):
+    """Renderiza `veces` veces en el mismo (pose, mira) y compara los píxeles entre corridas. La ficha es la del
+    sujeto a medir: `ficha=None` usa `armado.FICHA_MINIMA` (comportamiento histórico); una ficha propia (p. ej.
+    `skins.ficha`) verifica además que su carga/render sea estable."""
     mira = mira or ESTILOS[estilo]["direcciones"][0]
+    if ficha is None:
+        ficha = armado.FICHA_MINIMA
     huellas = []
     for _ in range(veces):
-        img = armado.render_cuadro(armado.FICHA_MINIMA, estilo, pose, 0, mira).img
+        img = armado.render_cuadro(ficha, estilo, pose, 0, mira).img
         huellas.append(hashlib.sha256(img.tobytes()).hexdigest()[:12])
     distintas = len(set(huellas))
     detalle = (f"{estilo}/{pose}/{mira}: {veces} renders idénticos" if distintas == 1 else

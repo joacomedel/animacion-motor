@@ -2,8 +2,8 @@
 
 Una skin es un PNG de 32×32 que se pinta sobre el muñeco base (`skins/guia.png`); el smoke la renderiza con la
 pose simple (`quieto` por defecto) y la pasa por el gate: la skin carga y mide 32×32, `gates.check_zonas` y
-`gates.check_pulido` sobre su ficha, y `gates.check_determinismo` del render en esa pose. Es la primera red antes
-de aprobar la skin.
+`gates.check_pulido` sobre su ficha, y `gates.check_determinismo` del render de esa ficha en esa pose. Es la
+primera red antes de aprobar la skin.
 
 El PNG se busca en `skins/<nombre>.png` **de la raíz del kit**, no del cwd (igual que la skin por defecto de
 `proceso_anim`): así el comando funciona desde cualquier directorio.
@@ -41,17 +41,19 @@ def check_carga(ruta):
 
 
 def correr_gate(ruta, anim="quieto", estilo="stardew"):
-    """Veredicto de la skin en esa pose: carga 32×32, zonas y pulido de su ficha, y determinismo del render.
+    """Veredicto de la skin en esa pose: carga 32×32, zonas y pulido de su ficha, y determinismo del render de esa
+    ficha (verifica también su camino de carga).
 
-    Si la skin no carga no se puede armar su ficha: zonas y pulido quedan fuera y el veredicto ya es ROJO.
+    Si la skin no carga no se puede armar su ficha: zonas, pulido y determinismo quedan fuera y el veredicto ya es
+    ROJO.
     """
     carga = check_carga(ruta)
     checks = [lambda: carga]
     if carga.ok:
         ficha = skins.ficha(ruta)
         checks += [lambda: gates.check_zonas(anim, estilo, ficha=ficha),
-                   lambda: gates.check_pulido(anim, estilo, ficha=ficha)]
-    checks.append(lambda: gates.check_determinismo(estilo, pose=anim))
+                   lambda: gates.check_pulido(anim, estilo, ficha=ficha),
+                   lambda: gates.check_determinismo(estilo, pose=anim, ficha=ficha)]
     return gates.correr(checks)
 
 
