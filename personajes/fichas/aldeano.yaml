@@ -1,0 +1,78 @@
+# Ficha de personaje — resultado de la entrevista (2026-09-30)
+# Estado: pendiente del OK del usuario (paso 2 del flujo sprite-personaje)
+
+identidad:
+  nombre: "Aldeano"
+  concepto: >
+    Aldeano común del pueblo: piel oscura, pelo rizado corto y camisa rojo teja.
+    Sin historia heroica: existe para poblar el mapa y caminar por él.
+  rol: pueblerino (NPC)
+  silueta_clave: "pelo rizado oscuro redondeando la cabeza + camisa rojo teja"
+
+cuerpo:
+  base: humano
+  clase_altura: adulto                # misma altura que el resto del elenco
+  complexion: normal
+  piel: oscura
+  cabello: rapado                     # base bajo los rizos: si asoma un hueco se ve pelo, no cráneo de piel
+
+paleta:                               # tono base; el estilo deriva sombra y luz
+  piel:     {base: "#7a4b33", por_que: "piel oscura; el blanco del ojo y el pelo negro se leen encima"}
+  pelo:     {base: "#241d19", por_que: "pelo negro rizado: silueta oscura sobre la piel"}
+  ropa:     {base: "#a84a34", por_que: "rojo teja: color identitario, legible a 1-3 px y no compite con césped ni tierra"}
+  pantalon: {base: "#55402c", por_que: "marrón tierra: ropa de trabajo, no compite con el rojo"}
+  bota:     {base: "#3a2a1e", por_que: "cuero gastado: ancla los pies al piso"}
+
+componentes:
+  - tipo: pelo_rizado
+    ancla: cabeza
+    material: pelo
+    parametros: {filas: 3, volumen: 1.0}
+    por_que: "pelo rizado (pedido del usuario); los rizos nacen fuera del volumen de la cabeza para leerse (lección de las rastas)"
+    nuevo: true
+  - tipo: ojos
+    ancla: cara
+    por_que: "expresión y hacia dónde mira"
+  - tipo: camisa
+    ancla: torso
+    material: ropa
+    parametros: {mangas: cortas}
+    por_que: "prenda principal en el color identitario; mangas cortas dejan ver los brazos"
+    nuevo: true
+  - tipo: pierna_humana
+    ancla: [pierna_derecha, pierna_izquierda]
+    material: pantalon
+    parametros: {calzado: bota}
+    por_que: "piernas vestidas sin componente extra: el pantalón es la pierna misma"
+  - tipo: botas
+    ancla: [pie_derecho, pie_izquierdo]
+    material: bota
+    parametros: {suela: pelo}
+    por_que: "bota con suela oscura (reusa el negro del pelo): se lee el apoyo en el piso"
+    reglas: [simetrico]
+
+reglas_globales:
+  - paleta_identica_entre_direcciones
+  - lineas_guia
+  - nada_recortado
+  - tamano_de_clase
+
+decisiones:                           # registro de la entrevista
+  - {pregunta: "identidad/rol", respuesta: "aldeano común", motivo: "personaje de entorno, no héroe"}
+  - {pregunta: "vista", respuesta: "8 direcciones pixel art", motivo: "pedido del usuario → estilo stardew8"}
+  - {pregunta: "referencia", respuesta: "LPC character generator, generado por nosotros",
+     motivo: "referencia de movimiento: el ciclo CAMINAR_LPC (8 cuadros) ya está medido; no se copian píxeles"}
+  - {pregunta: "cuerpo", respuesta: "adulto normal", motivo: "misma escala que el resto del elenco"}
+  - {pregunta: "piel y pelo", respuesta: "piel oscura, pelo rizado", motivo: "elección del usuario"}
+  - {pregunta: "ropa", respuesta: "camisa + pantalón + botas", motivo: "la silueta más simple y legible"}
+  - {pregunta: "color identitario", respuesta: "rojo teja", motivo: "fuerte y distinguible del entorno"}
+
+objeciones_resueltas:
+  - "LPC es de 4 direcciones: para 8 se usa el estilo stardew8 y el caminar medido de LPC como referencia de movimiento."
+  - "El pelo rizado no existía en el kit: componente nuevo (versión simple para el boceto)."
+  - "La camisa no existía: componente nuevo; el torso base era piel."
+  - "El pantalón no necesita componente propio: la pierna humana con material pantalon ya resuelve muslo y canilla."
+
+creditos: []                          # no se usaron referencias externas para el diseño del personaje
+
+estilos: [stardew8]

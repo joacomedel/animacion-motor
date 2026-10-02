@@ -1,6 +1,7 @@
 """Cuerpo base humano: cabeza, rostro, torso, brazos y piernas. Cada estilo cambia formas; las lecciones
 aplicadas: puño como pieza propia y más grande que el antebrazo, cabeza cuadrada en estilos no volumétricos,
-cara corrida hacia la cámara (se lee de perfil), ojos de 2 px en Stardew."""
+cara corrida hacia la cámara (se lee de perfil), ojos de 2 px en Stardew. El pelo rizado suma volumen de
+esferas fuera del cráneo, como las rastas: si nacen adentro, quedan tapadas."""
 
 import numpy as np
 
@@ -256,3 +257,40 @@ class PiernaHumana(Componente):
             A.r_pie,
             spec["parametros"]["calzado"] or m,
         )
+
+
+@registrar
+class PeloRizado(Componente):
+    tipo = "pelo_rizado"
+    anclas_validas = ("cabeza",)
+    material_defecto = "pelo"
+    params_defecto = {"filas": 2, "volumen": 1.0}
+
+    def dibujar(self, esc, ctx, spec):
+        entrar(esc, ctx, spec)
+        A, s = ctx.anat, ctx.escala()
+        hc, (rf, rl, rz) = ctx.a["cabeza"], A.cabeza
+        m, mb = spec["material"], f"{spec['material']}_b"
+        filas = max(1, int(spec["parametros"]["filas"]))
+        vol = float(spec["parametros"]["volumen"])
+        for fila, z in enumerate(np.linspace(0.45, 0.8, filas)):
+            n = max(2, 8 - fila)
+            for i in range(n):
+                ang = np.pi * (
+                    0.5 + i / (n - 1)
+                )  # costado → nuca → costado (la cara queda libre)
+                q = hc + v(np.cos(ang) * rf * 0.82, np.sin(ang) * rl * 0.82, rz * z)
+                esc.esfera(
+                    q,
+                    (0.62 + 0.16 * (i % 2)) * s * vol,
+                    mb if (i + fila) % 2 else m,
+                )
+        entrar(esc, ctx, spec, 1)
+        for i, l in enumerate(
+            (-0.6, -0.2, 0.2, 0.6)
+        ):  # corona: rizos sobre la línea del pelo, sin tapar la cara
+            esc.esfera(
+                hc + v(rf * 0.6, l * rl * 0.5, rz * 0.68),
+                (0.56 + 0.08 * (abs(l) < 0.4)) * s * vol,
+                mb if i % 2 else m,
+            )

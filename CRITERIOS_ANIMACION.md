@@ -506,3 +506,31 @@ la primera dirección con el perfil del estilo. Valores medidos (alto px / cabez
 - **Caso límite del esqueleto**: `saltar` cuadro 2 recoge las piernas en el pico (tobillo **por encima** de la
   cadera; decisión de diseño documentada en la sección de la plantilla de salto). `test_esqueleto` mantiene la
   aserción `cadera > tobillo` y saltea los cuadros en el aire, que el propio ciclo declara con `offset_y != 0`.
+
+## Generación de skins por un LLM: qué decide la calidad (experimento, 2026-10-02)
+
+Experimento: 10 modelos free, prompt idéntico (receta `skins.desde_colores` + detalle opcional copiando
+`skins/pintar_mago.py` + candado "detalle solo si `continuidad == []`"), 10 personajes, salida
+`caminar_lpc` en `stardew`. Review humana a ciegas de cada GIF.
+
+- **La calidad siguió a una conducta, no al modelo**: los 5 que escribieron un pase de pintado propio
+  (100+ líneas, loop de simetría como `pintar_mago`) sacaron 8–9.5; los 5 que quedaron en
+  `desde_colores` sacaron 6–7. Correlación perfecta.
+- **El prompt constante no discrimina**: el mismo modelo divergió entre corridas (longcat: aldeano
+  detallado 8 vs druida base 6; space-bunny: hechicera base vs pescador detallado 8). No es un ranking
+  de modelos: es iniciativa + interpretación del personaje + azar de la corrida.
+- **El candado jugó en contra**: "detalle solo si `continuidad == []`" hizo que `fledge` (robot) intentara
+  óxido, fallara la costura y revirtiera a `desde_colores`. Conviene "corregí hasta que cierre" (loop
+  corto) en lugar de revertir: el candado aplana justo a los que intentan.
+- **El bug típico del detalle es mapeo columna→dirección**: `caballero_carmesi` pintó `cabeza` cols 0-1
+  (nuca) de rojo; al mirar al N se ve la nuca roja. Al encargar una skin hay que pasar el mapa
+  (`skins.guia`, `skins.columnas_por_direccion`) y avisar que la col 0 y la última de cada zona son la espalda.
+- **Artefacto que no es del skin**: píxel oscuro que "popea" al caminar en `hechicera_hielo` (usó la base,
+  sin pintado propio) y `fantasma_cian` → revisar pipeline/GIF/contorno antes de culpar a la skin.
+
+Checklist para encargar una skin a un modelo/LLM:
+
+1. Exigir pase de detalle propio (no opcional) con simetría izquierda-derecha.
+2. Pasar `skins.guia` / `columnas_por_direccion` y la regla de la nuca (no pintar cols 0-1 / últimas de `cabeza`).
+3. Iterar hasta `continuidad == []` (corregir, no revertir).
+4. Cerrar con `zonas`/`pulido` para cazar el píxel que popea antes de mostrar.

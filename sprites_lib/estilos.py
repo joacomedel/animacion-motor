@@ -157,7 +157,7 @@ ESTILOS["stardew8"] = {
         "bob_px": True,
         "cabeza_pantalla": True,
         "cabeza_diagonal": 0.85,
-        "cabeza_desvio": {"SE": 0.9, "NE": -0.2, "SW": -1.0, "NW": 0.1},
+        "cabeza_desvio": {"SE": 0.9, "NE": -0.2, "SW": -0.9, "NW": 0.2},
     },
     "direcciones": ["S", "SE", "E", "NE", "N", "NW", "W", "SW"],
     # Fry (CC0) usa 14 colores en toda su hoja; el render daba ~70. 28 casi no se distingue (20 pierde ojos)

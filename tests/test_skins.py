@@ -74,11 +74,11 @@ def test_columnas_por_direccion_ubica_frente_y_espalda():
     assert cols["E"]["torso"] < cols["S"]["torso"] < cols["W"]["torso"]
     # las diagonales frontales caen entre el frente y su costado
     assert cols["SE"]["torso"] < cols["S"]["torso"] < cols["SW"]["torso"]
-    # los brazos son tan angostos (4) que las 8 direcciones no caben: se repiten columnas (muestra el límite)
+    # los brazos son de 8 de ancho: las 8 direcciones caen en 8 columnas distintas (con 4 se repetían de a pares)
     brazo = {
         cols[d]["brazo_derecho"] for d in ("S", "SE", "E", "NE", "N", "NW", "W", "SW")
     }
-    assert len(brazo) <= 4
+    assert len(brazo) == 8
 
 
 def test_guia_marca_las_direcciones(tmp_path):

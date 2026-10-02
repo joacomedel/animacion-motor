@@ -45,13 +45,14 @@ def test_regla_de_espejo_con_desfase(analisis):
         max(m["E-W"]["dif_px_por_cuadro"]) <= 1
         and max(m["S-S"]["dif_px_por_cuadro"]) == 0
     )
-    # las diagonales difieren solo en la cabeza (cabeza_desvio del estilo) y quedan marcadas, no borradas
+    # con `cabeza_desvio` simétrico (SE/SW y NE/NW iguales y opuestos) las diagonales se espejan: no quedan
+    # hallazgos de espejo por revisar en la cabeza
     diag = [
         h
         for h in analisis["hallazgos"]
-        if h["familia"] == "espejo" and h["dir"] in ("SE", "NE")
+        if h["familia"] == "espejo" and h["dir"] in ("SE", "NE") and h["fp"] is None
     ]
-    assert diag and all(h["fp"] == "desvio_de_estilo" for h in diag)
+    assert diag == []
 
 
 def test_movimiento_medido_contra_lpc(analisis):

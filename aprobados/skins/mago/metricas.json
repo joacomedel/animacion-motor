@@ -5,7 +5,7 @@
     {
       "regla": "skin 32×32",
       "ok": true,
-      "detalle": "/tmp/opencode/mago-8dir/skins/mago.png: carga y mide 32×32",
+      "detalle": "/home/jm/opencode/animaciones/skins/mago.png: carga y mide 32×32",
       "evidencia": [],
       "omitido": false
     },
@@ -34,8 +34,8 @@
         "limpieza/mancha SE c0 cabeza_frente: mancha de 2 px #e2aa34 distinta de todo lo que la rodea (dist. RGB 120) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)",
         "limpieza/mancha E c0 cabeza_frente: mancha de 1 px #5af0e6 distinta de todo lo que la rodea (dist. RGB 110) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)",
         "limpieza/mancha NE c0 cabeza_frente: mancha de 2 px #e2aa34 distinta de todo lo que la rodea (dist. RGB 123) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)",
-        "limpieza/mancha SW c0 cabeza_frente: mancha de 1 px #fffbec distinta de todo lo que la rodea (dist. RGB 106) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)",
-        "limpieza/mancha SW c0 cabeza_frente: mancha de 3 px #5af0e6 distinta de todo lo que la rodea (dist. RGB 110) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)"
+        "limpieza/mancha SW c0 cabeza_frente: mancha de 2 px #5af0e6 distinta de todo lo que la rodea (dist. RGB 110) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)",
+        "limpieza/mancha SW c0 cabeza_frente: mancha de 3 px #e2e2f0 distinta de todo lo que la rodea (dist. RGB 196) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)"
       ],
       "omitido": false
     },
@@ -44,8 +44,8 @@
       "ok": true,
       "detalle": "stardew8/quieto/S: 2 renders idénticos",
       "evidencia": [
-        "corrida 1: 2cb4417fe1b3",
-        "corrida 2: 2cb4417fe1b3"
+        "corrida 1: 5bb8d4ea840f",
+        "corrida 2: 5bb8d4ea840f"
       ],
       "omitido": false
     }
