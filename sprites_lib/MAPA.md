@@ -178,10 +178,12 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 - clase `Skin`  · métodos: color, zona, paleta
 - `cargar(ruta)`
 - `u_de(d, ref=0.0)` Ángulo alrededor del eje vertical → u (0.5 = hacia ref, que por defecto es adelante).
+- `continuidad(ruta_o_skin)` Zonas cuya costura trasera no cierra. La columna 0 y la última de una zona son el mismo punto del cuerpo
+- `columnas_por_direccion(estilo)` Columna (0..w-1) que muestrea cada dirección del estilo en cada zona de la skin. El cuerpo gira alrededor
 - `desde_colores(colores, ruta)` Skin simple a partir de colores (como la skin por defecto de Minecraft): pelo arriba y atrás, remera con
 - `plantilla_zonas(ruta='skins/zonas.png')` Skin de zonas: cada parte del cuerpo de un color distinto (la cara y el frente del torso, aparte).
 - `ficha(ruta, nombre=None)` Ficha mínima para renderizar una skin con el pipeline de siempre (render_cuadro, tests, exportar).
-- `guia(ruta, zoom=16)` PNG ampliado con cada zona rotulada y el frente marcado: la plantilla para pintar una skin a mano.
+- `guia(ruta, zoom=16, estilo='stardew8')` PNG ampliado con cada zona rotulada, el frente marcado y la columna que muestrea cada dirección del estilo
 - `demo(ruta, anim='caminar_lpc', estilo='stardew')` Vista previa rápida (una skin cualquiera): salida/skins/<nombre>/<anim>*
 - `salida_juego(ruta, anim='caminar_lpc', estilo='stardew', raiz='salida', cuadros=False)` Salida final del juego (convención del proyecto): salida/<personaje>/<anim>/<anim>*. Sirve para
 
@@ -254,7 +256,8 @@ antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, 
 
 ### `proceso_skin` — Proceso de skin: smoke, aprobar y lote de una skin pintada.
 - `check_carga(ruta)` La skin carga con `skins.cargar` y mide 32×32 (la medida la valida el propio cargador); cualquier falla de
-- `correr_gate(ruta, anim='quieto', estilo='stardew')` Veredicto de la skin en esa pose: carga 32×32, zonas y pulido de su ficha, y determinismo del render de esa
+- `check_continuidad(ruta)` La espalda de cada zona de la skin cierra: la columna 0 y la última son el mismo texel (u da la vuelta en
+- `correr_gate(ruta, anim='quieto', estilo='stardew')` Veredicto de la skin en esa pose: carga 32×32, costura de la espalda, zonas y pulido de su ficha, y
 - `smoke(nombre, anim='quieto', estilo='stardew')` Corre el gate de la skin y imprime el informe; devuelve 0 VERDE / 1 ROJO.
 - `fuentes_skin(nombre)` Fuentes de la skin para congelar/derivar: el PNG y, si existe, el script que la pinta
 - `aprobar(nombre, estilo='stardew', excepcion=None)` Corre el gate de `smoke` y, si está VERDE o hay `excepcion`, congela la skin en `aprobados/skins/<nombre>/`

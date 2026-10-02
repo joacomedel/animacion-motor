@@ -96,6 +96,52 @@ def u_de(d, ref=0.0):
     return (np.arctan2(d[..., 1], d[..., 0]) - ref) / (2 * math.pi) + 0.5
 
 
+def continuidad(ruta_o_skin):
+    """Zonas cuya costura trasera no cierra. La columna 0 y la última de una zona son el mismo punto del cuerpo
+    (u da la vuelta en la espalda), así que tienen que coincidir fila a fila: si no, en las vistas de espalda
+    (N/NE/NW) aparece una costura. Devuelve `[(zona, filas_que_no_cierran), ...]` (vacío = cierra)."""
+    sk = ruta_o_skin if isinstance(ruta_o_skin, Skin) else cargar(ruta_o_skin)
+    a = sk.a
+    malas = []
+    for nombre, (x0, y0, w, h) in ZONAS.items():
+        borde0, borde1 = a[y0 : y0 + h, x0], a[y0 : y0 + h, x0 + w - 1]
+        n = int((borde0 != borde1).any(axis=1).sum())
+        if n:
+            malas.append((nombre, n))
+    return malas
+
+
+def columnas_por_direccion(estilo):
+    """Columna (0..w-1) que muestrea cada dirección del estilo en cada zona de la skin. El cuerpo gira alrededor
+    del eje vertical (`u_de` con ref=0); la cabeza usa la cara corrida hacia la cámara (`centro_cara` + fuerza de
+    su estilo), igual que `CabezaSkin`. Permite pintar la skin sabiendo dónde cae cada dirección."""
+    from .cuerpo import centro_cara, fuerza_cara
+    from .escala import celda
+    from .estilos import ESTILOS, crear_camara
+    from .poses import ancho as _ancho
+
+    e = ESTILOS[estilo]
+    prop = e["proporciones"]
+    cols = {}
+    for mira in e["direcciones"]:
+        cam = crear_camara(
+            estilo, mira, celda(estilo, "adulto", _ancho("quieto", estilo))
+        )
+        cl = np.asarray(cam.cam_local, float)
+        d = np.array([cl[0], cl[1], 0.0])
+        n = np.linalg.norm(d)
+        d = d / n if n > 1e-9 else d
+        c = centro_cara(cl, fuerza_cara(prop, cl))
+        ref = math.atan2(c[1], c[0])
+        cols[mira] = {}
+        for nombre, (x0, y0, w, h) in ZONAS.items():
+            u = u_de(d, ref) if nombre == "cabeza" else u_de(d)
+            cols[mira][nombre] = int(
+                np.clip(np.floor(np.asarray(u) % 1.0 * w), 0, w - 1)
+            )
+    return cols
+
+
 def desde_colores(colores, ruta):
     """Skin simple a partir de colores (como la skin por defecto de Minecraft): pelo arriba y atrás, remera con
     mangas, pantalón y calzado. Claves: piel, pelo, remera, pantalon, calzado, iris, mangas ('cortas'|'largas')."""
@@ -212,29 +258,57 @@ def ficha(ruta, nombre=None):
     }
 
 
-def guia(ruta, zoom=16):
-    """PNG ampliado con cada zona rotulada y el frente marcado: la plantilla para pintar una skin a mano."""
-    im = Image.new("RGB", (LADO * zoom, LADO * zoom), (40, 40, 48))
+def guia(ruta, zoom=16, estilo="stardew8"):
+    """PNG ampliado con cada zona rotulada, el frente marcado y la columna que muestrea cada dirección del estilo
+    (la cabeza usa la cara corrida hacia la cámara). Es la plantilla para pintar una skin que cierre en todas las
+    direcciones: la columna 0 y la última de cada zona son la misma (la espalda). Leyenda al pie."""
+    from .estilos import ESTILOS
+
+    dirs = ESTILOS[estilo]["direcciones"]
+    cols = columnas_por_direccion(estilo)
+    colores = {}
+    for i, d in enumerate(dirs):
+        colores[d] = tuple(
+            int(70 + 185 * f) for f in ((i * 0.37) % 1, (i * 0.61) % 1, (i * 0.83) % 1)
+        )
+    alto_leyenda = 34
+    im = Image.new("RGB", (LADO * zoom, LADO * zoom + alto_leyenda), (28, 28, 34))
     dr = ImageDraw.Draw(im)
     for i, (nombre, (x, y, w, h)) in enumerate(ZONAS.items()):
         col = tuple(
-            int(90 + 120 * f) for f in ((i * 0.37) % 1, (i * 0.61) % 1, (i * 0.83) % 1)
+            int(60 + 40 * f) for f in ((i * 0.37) % 1, (i * 0.61) % 1, (i * 0.83) % 1)
         )
         dr.rectangle(
             [x * zoom, y * zoom, (x + w) * zoom - 1, (y + h) * zoom - 1],
             fill=col,
-            outline=(0, 0, 0),
+            outline=(90, 90, 100),
         )
+        for d in dirs:
+            c = cols[d][nombre]
+            xl = (x + c) * zoom + zoom // 2
+            dr.line(
+                [(xl, y * zoom + 1), (xl, (y + h) * zoom - 2)], fill=colores[d], width=2
+            )
         dr.line(
             [((x + w / 2) * zoom, y * zoom), ((x + w / 2) * zoom, (y + h) * zoom - 1)],
             fill=(255, 255, 255),
         )
-        dr.text((x * zoom + 3, y * zoom + 3), nombre.replace("_", "\n"), fill=(0, 0, 0))
+        dr.text(
+            (x * zoom + 3, y * zoom + 3), nombre.replace("_", "\n"), fill=(20, 20, 20)
+        )
+    y0 = LADO * zoom + 4
     dr.text(
-        (4, LADO * zoom - 28),
-        "línea blanca = frente; bordes = espalda; arriba = punta de la parte (hombro, cadera)",
-        fill=(255, 255, 255),
+        (4, y0),
+        "línea blanca = frente · col 0 y última = espalda (mismo texel)",
+        fill=(230, 230, 230),
     )
+    ancho = 46
+    for i, d in enumerate(dirs):
+        xi = 4 + i * ancho
+        dr.rectangle(
+            [xi, y0 + 13, xi + 10, y0 + 23], fill=colores[d], outline=(0, 0, 0)
+        )
+        dr.text((xi + 13, y0 + 13), d, fill=colores[d])
     os.makedirs(os.path.dirname(ruta) or ".", exist_ok=True)
     im.save(ruta)
     return ruta

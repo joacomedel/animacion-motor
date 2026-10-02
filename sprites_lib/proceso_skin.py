@@ -25,6 +25,7 @@ Uso:
 Animaciones: ver `sprites_lib.poses.POSES`. Estilos: ver `sprites_lib.estilos.ESTILOS`.
 Uso incorrecto, nombre de skin inválido o skin inexistente: exit 2.
 """
+
 import os
 import re
 import sys
@@ -38,9 +39,11 @@ RAIZ_APROBADOS = os.path.join("aprobados", "skins")
 RAIZ_ANIMACIONES = os.path.join("aprobados", "animaciones")
 RAIZ_INFORMES = os.path.join("salida", "zonas")
 NOMBRE = re.compile(r"^[a-z0-9_]+$")
-USO = ("uso: proceso_skin smoke <nombre> [--anim quieto] [--estilo stardew]\n"
-       "     proceso_skin aprobar <nombre> [--estilo stardew] [--excepcion MOTIVO]\n"
-       "     proceso_skin lote <nombre> [--estilo stardew] [--raiz output]")
+USO = (
+    "uso: proceso_skin smoke <nombre> [--anim quieto] [--estilo stardew]\n"
+    "     proceso_skin aprobar <nombre> [--estilo stardew] [--excepcion MOTIVO]\n"
+    "     proceso_skin lote <nombre> [--estilo stardew] [--raiz output]"
+)
 
 
 def _ruta_skin(nombre):
@@ -55,23 +58,42 @@ def check_carga(ruta):
         skins.cargar(ruta)
     except (ValueError, OSError) as e:
         return gates.Resultado("skin 32×32", False, str(e))
-    return gates.Resultado("skin 32×32", True, f"{ruta}: carga y mide {skins.LADO}×{skins.LADO}")
+    return gates.Resultado(
+        "skin 32×32", True, f"{ruta}: carga y mide {skins.LADO}×{skins.LADO}"
+    )
+
+
+def check_continuidad(ruta):
+    """La espalda de cada zona de la skin cierra: la columna 0 y la última son el mismo texel (u da la vuelta en
+    la espalda). Una costura abierta se ve como una línea dura en las vistas N/NE/NW. Ver `skins.continuidad`."""
+    malas = skins.continuidad(ruta)
+    return gates.Resultado(
+        "costura de la espalda",
+        not malas,
+        f"{len(skins.ZONAS)} zonas cierran"
+        if not malas
+        else f"{len(malas)} zonas con costura abierta",
+        [f"{zona}: {filas} filas no cierran" for zona, filas in malas],
+    )
 
 
 def correr_gate(ruta, anim="quieto", estilo="stardew"):
-    """Veredicto de la skin en esa pose: carga 32×32, zonas y pulido de su ficha, y determinismo del render de esa
-    ficha (verifica también su camino de carga).
+    """Veredicto de la skin en esa pose: carga 32×32, costura de la espalda, zonas y pulido de su ficha, y
+    determinismo del render de esa ficha (verifica también su camino de carga).
 
-    Si la skin no carga no se puede armar su ficha: zonas, pulido y determinismo quedan fuera y el veredicto ya es
+    Si la skin no carga no se puede armar su ficha: el resto de los checks quedan fuera y el veredicto ya es
     ROJO.
     """
     carga = check_carga(ruta)
     checks = [lambda: carga]
     if carga.ok:
         ficha = skins.ficha(ruta)
-        checks += [lambda: gates.check_zonas(anim, estilo, ficha=ficha),
-                   lambda: gates.check_pulido(anim, estilo, ficha=ficha),
-                   lambda: gates.check_determinismo(estilo, pose=anim, ficha=ficha)]
+        checks += [
+            lambda: check_continuidad(ruta),
+            lambda: gates.check_zonas(anim, estilo, ficha=ficha),
+            lambda: gates.check_pulido(anim, estilo, ficha=ficha),
+            lambda: gates.check_determinismo(estilo, pose=anim, ficha=ficha),
+        ]
     return gates.correr(checks)
 
 
@@ -97,8 +119,10 @@ def _por_dir_quieto(ruta, estilo):
     `skins.salida_juego` (incluida la reducción de paleta del estilo), para la hoja y el `smoke.gif` congelados."""
     ficha = skins.ficha(ruta)
     n = POSES["quieto"]["n"]
-    por_dir = {m: [armado.render_cuadro(ficha, estilo, "quieto", p, m).img for p in range(n)]
-               for m in ESTILOS[estilo]["direcciones"]}
+    por_dir = {
+        m: [armado.render_cuadro(ficha, estilo, "quieto", p, m).img for p in range(n)]
+        for m in ESTILOS[estilo]["direcciones"]
+    }
     tope = ESTILOS[estilo]["render"].get("paleta_max")
     if tope:
         paleta.reducir_paleta(por_dir, tope)
@@ -110,9 +134,16 @@ def _exportar_quieto(ruta, nombre, estilo, carpeta):
     como `smoke.gif`, el archivo que marca la aprobación de la skin."""
     por_dir = _por_dir_quieto(ruta, estilo)
     oy = offset_y("quieto")
-    base = exportar.exportar_direcciones(por_dir, nombre, carpeta, fps=fps("quieto"), zoom=6,
-                                         pivote=armado.pivote(estilo, pose="quieto"), loop=loop("quieto"),
-                                         extra={"offset_y": oy} if oy else None)
+    base = exportar.exportar_direcciones(
+        por_dir,
+        nombre,
+        carpeta,
+        fps=fps("quieto"),
+        zoom=6,
+        pivote=armado.pivote(estilo, pose="quieto"),
+        loop=loop("quieto"),
+        extra={"offset_y": oy} if oy else None,
+    )
     os.replace(base + "_todas.gif", os.path.join(carpeta, "smoke.gif"))
 
 
@@ -126,10 +157,14 @@ def aprobar(nombre, estilo="stardew", excepcion=None):
     v = correr_gate(ruta, "quieto", estilo)
     print(gates.informe(v))
     if not v.verde and not excepcion:
-        print('\nROJO: no se congeló nada (para aprobar igual hace falta --excepcion "motivo")')
+        print(
+            '\nROJO: no se congeló nada (para aprobar igual hace falta --excepcion "motivo")'
+        )
         return 1
     if not check_carga(ruta).ok:
-        print("\nROJO: la skin no carga, así que no hay nada que congelar ni con --excepcion")
+        print(
+            "\nROJO: la skin no carga, así que no hay nada que congelar ni con --excepcion"
+        )
         return 1
     if not v.verde:
         print(f"\nROJO con excepción: {excepcion}")
@@ -137,9 +172,14 @@ def aprobar(nombre, estilo="stardew", excepcion=None):
     os.makedirs(carpeta, exist_ok=True)
     _exportar_quieto(ruta, nombre, estilo, carpeta)
     gates.guardar(v, os.path.join(carpeta, "metricas.json"))
-    estado.escribir(carpeta, nombre, fuentes_skin(nombre), "metricas.json", nota=excepcion)
-    print(f"→ {carpeta} (congelado: hoja, smoke.gif, metricas.json y estado.json"
-          + (f"; con excepción: {excepcion}" if excepcion else "") + ")")
+    estado.escribir(
+        carpeta, nombre, fuentes_skin(nombre), "metricas.json", nota=excepcion
+    )
+    print(
+        f"→ {carpeta} (congelado: hoja, smoke.gif, metricas.json y estado.json"
+        + (f"; con excepción: {excepcion}" if excepcion else "")
+        + ")"
+    )
     return 0
 
 
@@ -147,21 +187,29 @@ def _gate_animacion(item, estilo, ficha):
     """Gate de una animación aprobada: zonas y pulido en todas las direcciones y deriva contra la fuente del ciclo
     (la misma que congeló `proceso_anim.aprobar`)."""
     anim = item["nombre"]
-    return gates.correr([
-        lambda: gates.check_zonas(anim, estilo, ficha=ficha),
-        lambda: gates.check_pulido(anim, estilo, ficha=ficha),
-        lambda: gates.check_deriva(item["estado"], proceso_anim.fuentes_actuales(anim)),
-    ])
+    return gates.correr(
+        [
+            lambda: gates.check_zonas(anim, estilo, ficha=ficha),
+            lambda: gates.check_pulido(anim, estilo, ficha=ficha),
+            lambda: gates.check_deriva(
+                item["estado"], proceso_anim.fuentes_actuales(anim)
+            ),
+        ]
+    )
 
 
 def _informe_lote(nombre, estilo, raiz, filas):
     """Escribe `salida/zonas/lote_<nombre>.md`: por animación, el veredicto del gate y el destino del export (o el
     motivo por el que no se exportó)."""
     rojas = sum(1 for fila in filas if not fila["verde"])
-    lineas = [f"# Lote {nombre}/{estilo}", "",
-              f"- skin: `{_ruta_skin(nombre)}`",
-              f"- export: `{raiz}/<nombre>/<anim>/`",
-              f"- animaciones: {len(filas)} ({rojas} rojas)", ""]
+    lineas = [
+        f"# Lote {nombre}/{estilo}",
+        "",
+        f"- skin: `{_ruta_skin(nombre)}`",
+        f"- export: `{raiz}/<nombre>/<anim>/`",
+        f"- animaciones: {len(filas)} ({rojas} rojas)",
+        "",
+    ]
     for fila in filas:
         lineas += [f"## {fila['anim']}", "", "```", fila["informe"], "```", ""]
         if fila["error"]:
@@ -199,7 +247,10 @@ def lote(nombre, estilo="stardew", raiz="output"):
     if estado_skin:
         r = gates.check_deriva(estado_skin, fuentes_skin(nombre))
         if not r.ok:
-            print(f"la skin cambió desde su aprobación: re-validar y re-aprobar ({r.detalle})", file=sys.stderr)
+            print(
+                f"la skin cambió desde su aprobación: re-validar y re-aprobar ({r.detalle})",
+                file=sys.stderr,
+            )
             return 1
     else:
         print("advertencia: skin sin aprobar: se exporta igual", file=sys.stderr)
@@ -215,7 +266,15 @@ def lote(nombre, estilo="stardew", raiz="output"):
                 verde, error = False, str(e)
         if not verde:
             fallan += 1
-        filas.append({"anim": anim, "verde": verde, "informe": gates.informe(v), "export": export, "error": error})
+        filas.append(
+            {
+                "anim": anim,
+                "verde": verde,
+                "informe": gates.informe(v),
+                "export": export,
+                "error": error,
+            }
+        )
         print(f"{anim}: {'VERDE' if verde else 'ROJO'}")
     print(f"→ {_informe_lote(nombre, estilo, raiz, filas)} (informe)")
     return 1 if fallan else 0
@@ -248,23 +307,38 @@ def main(argv=None):
         print(USO, file=sys.stderr)
         return 2
     nombre = args[1]
-    permitidas = {"smoke": ("anim", "estilo"), "aprobar": ("estilo", "excepcion"), "lote": ("estilo", "raiz")}
-    por_defecto = {"smoke": {"anim": "quieto", "estilo": "stardew"},
-                   "aprobar": {"estilo": "stardew", "excepcion": None},
-                   "lote": {"estilo": "stardew", "raiz": "output"}}
+    permitidas = {
+        "smoke": ("anim", "estilo"),
+        "aprobar": ("estilo", "excepcion"),
+        "lote": ("estilo", "raiz"),
+    }
+    por_defecto = {
+        "smoke": {"anim": "quieto", "estilo": "stardew"},
+        "aprobar": {"estilo": "stardew", "excepcion": None},
+        "lote": {"estilo": "stardew", "raiz": "output"},
+    }
     try:
         op = _opciones(args[2:], permitidas[cmd], por_defecto[cmd])
     except ValueError as e:
         print(f"{USO} ({e})", file=sys.stderr)
         return 2
     if not NOMBRE.fullmatch(nombre):
-        print(f"nombre de skin inválido: {nombre!r} (solo minúsculas, dígitos y _)", file=sys.stderr)
+        print(
+            f"nombre de skin inválido: {nombre!r} (solo minúsculas, dígitos y _)",
+            file=sys.stderr,
+        )
         return 2
     if op["estilo"] not in ESTILOS:
-        print(f"estilo desconocido: {op['estilo']!r}; disponibles: {', '.join(ESTILOS)}", file=sys.stderr)
+        print(
+            f"estilo desconocido: {op['estilo']!r}; disponibles: {', '.join(ESTILOS)}",
+            file=sys.stderr,
+        )
         return 2
     if cmd == "smoke" and op["anim"] not in POSES:
-        print(f"animación desconocida: {op['anim']!r}; disponibles: {', '.join(POSES)}", file=sys.stderr)
+        print(
+            f"animación desconocida: {op['anim']!r}; disponibles: {', '.join(POSES)}",
+            file=sys.stderr,
+        )
         return 2
     ruta = _ruta_skin(nombre)
     if not os.path.isfile(ruta):

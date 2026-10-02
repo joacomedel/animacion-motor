@@ -1,0 +1,53 @@
+{
+  "verde": true,
+  "informe": "VERDE (5/5)",
+  "checks": [
+    {
+      "regla": "skin 32×32",
+      "ok": true,
+      "detalle": "/tmp/opencode/mago-8dir/skins/mago.png: carga y mide 32×32",
+      "evidencia": [],
+      "omitido": false
+    },
+    {
+      "regla": "costura de la espalda",
+      "ok": true,
+      "detalle": "11 zonas cierran",
+      "evidencia": [],
+      "omitido": false
+    },
+    {
+      "regla": "zonas quieto/stardew8",
+      "ok": true,
+      "detalle": "0 por revisar",
+      "evidencia": [],
+      "omitido": false
+    },
+    {
+      "regla": "pulido quieto/stardew8",
+      "ok": true,
+      "detalle": "0 MAL · REVISAR: S c0 cabeza_frente/mancha, S c0 cabeza_frente/mancha, SE c0 cabeza_frente/mancha, SE c0 cabeza_frente/mancha, E c0 cabeza_frente/mancha, NE c0 cabeza_frente/mancha +2",
+      "evidencia": [
+        "limpieza/mancha S c0 cabeza_frente: mancha de 2 px #fffbec distinta de todo lo que la rodea (dist. RGB 159) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)",
+        "limpieza/mancha S c0 cabeza_frente: mancha de 2 px #817a94 distinta de todo lo que la rodea (dist. RGB 96) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)",
+        "limpieza/mancha SE c0 cabeza_frente: mancha de 2 px #5af0e6 distinta de todo lo que la rodea (dist. RGB 110) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)",
+        "limpieza/mancha SE c0 cabeza_frente: mancha de 2 px #e2aa34 distinta de todo lo que la rodea (dist. RGB 120) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)",
+        "limpieza/mancha E c0 cabeza_frente: mancha de 1 px #5af0e6 distinta de todo lo que la rodea (dist. RGB 110) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)",
+        "limpieza/mancha NE c0 cabeza_frente: mancha de 2 px #e2aa34 distinta de todo lo que la rodea (dist. RGB 123) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)",
+        "limpieza/mancha SW c0 cabeza_frente: mancha de 1 px #fffbec distinta de todo lo que la rodea (dist. RGB 106) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)",
+        "limpieza/mancha SW c0 cabeza_frente: mancha de 3 px #5af0e6 distinta de todo lo que la rodea (dist. RGB 110) en c0,c1,c2,c3 (4/4) dentro de la pieza sobre la cabeza → punto de color suelto que distrae (¿mota o detalle a propósito?)"
+      ],
+      "omitido": false
+    },
+    {
+      "regla": "determinismo",
+      "ok": true,
+      "detalle": "stardew8/quieto/S: 2 renders idénticos",
+      "evidencia": [
+        "corrida 1: 2cb4417fe1b3",
+        "corrida 2: 2cb4417fe1b3"
+      ],
+      "omitido": false
+    }
+  ]
+}

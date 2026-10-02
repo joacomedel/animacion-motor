@@ -1,0 +1,11 @@
+{
+  "artefacto": "mago",
+  "fuentes": {
+    "skin": "sha256:b4cb8cc8a91fa7cf7366fb29906bafe9af7cf6f77fb968719b7e5be7d300fd05",
+    "pintar": "sha256:6d8716033aef74e496b55e22cb202cb0c09ba8aa92f0c91ffb4a12e4502a4900"
+  },
+  "metricas": "metricas.json",
+  "fecha": "2026-10-02T12:15:20",
+  "aprobado_por": "usuario",
+  "nota": null
+}
