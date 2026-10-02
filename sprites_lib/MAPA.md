@@ -24,9 +24,11 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 - `cabeza_humana` · cabeza · piel · cabello='corto'
 - `cabeza_skin` · cabeza · — · skin=None
 - `cables_nuca` · nuca · cable · cables=2, luz_en_punta=None, largo='corto'
+- `camisa` · torso · ropa · mangas='cortas'
 - `cinturon` · cintura · cuero · hebilla=None
 - `munon_cables` · codo_derecho, codo_izquierdo, rodilla_derecha, rodilla_izquierda · cable · cables=3, largo_px=2, chispa=None, chispa_cada_cuadros=3
 - `ojos` · cara · — · solo=None, iris=None
+- `pelo_rizado` · cabeza · pelo · filas=2, volumen=1.0
 - `pierna_humana` · pierna_derecha, pierna_izquierda · piel · calzado=None
 - `pierna_robotica` · pierna_derecha, pierna_izquierda · metal · juntas=None, rodilla='piston', pie='bota_metalica'
 - `pierna_skin` · pierna_derecha, pierna_izquierda · — · skin=None
@@ -184,8 +186,8 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 - `plantilla_zonas(ruta='skins/zonas.png')` Skin de zonas: cada parte del cuerpo de un color distinto (la cara y el frente del torso, aparte).
 - `ficha(ruta, nombre=None)` Ficha mínima para renderizar una skin con el pipeline de siempre (render_cuadro, tests, exportar).
 - `guia(ruta, zoom=16, estilo='stardew8')` PNG ampliado con cada zona rotulada, el frente marcado y la columna que muestrea cada dirección del estilo
-- `demo(ruta, anim='caminar_lpc', estilo='stardew')` Vista previa rápida (una skin cualquiera): salida/skins/<nombre>/<anim>*
-- `salida_juego(ruta, anim='caminar_lpc', estilo='stardew', raiz='salida', cuadros=False)` Salida final del juego (convención del proyecto): salida/<personaje>/<anim>/<anim>*. Sirve para
+- `demo(ruta, anim='caminar_lpc', estilo='stardew')` Vista previa rápida (una skin cualquiera): docs/diagnostico/skins/<nombre>/<anim>*
+- `salida_juego(ruta, anim='caminar_lpc', estilo='stardew', raiz='salida', cuadros=False)` Salida final del juego (convención del proyecto): <raíz>/<personaje>/<estilo>/<anim>/<anim>*.
 
 ### `muneco` — Muñeco base: sin skin ni ficha de personaje, solo para ver y probar un ciclo/pose antes de aplicarlo a alguien
 - `demo(anim='caminar_lpc', estilo='stardew')`

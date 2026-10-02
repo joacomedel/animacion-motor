@@ -155,7 +155,13 @@ def test_aprobar_congela_y_exporta(tmp_path, monkeypatch):
     assert (carpeta / "estado.json").exists()
     assert list(carpeta.glob("*.png")), "faltan cuadros de control"
     assert (
-        tmp_path / "salida" / "animaciones" / "quieto" / "stardew" / "quieto.png"
+        tmp_path
+        / "docs"
+        / "diagnostico"
+        / "animaciones"
+        / "quieto"
+        / "stardew"
+        / "quieto.png"
     ).exists()
 
 
@@ -174,7 +180,15 @@ def test_aprobar_con_control_cambiado_no_congela(tmp_path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
     assert proceso_anim.main(["aprobar", "quieto", "--estilo", "stardew"]) == 0
     carpeta = tmp_path / "aprobados" / "animaciones" / "quieto" / "stardew"
-    export = tmp_path / "salida" / "animaciones" / "quieto" / "stardew" / "quieto.png"
+    export = (
+        tmp_path
+        / "docs"
+        / "diagnostico"
+        / "animaciones"
+        / "quieto"
+        / "stardew"
+        / "quieto.png"
+    )
     export.unlink()
     original = proceso_anim._todo
 

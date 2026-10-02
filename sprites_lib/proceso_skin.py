@@ -9,7 +9,7 @@ primera red antes de aprobar la skin.
 el `smoke.gif` de `quieto` en todas las direcciones del estilo, `metricas.json` (el veredicto) y `estado.json`
 —este último al final, como marca del congelado—. `lote` recorre las animaciones aprobadas del estilo
 (`aprobados/animaciones`), les corre el gate de zonas, pulido y deriva del ciclo, exporta las VERDE al formato del
-juego (`skins.salida_juego`) y junta el informe en `salida/zonas/lote_<nombre>.md`; una animación ROJA no corta el
+juego (`skins.salida_juego`) y junta el informe en `docs/diagnostico/zonas/lote_<nombre>.md`; una animación ROJA no corta el
 lote: queda listada sin exportar y el exit es 1.
 
 El PNG se busca en `skins/<nombre>.png` **de la raíz del kit**, no del cwd (igual que la skin por defecto de
@@ -21,7 +21,7 @@ Uso:
   .venv/bin/python -m sprites_lib.proceso_skin aprobar <nombre> [--estilo stardew] [--excepcion MOTIVO]
       → congela la skin aprobada en aprobados/skins/<nombre>/ (exit 0/1)
   .venv/bin/python -m sprites_lib.proceso_skin lote <nombre> [--estilo stardew] [--raiz output]
-      → exporta las animaciones aprobadas y escribe salida/zonas/lote_<nombre>.md (exit 0/1)
+      → exporta las animaciones aprobadas y escribe docs/diagnostico/zonas/lote_<nombre>.md (exit 0/1)
 Animaciones: ver `sprites_lib.poses.POSES`. Estilos: ver `sprites_lib.estilos.ESTILOS`.
 Uso incorrecto, nombre de skin inválido o skin inexistente: exit 2.
 """
@@ -37,7 +37,7 @@ from .poses import POSES, fps, loop, offset_y
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAIZ_APROBADOS = os.path.join("aprobados", "skins")
 RAIZ_ANIMACIONES = os.path.join("aprobados", "animaciones")
-RAIZ_INFORMES = os.path.join("salida", "zonas")
+RAIZ_INFORMES = os.path.join("docs", "diagnostico", "zonas")
 NOMBRE = re.compile(r"^[a-z0-9_]+$")
 USO = (
     "uso: proceso_skin smoke <nombre> [--anim quieto] [--estilo stardew]\n"
@@ -199,14 +199,14 @@ def _gate_animacion(item, estilo, ficha):
 
 
 def _informe_lote(nombre, estilo, raiz, filas):
-    """Escribe `salida/zonas/lote_<nombre>.md`: por animación, el veredicto del gate y el destino del export (o el
+    """Escribe `docs/diagnostico/zonas/lote_<nombre>.md`: por animación, el veredicto del gate y el destino del export (o el
     motivo por el que no se exportó)."""
     rojas = sum(1 for fila in filas if not fila["verde"])
     lineas = [
         f"# Lote {nombre}/{estilo}",
         "",
         f"- skin: `{_ruta_skin(nombre)}`",
-        f"- export: `{raiz}/<nombre>/<anim>/`",
+        f"- export: `{raiz}/<nombre>/<estilo>/<anim>/`",
         f"- animaciones: {len(filas)} ({rojas} rojas)",
         "",
     ]
@@ -230,7 +230,7 @@ def lote(nombre, estilo="stardew", raiz="output"):
     """Exporta en formato del juego todas las animaciones aprobadas del estilo con esta skin.
 
     Por animación corre el gate (zonas, pulido y deriva) y, si está VERDE, exporta con `skins.salida_juego`; una
-    ROJA no corta el lote: queda listada sin exportar en `salida/zonas/lote_<nombre>.md` y el exit final es 1.
+    ROJA no corta el lote: queda listada sin exportar en `docs/diagnostico/zonas/lote_<nombre>.md` y el exit final es 1.
     Devuelve 0 si todas son VERDE y 1 si alguna falla o no hay animaciones aprobadas.
     """
     aprobadas = [a for a in estado.listar(RAIZ_ANIMACIONES) if a["estilo"] == estilo]

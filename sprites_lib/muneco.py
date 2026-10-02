@@ -2,14 +2,20 @@
 (el mismo pipeline de render que las skins y los personajes, con una ficha mínima fija). Genérico por animación:
 no hay nada de "caminar" fijo acá, `demo(anim=...)` sirve para cualquier ciclo/pose registrado en `sprites_lib.poses`.
 
-Uso:  .venv/bin/python -m sprites_lib.muneco demo --anim saltar [--estilo stardew]   → salida/muneco/<anim>/
+Uso:  .venv/bin/python -m sprites_lib.muneco demo --anim saltar [--estilo stardew]   → docs/diagnostico/muneco/<anim>/
 """
+
 import os
 import sys
 
 FICHA = {
     "identidad": {"nombre": "muñeco base"},
-    "cuerpo": {"base": "humano", "clase_altura": "adulto", "complexion": "normal", "cabello": "calvo"},
+    "cuerpo": {
+        "base": "humano",
+        "clase_altura": "adulto",
+        "complexion": "normal",
+        "cabello": "calvo",
+    },
     "paleta": {"piel": {"base": "#f9d5ba"}},
     "componentes": [],
 }
@@ -20,12 +26,24 @@ def demo(anim="caminar_lpc", estilo="stardew"):
     from .estilos import ESTILOS
     from .exportar import exportar_direcciones
     from .poses import POSES, fps, loop, offset_y
+
     n = POSES[anim]["n"]
-    por_dir = {m: [render_cuadro(FICHA, estilo, anim, p, m).img for p in range(n)] for m in ESTILOS[estilo]["direcciones"]}
-    carpeta = os.path.join("salida", "muneco", anim)
+    por_dir = {
+        m: [render_cuadro(FICHA, estilo, anim, p, m).img for p in range(n)]
+        for m in ESTILOS[estilo]["direcciones"]
+    }
+    carpeta = os.path.join("docs", "diagnostico", "muneco", anim)
     oy = offset_y(anim)
-    exportar_direcciones(por_dir, anim, carpeta, fps=fps(anim), zoom=6, pivote=pivote(estilo, pose=anim), loop=loop(anim),
-                         extra={"offset_y": oy} if oy else None)
+    exportar_direcciones(
+        por_dir,
+        anim,
+        carpeta,
+        fps=fps(anim),
+        zoom=6,
+        pivote=pivote(estilo, pose=anim),
+        loop=loop(anim),
+        extra={"offset_y": oy} if oy else None,
+    )
     return carpeta
 
 
@@ -36,6 +54,7 @@ def ancho_necesario(anim="caminar_lpc", estilo="stardew8", margen=1):
     from .armado import render_cuadro
     from .estilos import ESTILOS
     from .poses import POSES
+
     izq = der = 0
     for d in ESTILOS[estilo]["direcciones"]:
         for p in range(POSES[anim]["n"]):
@@ -54,13 +73,16 @@ def grilla(anim="caminar_lpc", estilo="stardew8", ruta=None, zoom=6, cuadros=Non
     from .armado import render_cuadro
     from .estilos import ESTILOS
     from .poses import POSES
+
     f = skins.ficha(skins.plantilla_zonas())
     dirs, n = ESTILOS[estilo]["direcciones"], POSES[anim]["n"]
     ps = list(range(n)) if cuadros is None else cuadros
     fr = {(d, p): render_cuadro(f, estilo, anim, p, d).img for d in dirs for p in ps}
     cw, ch = fr[(dirs[0], ps[0])].size
     M = 22
-    im = Image.new("RGB", (M + len(ps) * cw * zoom, M + len(dirs) * ch * zoom), (28, 26, 40))
+    im = Image.new(
+        "RGB", (M + len(ps) * cw * zoom, M + len(dirs) * ch * zoom), (28, 26, 40)
+    )
     dr = ImageDraw.Draw(im)
     for j, p in enumerate(ps):
         dr.text((M + j * cw * zoom + 2, 4), f"c{p}", fill=(255, 255, 255))
@@ -69,7 +91,9 @@ def grilla(anim="caminar_lpc", estilo="stardew8", ruta=None, zoom=6, cuadros=Non
         for j, p in enumerate(ps):
             g = fr[(d, p)].resize((cw * zoom, ch * zoom), Image.NEAREST)
             im.paste(g, (M + j * cw * zoom, M + i * ch * zoom), g)
-    ruta = ruta or os.path.join("salida", "muneco", f"{anim}_{estilo}_zonas.png")
+    ruta = ruta or os.path.join(
+        "docs", "diagnostico", "muneco", f"{anim}_{estilo}_zonas.png"
+    )
     os.makedirs(os.path.dirname(ruta), exist_ok=True)
     im.save(ruta)
     return ruta

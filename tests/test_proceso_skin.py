@@ -9,7 +9,7 @@ NOMBRE = "prueba"
 
 
 def _kit(tmp_path, monkeypatch):
-    """Raíz de kit sintética con la skin de prueba y el cwd adentro (aprobados/ y salida/ quedan relativos)."""
+    """Raíz de kit sintética con la skin de prueba y el cwd adentro (aprobados/ y docs/diagnostico/ quedan relativos)."""
     (tmp_path / "skins").mkdir()
     apoyo.skin_prueba(tmp_path / "skins" / f"{NOMBRE}.png")
     monkeypatch.setattr(proceso_skin, "RAIZ", str(tmp_path))
@@ -78,7 +78,7 @@ def test_lote_exporta(tmp_path, monkeypatch, capsys):
         "metricas.json",
     )
     assert proceso_skin.main(["lote", NOMBRE, "--raiz", str(tmp_path / "output")]) == 0
-    assert (tmp_path / "output" / NOMBRE / "quieto" / "quieto.png").exists()
+    assert (tmp_path / "output" / NOMBRE / "stardew" / "quieto" / "quieto.png").exists()
     assert "skin sin aprobar" in capsys.readouterr().err
 
 
@@ -103,7 +103,7 @@ def test_lote_skin_derivada_da_1(tmp_path, monkeypatch, capsys):
     out = tmp_path / "output"
     assert proceso_skin.main(["lote", NOMBRE, "--raiz", str(out)]) == 1
     assert "la skin cambió desde su aprobación" in capsys.readouterr().err
-    assert not (out / NOMBRE / "quieto" / "quieto.png").exists()
+    assert not (out / NOMBRE / "stardew" / "quieto" / "quieto.png").exists()
 
 
 def test_lote_skin_rota_avisa_y_da_1(tmp_path, monkeypatch, capsys):
@@ -139,9 +139,13 @@ def test_lote_roja_no_corta_y_da_1(tmp_path, monkeypatch, capsys):
     assert proceso_skin.main(["lote", NOMBRE, "--raiz", str(out)]) == 1
     salida = capsys.readouterr().out
     assert "agachar: ROJO" in salida and "neutra: VERDE" in salida
-    assert not (out / NOMBRE / "agachar" / "agachar.png").exists()  # ROJA no se exporta
+    assert not (
+        out / NOMBRE / "stardew" / "agachar" / "agachar.png"
+    ).exists()  # ROJA no se exporta
     assert (
-        out / NOMBRE / "neutra" / "neutra.png"
+        out / NOMBRE / "stardew" / "neutra" / "neutra.png"
     ).exists()  # y el lote siguió con la otra
-    informe = (tmp_path / "salida" / "zonas" / f"lote_{NOMBRE}.md").read_text()
+    informe = (
+        tmp_path / "docs" / "diagnostico" / "zonas" / f"lote_{NOMBRE}.md"
+    ).read_text()
     assert "## agachar" in informe and "## neutra" in informe and "deriva" in informe

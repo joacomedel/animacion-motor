@@ -7,6 +7,7 @@
   .venv/bin/python -m personajes.generar aprobar <nombre> --estilo ...   (solo después del OK del usuario)
 Códigos de salida: 0 todo OK, 1 fallan tests, 2 ficha inexistente o inválida.
 """
+
 import argparse
 import os
 import sys
@@ -23,7 +24,7 @@ from sprites_lib.hoja_modelo import hoja
 from sprites_lib.poses import fps
 from sprites_lib.tests_personaje import correr_tests, informe_md, t_recorte, t_tamano
 
-SALIDA = "salida"
+SALIDA = os.path.join("docs", "diagnostico", "fichas")
 
 
 def _estilos(arg):
@@ -36,14 +37,20 @@ def _generar(nombre, estilo):
     sal = os.path.join(SALIDA, f["_nombre"], estilo)
     os.makedirs(sal, exist_ok=True)
     res = correr_tests(f, estilo, todo, sal)
-    res.append(fotos_control.comparar(f["_nombre"], estilo, todo, os.path.join(sal, "diferencias")))
+    res.append(
+        fotos_control.comparar(
+            f["_nombre"], estilo, todo, os.path.join(sal, "diferencias")
+        )
+    )
     return f, todo, res, sal
 
 
 def _resumen(estilo, res):
     mal = [r for r in res if not r.ok]
-    print(f"[{estilo}] {'OK' if not mal else 'CON FALLAS'}: "
-          f"{sum(r.ok and not r.omitido for r in res)} ok, {len(mal)} fallas, {sum(r.omitido for r in res)} omitidos")
+    print(
+        f"[{estilo}] {'OK' if not mal else 'CON FALLAS'}: "
+        f"{sum(r.ok and not r.omitido for r in res)} ok, {len(mal)} fallas, {sum(r.omitido for r in res)} omitidos"
+    )
     for r in mal:
         print(f"   ✗ {r.regla}: {r.detalle.splitlines()[0] if r.detalle else ''}")
         for e in r.evidencia[:5]:
@@ -55,12 +62,16 @@ def cmd_boceto(a):
     """Primer vistazo para pedir feedback: un estilo, frente y perfil, pose quieto, sin tests ni exportación."""
     est = "stardew" if a.estilo == "todos" else a.estilo.split(",")[0]
     f = cargar(a.nombre, estilos=[est])
-    dirs = [d for d in ("S", "E", "W") if d in ESTILOS[est]["direcciones"]] or ESTILOS[est]["direcciones"][:2]
+    dirs = [d for d in ("S", "E", "W") if d in ESTILOS[est]["direcciones"]] or ESTILOS[
+        est
+    ]["direcciones"][:2]
     crudos = [render_cuadro(f, est, "quieto", 0, d) for d in dirs]
     cuadros = [c.img for c in crudos]
     cw, ch = cuadros[0].size
     z = max(4, 192 // ch)
-    hoja = Image.new("RGB", (len(cuadros) * (cw * z + 16) + 16, ch * z + 32), (60, 58, 80))
+    hoja = Image.new(
+        "RGB", (len(cuadros) * (cw * z + 16) + 16, ch * z + 32), (60, 58, 80)
+    )
     for i, im in enumerate(cuadros):
         grande = im.resize((cw * z, ch * z), Image.NEAREST)
         hoja.paste(grande, (16 + i * (cw * z + 16), 16), grande)
@@ -72,7 +83,10 @@ def cmd_boceto(a):
     # resumen en números para no tener que abrir la imagen: alto y recorte (los tests completos van en `hoja`)
     todo = {"quieto": crudos}
     for r in (t_tamano(f, est, todo), t_recorte(todo)):
-        print(f"  {'OK' if r.ok else 'FALLA'} {r.regla}: {r.detalle}" + "".join(f"\n     - {e}" for e in r.evidencia[:3]))
+        print(
+            f"  {'OK' if r.ok else 'FALLA'} {r.regla}: {r.detalle}"
+            + "".join(f"\n     - {e}" for e in r.evidencia[:3])
+        )
     return 0
 
 
@@ -91,8 +105,12 @@ def cmd_hoja(a):
         with open(os.path.join(sal, "informe.md"), "w", encoding="utf-8") as fh:
             fh.write(informe_md(f, est, res))
         cel = celda(est, f["cuerpo"].get("clase_altura", "adulto"))
-        por_dir = {m: [c.img for c in todo[("quieto", m)]] for m in ESTILOS[est]["direcciones"]}
-        exportar_direcciones(por_dir, "quieto", sal, fps=fps("quieto"), pivote=(cel["gx"], cel["gy"]))
+        por_dir = {
+            m: [c.img for c in todo[("quieto", m)]] for m in ESTILOS[est]["direcciones"]
+        }
+        exportar_direcciones(
+            por_dir, "quieto", sal, fps=fps("quieto"), pivote=(cel["gx"], cel["gy"])
+        )
         print(f"hoja → {os.path.join(sal, 'hoja_modelo.png')}")
         codigo = max(codigo, _resumen(est, res))
     return codigo
@@ -111,14 +129,18 @@ def cmd_aprobar(a):
         f, todo, res, _ = _generar(a.nombre, est)
         mal = [r for r in res if not r.ok and r.regla != "fotos de control"]
         if mal:
-            print(f"[{est}] no se puede aprobar: fallan {', '.join(r.regla for r in mal)}")
+            print(
+                f"[{est}] no se puede aprobar: fallan {', '.join(r.regla for r in mal)}"
+            )
             return 1
         print(f"[{est}] aprobado → {fotos_control.guardar(f['_nombre'], est, todo)}")
     return 0
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="personajes.generar", description="Personajes consistentes desde fichas")
+    ap = argparse.ArgumentParser(
+        prog="personajes.generar", description="Personajes consistentes desde fichas"
+    )
     sub = ap.add_subparsers(dest="cmd", required=True)
     for n in ("boceto", "validar", "hoja", "tests", "aprobar"):
         p = sub.add_parser(n)
@@ -126,7 +148,13 @@ def main(argv=None):
         p.add_argument("--estilo", default="todos")
     a = ap.parse_args(argv)
     try:
-        return {"boceto": cmd_boceto, "validar": cmd_validar, "hoja": cmd_hoja, "tests": cmd_tests, "aprobar": cmd_aprobar}[a.cmd](a)
+        return {
+            "boceto": cmd_boceto,
+            "validar": cmd_validar,
+            "hoja": cmd_hoja,
+            "tests": cmd_tests,
+            "aprobar": cmd_aprobar,
+        }[a.cmd](a)
     except FileNotFoundError as e:
         print(f"error: {e}", file=sys.stderr)
         return 2

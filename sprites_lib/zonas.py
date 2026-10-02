@@ -25,7 +25,7 @@ La plantilla de colores planos (`COLORES`, un color distinto por zona) sale de e
 
 Uso:  .venv/bin/python -m sprites_lib.zonas --anim caminar_lpc --estilo stardew8 [--dirs S,SE] [--cuadros 0,1,2]
           [--skin skins/<personaje>.png | --ficha nombre] [--json] [--salida ruta.json] [--png]
-      → salida/zonas/<estilo>/<anim>.json y .md (el informe de texto también sale por stdout)
+      → docs/diagnostico/zonas/<estilo>/<anim>.json y .md (el informe de texto también sale por stdout)
 """
 
 import argparse
@@ -235,7 +235,9 @@ def _mover(a, dy, dx, relleno):
 def _ruta_plantilla():
     from .skins import plantilla_zonas
 
-    ruta = os.path.join("salida", "zonas", "skin_zonas.png")  # no pisa skins/zonas.png
+    ruta = os.path.join(
+        "docs", "diagnostico", "zonas", "skin_zonas.png"
+    )  # no pisa skins/zonas.png
     if not os.path.exists(ruta):
         plantilla_zonas(ruta)
     return ruta
@@ -1227,7 +1229,9 @@ def main(argv=None):
         if ficha is None
         else f"{a.anim}_{os.path.splitext(os.path.basename(origen))[0]}"
     )
-    ruta = a.salida or os.path.join("salida", "zonas", a.estilo, nombre + ".json")
+    ruta = a.salida or os.path.join(
+        "docs", "diagnostico", "zonas", a.estilo, nombre + ".json"
+    )
     os.makedirs(os.path.dirname(ruta) or ".", exist_ok=True)
     js = json.dumps(para_json(res), ensure_ascii=False, separators=(",", ":"))
     with open(ruta, "w", encoding="utf-8") as fh:

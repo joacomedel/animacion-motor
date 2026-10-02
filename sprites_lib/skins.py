@@ -6,8 +6,8 @@ los pone el estilo, así que la skin se pinta con colores planos. La cara (ojos,
 la dibuja el componente `ojos` con el iris de la skin.
 
 Uso:  .venv/bin/python -m sprites_lib.skins guia                     → skins/guia.png (zonas rotuladas, para pintar)
-      .venv/bin/python -m sprites_lib.skins demo  [skin.png] [--anim caminar_lpc]  → salida/skins/<nombre>/ (vista previa)
-      .venv/bin/python -m sprites_lib.skins juego [skin.png] [--anim caminar_lpc]  → salida/<nombre>/<anim>/ (salida del juego)
+      .venv/bin/python -m sprites_lib.skins demo  [skin.png] [--anim caminar_lpc]  → docs/diagnostico/skins/<nombre>/ (vista previa)
+      .venv/bin/python -m sprites_lib.skins juego [skin.png] [--anim caminar_lpc]  → <raíz>/<nombre>/<estilo>/<anim>/ (salida del juego)
 """
 
 import functools
@@ -22,15 +22,17 @@ LADO = 32
 ZONAS = {  # nombre: (x, y, ancho, alto) en el PNG
     "cabeza": (0, 0, 24, 10),
     "torso": (0, 10, 16, 10),
-    "brazo_derecho": (16, 10, 4, 8),
-    "brazo_izquierdo": (20, 10, 4, 8),
-    "mano_derecha": (24, 10, 4, 2),
-    "mano_izquierda": (28, 10, 4, 2),
-    "iris": (24, 12, 1, 1),
+    # brazos y pies de 8 de ancho: con 4 texeles las 8 direcciones colapsaban en 4 columnas y las
+    # mangas/puños/hebillas saltaban de a dos direcciones (u da la vuelta en el ancho de la zona)
+    "brazo_derecho": (16, 10, 8, 8),
+    "brazo_izquierdo": (24, 10, 8, 8),
+    "mano_derecha": (16, 18, 4, 2),
+    "mano_izquierda": (20, 18, 4, 2),
+    "iris": (24, 18, 1, 1),
     "pierna_derecha": (0, 20, 8, 10),
     "pierna_izquierda": (8, 20, 8, 10),
-    "pie_derecho": (16, 20, 4, 3),
-    "pie_izquierdo": (20, 20, 4, 3),
+    "pie_derecho": (16, 20, 8, 3),
+    "pie_izquierdo": (24, 20, 8, 3),
 }
 CARA = (12, 6)  # texel de piel de la cara (color de la ficha para 'piel')
 PELO = (12, 0)  # texel de la coronilla (color para 'pelo': cejas)
@@ -354,21 +356,21 @@ def _exportar(f, por_dir, anim, estilo, carpeta, zoom, cuadros=False):
 
 
 def demo(ruta, anim="caminar_lpc", estilo="stardew"):
-    """Vista previa rápida (una skin cualquiera): salida/skins/<nombre>/<anim>*"""
+    """Vista previa rápida (una skin cualquiera): docs/diagnostico/skins/<nombre>/<anim>*"""
     f, por_dir = _por_dir(ruta, anim, estilo)
-    carpeta = os.path.join("salida", "skins", f["identidad"]["nombre"])
+    carpeta = os.path.join("docs", "diagnostico", "skins", f["identidad"]["nombre"])
     return _exportar(f, por_dir, anim, estilo, carpeta, zoom=6)
 
 
 def salida_juego(
     ruta, anim="caminar_lpc", estilo="stardew", raiz="salida", cuadros=False
 ):
-    """Salida final del juego (convención del proyecto): salida/<personaje>/<anim>/<anim>*. Sirve para
+    """Salida final del juego (convención del proyecto): <raíz>/<personaje>/<estilo>/<anim>/<anim>*.
+    El estilo (`stardew` 4 direcciones, `stardew8` 8 direcciones) es la capa intermedia, así que
+    los archivos que empiezan con el nombre de la animación no colisionan entre estilos. Sirve para
     cualquier skin (las que vengan): mismo comando, cambiando el PNG y/o --anim."""
     f, por_dir = _por_dir(ruta, anim, estilo)
-    carpeta = os.path.join(
-        raiz, f["identidad"]["nombre"], anim + ("_8dir" if estilo == "stardew8" else "")
-    )
+    carpeta = os.path.join(raiz, f["identidad"]["nombre"], estilo, anim)
     return _exportar(f, por_dir, anim, estilo, carpeta, zoom=4, cuadros=cuadros)
 
 

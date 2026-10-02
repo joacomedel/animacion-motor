@@ -25,5 +25,5 @@ Diseño: `docs/superpowers/specs/2026-09-29-procesos-estilo-animacion-skin-desig
 
 - `aprobados/animaciones/<anim>/<estilo>/`: cuadros de control (`<anim>_<dir>_<cuadro>.png`), `metricas.json` y
   `estado.json` (último).
-- Exporta la fuente con esa skin a `salida/animaciones/<anim>/<estilo>/` (hoja, JSON y GIF), disponible para el
+- Exporta la fuente con esa skin a `docs/diagnostico/animaciones/<anim>/<estilo>/` (hoja, JSON y GIF), disponible para el
   lote de skins.

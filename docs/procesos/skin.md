@@ -24,7 +24,7 @@ Diseño: `docs/superpowers/specs/2026-09-29-procesos-estilo-animacion-skin-desig
 
 - `aprobados/skins/<nombre>/`: hoja, `smoke.gif` (todas las direcciones de `quieto`), `metricas.json` y
   `estado.json` (último).
-- El lote exporta a `output/<nombre>/<anim>/` y escribe el informe `salida/zonas/lote_<nombre>.md`
+- El lote exporta a `output/<nombre>/<estilo>/<anim>/` y escribe el informe `docs/diagnostico/zonas/lote_<nombre>.md`
   (`--raiz` cambia la raíz de entrega).
 
 Elenco: mismo pipeline por ficha + componentes, con el gate extra `tests_personaje`.

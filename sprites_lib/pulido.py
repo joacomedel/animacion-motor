@@ -18,7 +18,7 @@ texto (qué significa para el ojo), fp (None | motivo de falsa conocida)}. Las f
 
 Uso:  .venv/bin/python -m sprites_lib.pulido --anim caminar_lpc --estilo stardew8 [--skin skins/<personaje>.png | --ficha x]
           [--dirs S,E] [--json] [--salida ruta.json]
-      → salida/zonas/<estilo>/<anim>[_<skin>]_pulido.json y .md (el informe también sale por stdout)
+      → docs/diagnostico/zonas/<estilo>/<anim>[_<skin>]_pulido.json y .md (el informe también sale por stdout)
 """
 
 import argparse
@@ -1194,7 +1194,7 @@ def main(argv=None):
         else f"{a.anim}_{os.path.splitext(os.path.basename(origen))[0]}"
     )
     ruta = a.salida or os.path.join(
-        "salida", "zonas", a.estilo, nombre + "_pulido.json"
+        "docs", "diagnostico", "zonas", a.estilo, nombre + "_pulido.json"
     )
     os.makedirs(os.path.dirname(ruta) or ".", exist_ok=True)
     js = json.dumps(

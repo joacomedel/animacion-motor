@@ -2,9 +2,11 @@
 .venv/
 __pycache__/
 *.pyc
+.ruff_cache/
 
 # archivos generados (se regeneran con los scripts)
 salida/
+docs/diagnostico/
 prueba/
 el_llamado/out/
 mago/*.png
