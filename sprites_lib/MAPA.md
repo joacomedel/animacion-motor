@@ -13,7 +13,7 @@ Flujo: ficha YAML → `ficha.cargar` → `armado.render_cuadro` (cuerpo base + c
 | fry8 | cenital | S SE E NE N NW W SW | 54 | 48×64 | no |
 
 ## Anclas
-antebrazo_derecho, antebrazo_izquierdo, brazo_derecho, brazo_izquierdo, cabeza, cadera_derecha, cadera_izquierda, cara, cintura, codo_derecho, codo_izquierdo, coronilla, cuello, frente, hombro_derecho, hombro_izquierdo, mano_derecha, mano_izquierda, muneca_derecha, muneca_izquierda, nuca, ojo_derecho, ojo_izquierdo, pecho, pie_derecho, pie_izquierdo, pierna_derecha, pierna_izquierda, rodilla_derecha, rodilla_izquierda, sien_derecha, sien_izquierda, suelo, tobillo_derecho, tobillo_izquierdo, torso
+antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, cabeza, cadera_derecha, cadera_izquierda, cara, cintura, codo_derecho, codo_izquierdo, coronilla, cuello, frente, hombro_derecho, hombro_izquierdo, mano_derecha, mano_izquierda, muneca_derecha, muneca_izquierda, nuca, ojo_derecho, ojo_izquierdo, pecho, pie_derecho, pie_izquierdo, pierna_derecha, pierna_izquierda, rodilla_derecha, rodilla_izquierda, sien_derecha, sien_izquierda, suelo, tobillo_derecho, tobillo_izquierdo, torso
 
 ## Componentes (tipo · anclas · material por defecto · parámetros)
 - `botas` · pie_derecho, pie_izquierdo · bota · suela=None

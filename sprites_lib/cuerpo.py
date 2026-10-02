@@ -19,7 +19,7 @@ ANCLAS = (
     "cintura", "torso", "pecho", "cuello",
     "hombro_derecho", "hombro_izquierdo", "codo_derecho", "codo_izquierdo",
     "muneca_derecha", "muneca_izquierda", "mano_derecha", "mano_izquierda",
-    "cabeza", "coronilla", "cara", "frente", "ojo_derecho", "ojo_izquierdo", "sien_derecha", "sien_izquierda", "nuca",
+    "cabeza", "coronilla", "cara", "frente", "boca", "ojo_derecho", "ojo_izquierdo", "sien_derecha", "sien_izquierda", "nuca",
 )
 SEGMENTOS = {
     "brazo_derecho": ("hombro_derecho", "codo_derecho", "muneca_derecha", "mano_derecha"),
@@ -232,8 +232,11 @@ def posar(anat, ps, cam_local, mira=None):
         cara = sobre_caja(hc, base, rad, g)
         ojo_i = sobre_caja(hc, base + perp * rl * sep + v(0, 0, -rz * .24), rad, g)
         ojo_d = sobre_caja(hc, base - perp * rl * sep + v(0, 0, -rz * .24), rad, g)
+        boca = sobre_caja(hc, base + v(0, 0, -rz * .40), rad, g)
+    else:
+        boca = cara + v(0, 0, -rz * .55)
     a.update(
-        cabeza=hc, coronilla=hc + v(0, 0, rz), cara=cara,
+        cabeza=hc, coronilla=hc + v(0, 0, rz), cara=cara, boca=boca,
         frente=hc + np.array([c[0] * rf, c[1] * rl, 0.0]) + v(0, 0, rz * .36),
         ojo_izquierdo=ojo_i, ojo_derecho=ojo_d,
         sien_derecha=hc + v(rf * .25, -rl * .97, rz * .25), sien_izquierda=hc + v(rf * .25, rl * .97, rz * .25),

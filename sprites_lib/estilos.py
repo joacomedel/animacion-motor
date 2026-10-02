@@ -150,7 +150,9 @@ ESTILOS["stardew8"] = {
         "cara_diagonal": 0.45,
         "sep_ojos_diagonal": 0.45,
         "ojos_umbral": 0.05,
-        "cara_perfil": 0.9,
+        # 0.5: la cara se apoya más al frente, así el perfil E/W se lee de costado (pelo atrás, un solo ojo).
+        # 0.9 empujaba la cara casi de frente a la cámara y el perfil se veía como un 3/4 con los dos ojos.
+        "cara_perfil": 0.5,
         "sin_boca_diagonal": True,
         "bob_px": True,
         "cabeza_pantalla": True,

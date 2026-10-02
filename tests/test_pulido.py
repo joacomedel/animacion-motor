@@ -7,7 +7,6 @@ from PIL import Image
 
 from sprites_lib import pulido as P
 from sprites_lib import skins
-from sprites_lib.estilos import ESTILOS
 from tests import apoyo
 
 
@@ -64,22 +63,15 @@ def test_movimiento_medido_contra_lpc(analisis):
     )  # los dos pasos rebotan igual
 
 
-def test_ojo_que_sobresale_de_la_silueta(skin, monkeypatch):
-    """Defecto que vio el usuario: con cara_perfil .55 el blanco del ojo queda afuera de la cabeza en E/W."""
-    monkeypatch.setitem(
-        ESTILOS["stardew8"],
-        "proporciones",
-        {**ESTILOS["stardew8"]["proporciones"], "cara_perfil": 0.55},
-    )
+def test_perfil_e_w_sin_rasgo_afuera(skin):
+    """Defecto que vio el usuario: en E/W la cabeza se leía de frente y el ojo lejano quedaba pegado al borde de la
+    silueta. Ahora el perfil culla el ojo lejano y apoya los rasgos en la caja: ningún rasgo afuera y limpieza sin MAL.
+
+    (El test viejo forzaba `cara_perfil=.55` para que la herramienta DETECTARA el ojo afuera; con el arreglo ese caso
+    ya no existe, así que ahora custodia el resultado: ver también `test_zonas.test_en_perfil_se_ve_un_solo_ojo`.)"""
     pul = P.analizar("caminar_lpc", "stardew8", ["E", "W"], skins.ficha(skin))
-    h = _reales(pul, tipo="rasgo_fuera", sev=3)
-    assert {x["dir"] for x in h} == {"E", "W"} and all(
-        x["zona"].startswith("ojo") for x in h
-    )
-    assert (
-        pul["resumen"]["notas"]["limpieza"] == "MAL"
-        and pul["resumen"]["top"][0]["tipo"] == "rasgo_fuera"
-    )
+    assert not _reales(pul, tipo="rasgo_fuera", sev=3)
+    assert pul["resumen"]["notas"]["limpieza"] != "MAL"
 
 
 def test_luz_verde_suelta_sobre_el_pelo(skin, tmp_path):

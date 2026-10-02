@@ -385,6 +385,20 @@ diagonales (vector ±0,7071). No está en `ACTIVOS`: `stardew` (4 dir.) sigue si
   (`cuerpo.fuerza_cara`). Lección: una falsa "por diseño" hay que confirmarla mirando el GIF, no solo los números.
   Detector de píxeles sueltos: 1 px opaco con 0–1 vecinos opacos (4-conexos); lo que queda son contornos de 1 px en manos/pies
   (normales) y la nariz de perfil (E/W, y 17,10-11).
+- **Perfil E/W con los dos ojos y cara de frente (2026-10-02)**: `cara_perfil=.9` corría la cara casi de frente a la cámara
+  → en E/W la cara envolvía toda la cabeza (cara 117 px vs pelo 41) y se dibujaban los dos ojos (a 2 px), con la oreja
+  a mitad de cara. El culling de `ojos` (`ojos_umbral`) solo cubría diagonales (`len(mira)==2`). Arreglo: `cara_perfil=.5`
+  (perfil con pelo atrás, un solo ojo), cull explícito del ojo lejano en E/W (`componentes/humano.py`) y ancla `boca`
+  apoyada en la caja (`cuerpo.posar` → `sobre_caja`, offset `-rz·.40`) para que la boca no cruce la silueta. Resultado:
+  E/W con un solo ojo, sin `rasgo_fuera` de ojos ni de boca; `zonas` sigue sin alertas alta/media. Solo afecta E/W (las
+  diagonales usan `cara_diagonal`). Test: `test_zonas.test_en_perfil_se_ve_un_solo_ojo`.
+  - **Lecciones para futuras animaciones**: (1) `cara_perfil` sólo afecta E/W; las diagonales usan `cara_diagonal` (no
+    tocar una esperando cambiar la otra). (2) Todo rasgo de cara (ojo, ceja, boca) va apoyado con `cuerpo.sobre_caja`,
+    nunca con un offset fijo sobre la dirección de la cara: con la cara corrida, un offset fijo termina fuera de la
+    silueta. (3) El culling de ojo "de canto" (`ojos_umbral`) y el "lejano" hay que cubrir TODOS los cardinales y
+    diagonales, no sólo diagonales. (4) Antes de "arreglar" subiendo un parámetro (`cara_perfil=.9`), mirar el GIF: ese
+    cambio había tapado un defecto (ojo afuera) empeorando otro (perfil de frente, dos ojos). (5) `zonas`+`pulido` ven
+    esto sin mirar imágenes: el mapa de zonas por píxel (E c0) fue lo que mostró los dos ojos y la cara dominante.
 
 ## Modo pulido: ¿se ve BONITA? (2026-09-28)
 - Comando: `.venv/bin/python -m sprites_lib.pulido --anim caminar_lpc --estilo stardew8 --skin skins/clast.png`

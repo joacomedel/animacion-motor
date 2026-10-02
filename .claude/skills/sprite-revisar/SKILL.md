@@ -108,9 +108,10 @@ salió de mirar datos de `caminar_lpc` en stardew8:
   CUIDADO: esta regla escondió un defecto real: el **cuello** asomaba 3 px en los cuadros pares y no en los impares
   (rebote fraccionario). Se arregló con `bob_px` (rebote en px enteros, stardew8). Si una zona diminuta alterna
   cada 2 cuadros con el ritmo del rebote, es parpadeo real: revisarla antes de darla por falsa.
-- `perfil`: ojo a 0 px del borde en E/W. OJO: con la fuerza de cara de los perfiles (.55) el blanco del ojo **sobresalía de la
-  silueta** (un píxel blanco pegado afuera de la cabeza, visto en el GIF). Se arregló con `cara_perfil=.9` en stardew8; si
-  reaparece un píxel claro afuera de la cabeza en E/W, es un defecto real, no un falso positivo.
+- `perfil`: ojo a 0 px del borde en E/W (el ojo cercano queda en el borde frontal a propósito). En E/W se ve **un solo**
+  ojo: `cara_perfil=.5` apoya la cara al frente y el ojo lejano se culla en `componentes/humano.py`. Si en E/W aparecen los
+  **dos** ojos, o un píxel claro afuera de la cabeza, es un defecto real (no un falso positivo). El `cara_perfil=.9` viejo
+  corría la cara de frente y volvía a mostrar los dos ojos (ver CRITERIOS_ANIMACION.md, 2026-10-02).
 - `area_visible`: salto de centro o cambio de px del torso cuando el torso visible (frente+espalda) cambió ≥ 15 % de px
   (el brazo lo tapa/destapa), o de otra zona cuando su propio px cambió > 25 %.
 - `extremidad_en_movimiento`: cambio de px de brazo/mano/pierna/pie al caminar (se giran y se tapan).
@@ -148,8 +149,10 @@ zonas no tenga alertas ALTA/MEDIA por revisar (si las hay, el informe lo avisa a
    `oclusion`, `desvio_de_estilo`, `asimetria_declarada`, `animacion_asimetrica`, `extremidad_en_movimiento`,
    `tono_vecino`, `tono_de_material`, `pie_al_piso`, `ya_en_zonas`. Salieron de mirar caminar_lpc/stardew8 con Clast y
    con el muñeco; misma regla que arriba para agregar una nueva.
-Firmas nuevas del catálogo: **ojo que sobresale** = `rasgo_fuera` MAL en E/W (con `cara_perfil` .55; la falsa `perfil`
-de zonas NO lo cubre); **luz suelta sobre el pelo** = `mancha` REVISAR en `cabeza_resto` (E y NE con la luz de la sien).
+Firmas nuevas del catálogo: **ojo que sobresale** = `rasgo_fuera` MAL en E/W (la falsa `perfil` de zonas NO lo cubre);
+ya no se reproduce con `cara_perfil=.5` + cull del ojo lejano (ver 2026-10-02), pero sigue siendo la firma a buscar si
+alguien vuelve a subir la fuerza de cara; **luz suelta sobre el pelo** = `mancha` REVISAR en `cabeza_resto` (E y NE con
+la luz de la sien).
 
 ## 8. Mantener el catálogo
 Cada vez que el usuario diga que algo se ve feo (o aparezca una alerta nueva y real): (1) buscar la firma en el

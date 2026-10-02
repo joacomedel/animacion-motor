@@ -29,6 +29,20 @@ def test_cada_zona_de_la_plantilla_aparece():
     assert s0["ojo_derecho"]["centro"][0] < s0["ojo_izquierdo"]["centro"][0]
 
 
+def test_en_perfil_se_ve_un_solo_ojo():
+    """En E/W la cabeza se lee de perfil: se ve el ojo del lado cercano y el lejano queda tapado.
+
+    Antes se dibujaban los dos (a 2 px), porque el culling de `ojos` solo cubría las diagonales."""
+    f = Z.ficha_plantilla()
+    for mira, cerca, lejos in (
+        ("E", "ojo_derecho", "ojo_izquierdo"),
+        ("W", "ojo_izquierdo", "ojo_derecho"),
+    ):
+        z = _res((mira,), (0,), ficha=f)["direcciones"][mira]["cuadros"][0]["zonas"]
+        assert z[cerca], f"en {mira} debería verse {cerca}"
+        assert not z[lejos], f"en {mira} no debería verse {lejos}"
+
+
 def test_cada_pixel_opaco_en_exactamente_una_zona():
     f = Z.ficha_plantilla()
     for mira in ("S", "E", "NW"):

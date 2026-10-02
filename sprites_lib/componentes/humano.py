@@ -132,6 +132,13 @@ class Ojos(Componente):
                 n = e - ctx.a["cabeza"]
                 if float(n @ ctx.cam_local) / (np.linalg.norm(n) + 1e-9) < umbral:
                     continue
+            if ctx.mira in (
+                "E",
+                "W",
+            ) and nombre == min(
+                cara, key=cara.get
+            ):  # perfil: el ojo lejano queda detrás de la cabeza
+                continue
             esc.componente = (
                 f"{spec['id']}#{nombre}"  # cada ojo es una parte: se mide por separado
             )
@@ -162,9 +169,8 @@ class Ojos(Componente):
             # en las diagonales de 8 direcciones la boca cae sobre el contorno de la cabeza y se confunde con él
             esc.componente = rostro + "#boca"
             esc.detalle(
-                ctx.a["cara"] + v(0, 0, -ctx.anat.cabeza[2] * 0.55),
-                _oscuro(pal["piel"][0], 0.8),
-            )  # boca
+                ctx.a["boca"], _oscuro(pal["piel"][0], 0.8)
+            )  # boca (ancla apoyada en la caja de la cabeza, ver cuerpo.posar)
             esc.componente = rostro + "#nariz"
             esc.detalle(
                 ctx.a["cara"] + v(0.3 * s, 0, -ctx.anat.cabeza[2] * 0.3), pal["piel"][0]
