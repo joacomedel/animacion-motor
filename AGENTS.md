@@ -23,6 +23,31 @@ Guía para trabajar en este repo con OpenCode. Reemplaza a `CLAUDE.md` como guí
 - En los procesos de `docs/procesos/`: tope 3 vueltas propias; si no converge, consultar con el estado y las
   opciones. Nunca subir un umbral "para que dé verde" sin mirar qué era.
 
+## Edición de Python sin inflar diffs
+
+**Causa:** la config global de OpenCode (`~/.config/opencode/opencode.jsonc`) tiene `"formatter": true`, lo que
+dispara un formateo automático después de cada `write`/`edit`. Esto reformatea el archivo entero y el diff se
+infla, especialmente con sentencias compactadas (varias por línea con `;`).
+
+**Config aplicada:** `opencode.json` del proyecto con `"formatter": false`. Esto desactiva el formatter global
+para este repo. **Importante:** la config no se recarga en caliente; hay que reiniciar la sesión para que tenga
+efecto.
+
+**Workaround por shell** (para sesiones donde la config aún no se aplicó): editar Python directamente con shell
+en vez de la herramienta `edit`. Ejemplo:
+
+```bash
+# Reemplazar una línea sin reformatear el archivo
+sed -i 's/viejo/nuevo/' archivo.py
+
+# O escribir un archivo con sentencias compactadas
+cat > archivo.py << 'EOF'
+x = 1; y = 2; z = 3
+a = x + y; b = y + z; c = z + x
+print(a); print(b); print(c)
+EOF
+```
+
 ## Tareas
 
 - **Listas planas:** `taskPendientes.md` y `taskCompletadas.md` son solo una lista (id + nombre corto), una línea
