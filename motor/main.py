@@ -120,26 +120,29 @@ def main():
         screen.fill(COLOR_FONDO)
 
         try:
-            # posición del personaje en el mundo (px), clampeada a los bordes
-            char_px = min(
-                max(estado_interpolado.x, mundo.tile), mundo.ancho_px - mundo.tile
-            )
-            char_py = min(
-                max(estado_interpolado.y, mundo.tile), mundo.alto_px - mundo.tile
-            )
+            # Renderizar el personaje primero: su tamaño define el margen con el que se
+            # clampea al mundo. Sin esto, en el borde lateral la cámara se clampea y el
+            # sprite se corta contra la pantalla al moverse al costado.
+            personaje = renderer.renderizar(estado_interpolado)
+            px, py = renderer.pies()
+            w, h = personaje.get_width(), personaje.get_height()
+
+            # Posición clampeada dejando que el sprite entero entre en pantalla
+            char_px = min(max(estado_interpolado.x, px), mundo.ancho_px - (w - px))
+            char_py = min(max(estado_interpolado.y, py), mundo.alto_px - (h - py))
 
             # cámara que sigue al personaje
             cam_x, cam_y = camara.seguir(char_px, char_py)
             screen.blit(mundo.superficie(), (-cam_x, -cam_y))
 
             # personaje: los pies en su posición del mundo, levantado por z (salto)
-            personaje = renderer.renderizar(estado_interpolado)
-            px, py = renderer.pies()
-            destino = (
-                int(char_px - cam_x - px),
-                int(char_py - cam_y - py - estado_interpolado.z),
+            screen.blit(
+                personaje,
+                (
+                    int(char_px - cam_x - px),
+                    int(char_py - cam_y - py - estado_interpolado.z),
+                ),
             )
-            screen.blit(personaje, destino)
 
             # Iluminación en tiempo real: capa de tinte sobre la escena
             capa = renderer.capa_ambiente(SCREEN_WIDTH, SCREEN_HEIGHT)

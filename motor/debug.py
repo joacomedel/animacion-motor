@@ -15,15 +15,18 @@ from motor.camara import Camara
 
 def escena(renderer, mundo, camara, estado, screen):
     """Compone una vista: región visible del mundo + personaje en su posición."""
-    char_px = min(max(estado.x, mundo.tile), mundo.ancho_px - mundo.tile)
-    char_py = min(max(estado.y, mundo.tile), mundo.alto_px - mundo.tile)
+    # Renderizar el personaje primero: su tamaño define el margen de clampeo.
+    personaje = renderer.renderizar(estado)
+    px, py = renderer.pies()
+    w, h = personaje.get_width(), personaje.get_height()
+
+    char_px = min(max(estado.x, px), mundo.ancho_px - (w - px))
+    char_py = min(max(estado.y, py), mundo.alto_px - (h - py))
     cam_x, cam_y = camara.seguir(char_px, char_py)
 
     screen.fill(COLOR_FONDO)
     screen.blit(mundo.superficie(), (-cam_x, -cam_y))
 
-    personaje = renderer.renderizar(estado)
-    px, py = renderer.pies()
     screen.blit(
         personaje, (int(char_px - cam_x - px), int(char_py - cam_y - py - estado.z))
     )
