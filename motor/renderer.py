@@ -9,7 +9,9 @@ El piso isométrico se dibuja aparte y se desplaza con la posición del mundo,
 para que el movimiento se perciba (task-010).
 """
 
+import numpy as np
 import pygame
+import pygame.surfarray
 from PIL import Image
 
 from sprites_lib import armado, skins
@@ -51,7 +53,7 @@ class Renderer:
         pivote: punto de los pies (suelo) dentro de la celda, en px de celda
     """
 
-    def __init__(self, estilo="stardew8", skin=SKIN_DEFECTO, zoom=4):
+    def __init__(self, estilo="stardew8", skin=SKIN_DEFECTO, zoom=4, bloom=False):
         if estilo not in ESTILOS:
             raise ValueError(
                 f"estilo desconocido {estilo!r}; disponibles: {', '.join(ESTILOS)}"
@@ -60,6 +62,7 @@ class Renderer:
             raise ValueError("zoom debe ser >= 1")
         self.estilo = estilo
         self.zoom = int(zoom)
+        self.bloom = bloom
         self.skin_ruta = skin
         self.arma = None
         self.dano = False
@@ -69,6 +72,8 @@ class Renderer:
         self.ficha = self._construir_ficha()
         self.pivote = armado.pivote(estilo)
         self._cache = {}
+        self._cache_normal = {}
+        self._ultima_normal = None
         self._piso = None
         self._sombra = None
         # capas de tinte de iluminación en tiempo real (baratas: no re-renderizan 3D)
@@ -99,6 +104,8 @@ class Renderer:
 
     def _limpiar(self):
         self._cache.clear()
+        self._cache_normal.clear()
+        self._ultima_normal = None
 
     # --- skins en tiempo real (task-012) ---
 
@@ -158,7 +165,7 @@ class Renderer:
         for anim in ANIM_A_POSE:
             for d in ESTILOS[self.estilo]["direcciones"]:
                 for f in range(self.n_cuadros(anim)):
-                    self._superficie(anim, d, f)
+                    self._superficie(anim, d, f)  # noqa: B018 (cachea normal)
 
     def _pose(self, anim: str) -> str:
         """Traduce la animación del motor al nombre de pose del kit."""
@@ -168,29 +175,126 @@ class Renderer:
         """Cuántos cuadros tiene la animación (según el kit)."""
         return len(cuadros(self._pose(anim)))
 
-    def _superficie(self, anim: str, direccion: str, frame: int) -> pygame.Surface:
-        """Superficie cacheada de (animación, dirección, frame)."""
+    def _superficie(self, anim: str, direccion: str, frame: int):
+        """Superficie y buffer de normal cacheados de (animación, dirección, frame).
+
+        Returns:
+            (pygame.Surface, np.ndarray | None): superficie escalada y normal
+            (h, w, 3) uint8 con ejes de mundo [-1,1]→[0,255], o None si el
+            cuadro no tiene normal.
+        """
         pose = self._pose(anim)
         n = len(cuadros(pose))
         p = int(frame) % n
         if direccion not in ESTILOS[self.estilo]["direcciones"]:
             direccion = ESTILOS[self.estilo]["direcciones"][0]
         clave = (pose, direccion, p)
-        sup = self._cache.get(clave)
-        if sup is None:
-            cuadro = armado.render_cuadro(self.ficha, self.estilo, pose, p, direccion)
-            img = cuadro.img.convert("RGBA")
-            if self.zoom != 1:
-                img = img.resize(
-                    (img.width * self.zoom, img.height * self.zoom), Image.NEAREST
-                )
-            sup = _superficie(img)
-            self._cache[clave] = sup
-        return sup
+        if clave in self._cache:
+            return self._cache[clave], self._cache_normal.get(clave)
+        cuadro = armado.render_cuadro(self.ficha, self.estilo, pose, p, direccion, bloom=self.bloom)
+        img = cuadro.img.convert("RGBA")
+        if self.zoom != 1:
+            img = img.resize(
+                (img.width * self.zoom, img.height * self.zoom), Image.NEAREST
+            )
+        sup = _superficie(img)
+        # normal (ch, cw, 3) -> transponer a (h, w, 3) para coincidir con array3d
+        normal = cuadro.buf.get("normal")
+        if normal is not None:
+            normal = (
+                normal.transpose(1, 0, 2) if normal.shape[0] != img.height else normal
+            )
+        self._cache[clave] = sup
+        self._cache_normal[clave] = normal
+        return sup, normal
 
     def renderizar(self, estado) -> pygame.Surface:
         """Superficie del personaje para el estado dado, ya escalada."""
-        return self._superficie(estado.animacion, estado.direccion, estado.frame)
+        sup, normal = self._superficie(estado.animacion, estado.direccion, estado.frame)
+        self._ultima_normal = normal
+        return sup
+
+    def buffer_normal(self):
+        """Buffer de normal (h, w, 3) uint8 del último cuadro renderizado.
+
+        Las normales están en ejes de mundo: [-1,1]→[0,255] por canal.
+        """
+        if self._ultima_normal is None:
+            raise RuntimeError(
+                "No hay cuadro renderizado. Llamá a renderizar() primero."
+            )
+        return self._ultima_normal
+
+    def iluminar(self, surface, normal, luz_pos, luz_color, luz_radio, intensidad):
+        """Ilumina una superficie con una luz puntual por píxel (task-020).
+
+        Aplica factor = max(0, N·L) * caida(distancia) sobre el color del sprite,
+        sin re-renderizar 3D. Los píxeles transparentes no se modifican.
+
+        Args:
+            surface: pygame.Surface RGBA a iluminar.
+            normal: np.ndarray (h, w, 3) uint8 con normales en ejes de mundo.
+            luz_pos: (x, y) en px de pantalla.
+            luz_color: (r, g, b) color de la luz.
+            luz_radio: radio de la luz en px.
+            intensidad: factor de intensidad (>= 0).
+
+        Returns:
+            Nueva pygame.Surface iluminada (la original no se modifica).
+        """
+        w, h = surface.get_width(), surface.get_height()
+        nh, nw = normal.shape[:2]
+
+        # Escalar normal al tamaño de la surface si hace falta
+        if (nw, nh) != (w, h):
+            normal_surf = pygame.surfarray.make_surface(normal.transpose(1, 0, 2))
+            normal_surf = pygame.transform.scale(normal_surf, (w, h))
+            normal = pygame.surfarray.array3d(normal_surf).transpose(1, 0, 2)
+
+        arr = pygame.surfarray.array3d(surface).astype(np.float32)  # (w, h, 3)
+        alpha = pygame.surfarray.array_alpha(surface)  # (w, h)
+
+        # Normales en [-1, 1]
+        n = normal.astype(np.float32) / 127.5 - 1.0  # (h, w, 3)
+
+        # Distancia y caída
+        yy, xx = np.mgrid[0:h, 0:w]  # (h, w)
+        dx = xx - luz_pos[0]
+        dy = yy - luz_pos[1]
+        dist = np.sqrt(dx**2 + dy**2)
+        caida = np.clip(1.0 - dist / luz_radio, 0.0, 1.0) ** 2  # (h, w)
+
+        # Vector luz normalizado (con altura sobre el plano)
+        dist_safe = np.where(dist == 0, 1.0, dist)
+        lx = -dx / dist_safe
+        ly = -dy / dist_safe
+        lz = 0.6
+        L = np.stack([lx, ly, np.full_like(lx, lz)], axis=-1)  # (h, w, 3)
+        L_norm = np.sqrt(lx**2 + ly**2 + lz**2)
+        L = L / L_norm[..., None]
+
+        # N·L
+        NdotL = np.clip((n * L).sum(axis=-1), 0.0, 1.0)  # (h, w)
+
+        # Factor final
+        factor = NdotL * caida * intensidad  # (h, w)
+
+        # Color de la luz normalizado
+        luz = np.array(luz_color, dtype=np.float32) / 255.0  # (3,)
+
+        # Iluminación aditiva: arr + factor * luz * 255
+        factor_w = factor.T[..., None]  # (w, h, 1)
+        arr_ilu = arr + factor_w * luz * 255.0
+
+        # Solo píxeles opacos
+        alpha_w = alpha[..., None] / 255.0  # (w, h, 1)
+        arr_ilu = arr * (1.0 - alpha_w) + arr_ilu * alpha_w
+
+        arr_ilu = np.clip(arr_ilu, 0, 255).astype(np.uint8)
+        result = pygame.Surface((w, h), pygame.SRCALPHA)
+        pygame.surfarray.pixels3d(result)[:] = arr_ilu
+        pygame.surfarray.pixels_alpha(result)[:] = alpha
+        return result
 
     def pies(self) -> tuple:
         """Posición (x, y) de los pies dentro de la superficie renderizada (px de pantalla)."""

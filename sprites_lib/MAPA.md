@@ -54,9 +54,10 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 - `celda(estilo, clase='adulto', ancho=None)` ancho: ancho propio de una animación (ver poses.ancho); el alto y los pies no cambian.
 
 ### `paleta` — Paleta de un personaje por estilo: la ficha da solo el tono base de cada material; el estilo deriva
+- clase `Material` Material con propiedades de render: (sombra, base, luz) + especular, transmision, textura, rugosidad.
 - `hex_rgb(h)`
 - `tonos(base, regla, emisivo=False)` (sombra, base, luz). Los emisivos (runas, visor) no se oscurecen: brillan igual en todos lados.
-- `paleta_estilo(paleta_ficha, estilo)` {material: (sombra, base, luz)}. Agrega '<material>_b' (variante un poco más oscura para texturas:
+- `paleta_estilo(paleta_ficha, estilo)` {material: Material}. Agrega '<material>_b' (variante un poco más oscura para texturas:
 - `reducir_paleta(por_dir, n)` Deja a lo sumo `n` colores en TODAS las direcciones y cuadros a la vez ({dir: [imágenes RGBA]}, in situ).
 - `ajustar_paleta(por_dir, colores)` Mapea cada píxel opaco al color más cercano de `colores` (lista de hex #rrggbb), en TODAS las direcciones
 
@@ -106,8 +107,8 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 ### `armado` — Armado: ficha → lista de componentes (cuerpo base + los de la ficha) → escena → cuadros renderizados.
 - `expandir(ficha)` Specs finales, una por (tipo, ancla): cuerpo base (salvo sustituciones o componentes propios del mismo
 - clase `Cuadro`
-- `render_cuadro(ficha, estilo, pose, p, mira, ancho=None)`
-- `render_todo(ficha, estilo, poses=('neutra', 'quieto'))`
+- `render_cuadro(ficha, estilo, pose, p, mira, ancho=None, bloom=False)`
+- `render_todo(ficha, estilo, poses=('neutra', 'quieto'), bloom=False)`
 - `pivote(estilo, clase_altura='adulto', pose='quieto')` Punto de los pies (piso) dentro de la celda: el mismo para cualquier pose/dirección/personaje de ese
 
 ### `ficha` — Fichas de personaje: cargar el YAML y validarlo antes de generar nada. Los errores dicen qué está mal y,
@@ -155,8 +156,8 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 
 ### `exportar` — Exportación genérica de animaciones (sirve para cualquier motor).
 - `revision(frames, ruta, zoom=5, columnas=5)`
-- `exportar(frames, nombre, carpeta, fps=12, pivote=None, zoom=4, extra=None, loop=True)`
-- `exportar_direcciones(por_dir, nombre, carpeta, fps=12, pivote=None, zoom=3, loop=True, extra=None, cuadros=False)` por_dir: {"SE": [frames], "E": [...], ...} → hoja con una fila por dirección + JSON + GIF por dirección.
+- `exportar(frames, nombre, carpeta, fps=12, pivote=None, zoom=4, extra=None, loop=True, buffers=None)` buffers: lista (uno por frame) de dicts con normal/mat/solido/mat_nombres (de Escena.render).
+- `exportar_direcciones(por_dir, nombre, carpeta, fps=12, pivote=None, zoom=3, loop=True, extra=None, cuadros=False, buffers=None)` por_dir: {"SE": [frames], "E": [...], ...} → hoja con una fila por dirección + JSON + GIF por dirección.
 
 ### `referencia` — Separar sprite sheets de referencia en animaciones.
 - `color_fondo(a)`

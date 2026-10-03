@@ -5,5 +5,13 @@
     "prune": true,
     "preserve_recent_tokens": 15000,
     "reserved": 798576
+  },
+  "formatter": {
+    "ruff": {
+      "disabled": true
+    },
+    "uv": {
+      "disabled": true
+    }
   }
 }

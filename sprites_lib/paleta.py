@@ -6,6 +6,80 @@ import re
 HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
 
 
+class Material(tuple):
+    """Material con propiedades de render: (sombra, base, luz) + especular, transmision, textura, rugosidad.
+
+    Subclass de tuple para compatibilidad con todo el código existente que espera (sombra, base, luz).
+    """
+
+    def __new__(
+        cls, tonos, especular=0.0, transmision=0.0, textura=None, rugosidad=0.5
+    ):
+        obj = super().__new__(cls, tonos)
+        obj.especular = especular
+        obj.transmision = transmision
+        obj.textura = textura
+        obj.rugosidad = rugosidad
+        return obj
+
+
+# Materiales estándar de equipamiento: siempre presentes en la paleta.
+# Se usan como base para motor/equipo.py y como referencia para materiales con propiedades.
+MATERIALES_BASE = {
+    "cuero": {
+        "base": "#8a5a2b",
+        "especular": 0.1,
+        "transmision": 0.0,
+        "rugosidad": 0.8,
+    },
+    "metal": {
+        "base": "#9aa0a8",
+        "especular": 0.9,
+        "transmision": 0.0,
+        "rugosidad": 0.2,
+    },
+    "oro": {
+        "base": "#e0b34a",
+        "especular": 0.95,
+        "transmision": 0.0,
+        "rugosidad": 0.15,
+    },
+    "tela": {"base": "#4a6fa5", "especular": 0.0, "transmision": 0.0, "rugosidad": 0.9},
+    "madera": {
+        "base": "#7a4a22",
+        "especular": 0.05,
+        "transmision": 0.0,
+        "rugosidad": 0.7,
+    },
+    "fuego": {
+        "base": "#ff8c1a",
+        "emisivo": True,
+        "especular": 0.0,
+        "transmision": 0.0,
+        "rugosidad": 0.5,
+    },
+    "agua": {"base": "#4a90d9", "especular": 0.3, "transmision": 0.6, "rugosidad": 0.1},
+    "cristal": {
+        "base": "#a0d8ef",
+        "especular": 0.8,
+        "transmision": 0.9,
+        "rugosidad": 0.05,
+    },
+    "piedra": {
+        "base": "#808080",
+        "especular": 0.0,
+        "transmision": 0.0,
+        "rugosidad": 0.95,
+    },
+    "tierra": {
+        "base": "#8b6914",
+        "especular": 0.0,
+        "transmision": 0.0,
+        "rugosidad": 0.9,
+    },
+}
+
+
 def hex_rgb(h):
     if not isinstance(h, str) or not HEX.match(h):
         raise ValueError(f"color inválido {h!r}: tiene que ser #rrggbb")
@@ -30,22 +104,35 @@ def tonos(base, regla, emisivo=False):
     return (_mezclar(_mult(base, ks), hs, ms), base, _mezclar(_mult(base, kl), hl, ml))
 
 
+def _props_mat(nombre, ficha_mat):
+    """Propiedades de render para un material: busca en MATERIALES_BASE y mezcla con la ficha."""
+    base = MATERIALES_BASE.get(nombre, {})
+    return {
+        "especular": ficha_mat.get("especular", base.get("especular", 0.0)),
+        "transmision": ficha_mat.get("transmision", base.get("transmision", 0.0)),
+        "textura": ficha_mat.get("textura", base.get("textura")),
+        "rugosidad": ficha_mat.get("rugosidad", base.get("rugosidad", 0.5)),
+    }
+
+
 def paleta_estilo(paleta_ficha, estilo):
-    """{material: (sombra, base, luz)}. Agrega '<material>_b' (variante un poco más oscura para texturas:
+    """{material: Material}. Agrega '<material>_b' (variante un poco más oscura para texturas:
     mechones, pliegues) y 'mano' (piel un tono más clara) si la ficha no la define."""
     regla = estilo["tonos"]
     out = {}
     for nombre, m in paleta_ficha.items():
         base = hex_rgb(m["base"])
         emi = bool(m.get("emisivo", False))
-        out[nombre] = tonos(base, regla, emi)
+        props = _props_mat(nombre, m)
+        out[nombre] = Material(tonos(base, regla, emi), **props)
         if not nombre.endswith("_b"):
-            out.setdefault(f"{nombre}_b", tonos(_mult(base, 0.86), regla, emi))
+            out.setdefault(
+                f"{nombre}_b", Material(tonos(_mult(base, 0.86), regla, emi), **props)
+            )
     if "piel" in paleta_ficha and "mano" not in paleta_ficha:
-        out["mano"] = tonos(
-            _mezclar(hex_rgb(paleta_ficha["piel"]["base"]), (255, 255, 255), 0.12),
-            regla,
-        )
+        base = _mezclar(hex_rgb(paleta_ficha["piel"]["base"]), (255, 255, 255), 0.12)
+        props = _props_mat("piel", paleta_ficha["piel"])
+        out["mano"] = Material(tonos(base, regla), **props)
     return out
 
 
