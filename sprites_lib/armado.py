@@ -67,7 +67,7 @@ class Cuadro:
     bob: int
 
 
-def render_cuadro(ficha, estilo, pose, p, mira, ancho=None, bloom=False):
+def render_cuadro(ficha, estilo, pose, p, mira, ancho=None, bloom=False, luces=None):
     cu = ficha["cuerpo"]
     clase = cu.get("clase_altura", "adulto")
     anat = anatomia(estilo, clase, cu.get("complexion", "normal"))
@@ -87,7 +87,10 @@ def render_cuadro(ficha, estilo, pose, p, mira, ancho=None, bloom=False):
         ctx = Contexto(anat=anat, a=a, ps=ps, estilo=estilo, est=est, cam_local=cam.cam_local, paleta=pal,
                        mira=mira, ausentes=aus, pieza_base=s["pieza_base"], cuadro=ps["cuadro"])
         REGISTRO[s["tipo"]].dibujar(esc, ctx, s)
-    img, buf = esc.render(estilo=est["render"], buffers=True, bloom=bloom)
+    render_est = est["render"]
+    if luces is not None:
+        render_est = {**render_est, "luces": luces}
+    img, buf = esc.render(estilo=render_est, buffers=True, bloom=bloom)
     anclas_px = {k: tuple(float(x) for x in cam.proyectar(val)) for k, val in a.items()}
     return Cuadro(img=img, buf=buf, anclas_px=anclas_px, specs=specs, mira=mira, pose=pose, indice=p, cam=cam,
                   anat=anat, escala=anat.H / 28.0, bob=ps["bob"])

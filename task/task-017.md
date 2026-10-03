@@ -1,6 +1,6 @@
 # task-017 — Paleta fija compartida por estilo
 
-**Estado:** pendiente
+**Estado:** completada (2026-10-03)
 **Origen:** pedido del usuario (2026-10-03): "tener paleta de colores y que los colores que salgan siempre
 correspondan a esa paleta". Alcance elegido: **por estilo, compartida** (cada estilo tiene su lista y todo
 sprite de ese estilo sale de ahí).
