@@ -185,10 +185,12 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 - `columnas_por_direccion(estilo)` Columna (0..w-1) que muestrea cada dirección del estilo en cada zona de la skin. El cuerpo gira alrededor
 - `desde_colores(colores, ruta)` Skin simple a partir de colores (como la skin por defecto de Minecraft): pelo arriba y atrás, remera con
 - `plantilla_zonas(ruta='skins/zonas.png')` Skin de zonas: cada parte del cuerpo de un color distinto (la cara y el frente del torso, aparte).
+- `ficha_con_arma(ruta, arma='espada', nombre=None, ancla='mano_derecha')` Ficha de una skin con un arma en la mano: la misma skin y las mismas animaciones, más el componente `objeto`.
 - `ficha(ruta, nombre=None)` Ficha mínima para renderizar una skin con el pipeline de siempre (render_cuadro, tests, exportar).
 - `guia(ruta, zoom=16, estilo='stardew8')` PNG ampliado con cada zona rotulada, el frente marcado y la columna que muestrea cada dirección del estilo
 - `demo(ruta, anim='caminar_lpc', estilo='stardew')` Vista previa rápida (una skin cualquiera): docs/diagnostico/skins/<nombre>/<anim>*
 - `salida_juego(ruta, anim='caminar_lpc', estilo='stardew', raiz='salida', cuadros=False)` Salida final del juego (convención del proyecto): <raíz>/<personaje>/<estilo>/<anim>/<anim>*.
+- `salida_arma(ruta, arma='espada', anim='golpear', estilo='stardew', raiz='salida', cuadros=False, ancla='mano_derecha')` Salida de una skin con un arma en la mano, mismo layout que `salida_juego`:
 
 ### `muneco` — Muñeco base: sin skin ni ficha de personaje, solo para ver y probar un ciclo/pose antes de aplicarlo a alguien
 - `demo(anim='caminar_lpc', estilo='stardew')`

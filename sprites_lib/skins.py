@@ -8,6 +8,8 @@ la dibuja el componente `ojos` con el iris de la skin.
 Uso:  .venv/bin/python -m sprites_lib.skins guia                     → skins/guia.png (zonas rotuladas, para pintar)
       .venv/bin/python -m sprites_lib.skins demo  [skin.png] [--anim caminar_lpc]  → docs/diagnostico/skins/<nombre>/ (vista previa)
       .venv/bin/python -m sprites_lib.skins juego [skin.png] [--anim caminar_lpc]  → <raíz>/<nombre>/<estilo>/<anim>/ (salida del juego)
+      .venv/bin/python -m sprites_lib.skins arma  [skin.png] [--arma espada] [--anim golpear] [--estilo stardew]
+                                                                                     → <nombre>_<arma>/... (la skin con un arma en la mano)
 """
 
 import functools
@@ -235,6 +237,42 @@ def plantilla_zonas(ruta="skins/zonas.png"):
 # Brazo con el que el personaje ataca en las animaciones asimétricas (golpear): el de metal / el fuerte.
 BRAZO_ACTIVO = {}
 
+# Armas del componente `objeto`: materiales que se suman a la paleta de la skin (el arma no está en el PNG de 32×32)
+# y parámetros por forma. La skin no cambia: el arma es una capa aparte que sigue la mano.
+MATERIALES_ARMA = {
+    "arma_metal": {"base": "#cdd6e0"},
+    "arma_cuero": {"base": "#5a3a28"},
+    "arma_oro": {"base": "#e2aa34"},
+    "arma_brillo": {"base": "#fff1a8", "emisivo": True},
+}
+ARMAS = {
+    "espada": {"mango": "arma_cuero", "pomo": "arma_oro", "detalle": "arma_brillo"},
+    "hacha": {"mango": "arma_cuero", "detalle": "arma_brillo"},
+    "antorcha": {"mango": "arma_cuero", "detalle": "arma_brillo"},
+    "escudo": {"detalle": "arma_oro"},
+    "baston": {"mango": "arma_cuero", "detalle": "arma_brillo"},
+}
+
+
+def ficha_con_arma(ruta, arma="espada", nombre=None, ancla="mano_derecha"):
+    """Ficha de una skin con un arma en la mano: la misma skin y las mismas animaciones, más el componente `objeto`.
+    El arma sigue la mano en cualquier ciclo (blandir = `golpear`)."""
+    if arma not in ARMAS:
+        raise ValueError(f"arma desconocida {arma!r}; disponibles: {', '.join(ARMAS)}")
+    base = os.path.splitext(os.path.basename(ruta))[0]
+    f = ficha(ruta, nombre or f"{base}_{arma}")
+    f["paleta"].update(MATERIALES_ARMA)
+    f["componentes"] = list(f.get("componentes", [])) + [
+        {
+            "tipo": "objeto",
+            "ancla": ancla,
+            "material": "arma_metal",
+            "parametros": {"forma": arma, **ARMAS[arma]},
+            "por_que": f"arma ({arma}) en {ancla}",
+        }
+    ]
+    return f
+
 
 def ficha(ruta, nombre=None):
     """Ficha mínima para renderizar una skin con el pipeline de siempre (render_cuadro, tests, exportar)."""
@@ -317,11 +355,14 @@ def guia(ruta, zoom=16, estilo="stardew8"):
 
 
 def _por_dir(ruta, anim, estilo):
+    return _por_dir_ficha(ficha(ruta), anim, estilo)
+
+
+def _por_dir_ficha(f, anim, estilo):
     from .armado import render_cuadro
     from .estilos import ESTILOS
     from .poses import POSES
 
-    f = ficha(ruta)
     n = POSES[anim]["n"]
     por_dir = {
         m: [render_cuadro(f, estilo, anim, p, m).img for p in range(n)]
@@ -374,6 +415,23 @@ def salida_juego(
     return _exportar(f, por_dir, anim, estilo, carpeta, zoom=4, cuadros=cuadros)
 
 
+def salida_arma(
+    ruta,
+    arma="espada",
+    anim="golpear",
+    estilo="stardew",
+    raiz="salida",
+    cuadros=False,
+    ancla="mano_derecha",
+):
+    """Salida de una skin con un arma en la mano, mismo layout que `salida_juego`:
+    `<raíz>/<skin>_<arma>/<estilo>/<anim>/`."""
+    f = ficha_con_arma(ruta, arma, ancla=ancla)
+    f, por_dir = _por_dir_ficha(f, anim, estilo)
+    carpeta = os.path.join(raiz, f["identidad"]["nombre"], estilo, anim)
+    return _exportar(f, por_dir, anim, estilo, carpeta, zoom=4, cuadros=cuadros)
+
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     if args[:1] == ["guia"]:
@@ -393,5 +451,23 @@ if __name__ == "__main__":
                     ruta, anim, estilo, raiz="output" if ent else "salida", cuadros=ent
                 ),
             )
+    elif args[:1] == ["arma"]:
+        anim = args[args.index("--anim") + 1] if "--anim" in args else "golpear"
+        estilo = args[args.index("--estilo") + 1] if "--estilo" in args else "stardew"
+        arma = args[args.index("--arma") + 1] if "--arma" in args else "espada"
+        rutas = [a for a in args[1:] if a.endswith(".png")]
+        ruta = rutas[0] if rutas else "skins/zonas.png"
+        ent = "--output" in args
+        print(
+            "→",
+            salida_arma(
+                ruta,
+                arma,
+                anim,
+                estilo,
+                raiz="output" if ent else "salida",
+                cuadros=ent,
+            ),
+        )
     else:
         print(__doc__)
