@@ -146,6 +146,14 @@ def _oscurecer(c, k):
     return tuple(int(v * k) for v in c)
 
 
+def _snap_tonos(col, tonos):
+    """Acerca cada color a uno de los 3 tonos del material (sombra/base/luz) para que el
+    especular y la textura no introduzcan colores fuera de la paleta fija del estilo."""
+    t = np.array(tonos, float)
+    d = ((col[:, None, :] - t[None, :, :]) ** 2).sum(-1)
+    return t[d.argmin(1)]
+
+
 def _specular(N_mundo, luz, cam, especular, rugosidad):
     """Highlight especular: devuelve (N,) float con la intensidad del brillo.
 
@@ -461,6 +469,8 @@ class Escena:
                         col = col * _textura_mod(textura, mask.shape)[mask][:, None]
                     if spec_img is not None:
                         col = col + spec_img[mask][:, None] * 255
+                    if textura or spec_img is not None:
+                        col = _snap_tonos(col, tonos)
                     col = np.clip(col, 0, 255).astype(np.uint8)
                     alpha = int(255 * (1.0 - transmision))
                     img[mask] = np.column_stack([col, np.full(n, alpha)])
@@ -475,6 +485,8 @@ class Escena:
                     col = col * _textura_mod(textura, mask.shape)[mask][:, None]
                 if spec_img is not None:
                     col = col + spec_img[mask][:, None] * 255
+                if textura or spec_img is not None:
+                    col = _snap_tonos(col, tonos)
                 col = np.clip(col, 0, 255).astype(np.uint8)
                 alpha = int(255 * (1.0 - transmision))
                 img[mask] = np.column_stack([col, np.full(n, alpha)])
