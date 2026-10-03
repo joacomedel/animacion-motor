@@ -105,8 +105,8 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 ### `armado` — Armado: ficha → lista de componentes (cuerpo base + los de la ficha) → escena → cuadros renderizados.
 - `expandir(ficha)` Specs finales, una por (tipo, ancla): cuerpo base (salvo sustituciones o componentes propios del mismo
 - clase `Cuadro`
-- `render_cuadro(ficha, estilo, pose, p, mira, ancho=None)`
-- `render_todo(ficha, estilo, poses=('neutra', 'quieto'))`
+- `render_cuadro(ficha, estilo, pose, p, mira, ancho=None, bloom=False)`
+- `render_todo(ficha, estilo, poses=('neutra', 'quieto'), bloom=False)`
 - `pivote(estilo, clase_altura='adulto', pose='quieto')` Punto de los pies (piso) dentro de la celda: el mismo para cualquier pose/dirección/personaje de ese
 
 ### `ficha` — Fichas de personaje: cargar el YAML y validarlo antes de generar nada. Los errores dicen qué está mal y,

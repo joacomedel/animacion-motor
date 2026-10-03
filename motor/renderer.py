@@ -51,7 +51,7 @@ class Renderer:
         pivote: punto de los pies (suelo) dentro de la celda, en px de celda
     """
 
-    def __init__(self, estilo="stardew8", skin=SKIN_DEFECTO, zoom=4):
+    def __init__(self, estilo="stardew8", skin=SKIN_DEFECTO, zoom=4, bloom=False):
         if estilo not in ESTILOS:
             raise ValueError(
                 f"estilo desconocido {estilo!r}; disponibles: {', '.join(ESTILOS)}"
@@ -60,6 +60,7 @@ class Renderer:
             raise ValueError("zoom debe ser >= 1")
         self.estilo = estilo
         self.zoom = int(zoom)
+        self.bloom = bloom
         self.skin_ruta = skin
         self.arma = None
         self.dano = False
@@ -177,7 +178,7 @@ class Renderer:
         clave = (pose, direccion, p)
         sup = self._cache.get(clave)
         if sup is None:
-            cuadro = armado.render_cuadro(self.ficha, self.estilo, pose, p, direccion)
+            cuadro = armado.render_cuadro(self.ficha, self.estilo, pose, p, direccion, bloom=self.bloom)
             img = cuadro.img.convert("RGBA")
             if self.zoom != 1:
                 img = img.resize(
