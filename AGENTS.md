@@ -58,6 +58,7 @@ Guía para trabajar en este repo con OpenCode. Reemplaza a `CLAUDE.md` como guí
 | Procesos | `.venv/bin/python -m sprites_lib.proceso_estilo` / `proceso_anim` / `proceso_skin` (pasos y gates en `docs/procesos/`); congelan en `aprobados/estilos/`, `aprobados/animaciones/` y `aprobados/skins/` |
 | Salidas | `salida/<personaje>/<estilo>/<anim>/` (trabajo; `<estilo>` = `stardew` 4 dir o `stardew8` 8 dir); el lote de skins exporta la entrega del juego a `output/<nombre>/<estilo>/<anim>/`. Diagnósticos (zonas, vistas previas, review) en `docs/diagnostico/` |
 | Referencias descargadas | `referencias/` (y `sprites_x/`: Mega Man X separado en 14 animaciones) |
+| Motor tiempo real | `motor/`: render 3D→2D en vivo con el kit (`armado.render_cuadro`) + caché por (anim, dir, frame); lógica `LogicaSimulada` desacoplable; correr `SDL_VIDEODRIVER=dummy .venv/bin/python -m motor.debug` para capturas, `python -m motor.main` para la ventana |
 | Archivo v1 | contenido anterior (skins, fichas, `mago/`, `el_llamado/`, `prueba/`) fuera de este repo, en `/home/jm/claude-code/archivo-animaciones-v1/` |
 
 ## Subagentes

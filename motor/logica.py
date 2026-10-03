@@ -36,7 +36,7 @@ class LogicaSimulada:
         # Animaciones disponibles (frames, fps, loop)
         self.animaciones = {
             "idle": {"n": 4, "fps": 4, "loop": True},
-            "run": {"n": 10, "fps": 12, "loop": True},
+            "run": {"n": 8, "fps": 10, "loop": True},
             "jump": {"n": 6, "fps": 10, "loop": False},
             "crouch": {"n": 4, "fps": 8, "loop": False},
         }
@@ -144,7 +144,8 @@ class LogicaSimulada:
         if angulo < 0:
             angulo += 360
 
-        # 8 direcciones: S=0, SE=45, E=90, NE=135, N=180, NW=225, W=270, SW=315
-        direcciones = ["S", "SE", "E", "NE", "N", "NW", "W", "SW"]
+        # En pantalla +y es abajo (sur) y +x es derecha (este). Ordenados por el ángulo de atan2:
+        # E=0, SE=45, S=90, SW=135, W=180, NW=225, N=270, NE=315
+        direcciones = ["E", "SE", "S", "SW", "W", "NW", "N", "NE"]
         indice = round(angulo / 45) % 8
         return direcciones[indice]

@@ -1,6 +1,6 @@
 # task-015 — Piso isométrico: verificar escala/posición
 
-**Estado:** pendiente
+**Estado:** completada (2026-10-02)
 **Origen:** revisión del motor 3D→2D (2026-10-02).
 
 ## Problema

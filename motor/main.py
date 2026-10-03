@@ -25,8 +25,9 @@ def main():
     # Crear componentes
     logica = LogicaSimulada()
     game_loop = GameLoop()
-    renderer = Renderer(estilo="stardew8")
+    renderer = Renderer(estilo="stardew8", skin="skins/caballero_carmesi.png", zoom=4)
     input_handler = InputHandler()
+    fuente = pygame.font.Font(None, 24)
 
     # Estado inicial
     estado_inicial = Estado(x=0, y=0, z=0, animacion="idle", direccion="S", frame=0)
@@ -58,13 +59,29 @@ def main():
         screen.fill(COLOR_FONDO)
 
         try:
-            superficie = renderer.renderizar(estado_interpolado)
-            # Centrar en pantalla
-            x = (SCREEN_WIDTH - superficie.get_width()) // 2
-            y = (SCREEN_HEIGHT - superficie.get_height()) // 2
-            screen.blit(superficie, (x, y))
+            # Piso: se desplaza con la posición del mundo (el movimiento se ve)
+            piso, pos_piso = renderer.piso(
+                SCREEN_WIDTH,
+                SCREEN_HEIGHT,
+                (estado_interpolado.x, estado_interpolado.y),
+            )
+            screen.blit(piso, pos_piso)
+
+            # Personaje: los pies en el centro-bajo, levantado por z (salto)
+            personaje = renderer.renderizar(estado_interpolado)
+            px, py = renderer.pies()
+            destino = (
+                SCREEN_WIDTH // 2 - px,
+                int(SCREEN_HEIGHT * 0.68) - py - int(estado_interpolado.z),
+            )
+            screen.blit(personaje, destino)
         except Exception as e:
             print(f"Error renderizando: {e}")
+
+        # HUD: FPS y estado
+        fps = clock.get_fps()
+        hud = f"{fps:4.0f} FPS  {estado_interpolado.animacion} {estado_interpolado.direccion} f={estado_interpolado.frame}"
+        screen.blit(fuente.render(hud, True, (230, 230, 240)), (8, 8))
 
         # Actualizar pantalla
         pygame.display.flip()

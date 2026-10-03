@@ -9,11 +9,6 @@ Lista plana: id + nombre corto. El detalle de cada una vive en `task/task-XXX.md
 - [ ] task-005 — `salida/_review/`: decidir si se borra o se deja
 - [ ] task-006 — Subagentes cancelados devuelven "Subagent cancelled" con trabajo hecho
 - [ ] task-007 — Revisar los 5 scripts en `desde_colores` con el checklist de CRITERIOS_ANIMACION.md
-- [ ] task-008 — Reparar layout git: el kit quedó movido dentro de `referencias/` (ignorado)
-- [ ] task-009 — Renderer del motor: reutilizar el kit real (`ficha`/`armado`/`skins`), no primitivas
-- [ ] task-010 — Movimiento visible: cámara y piso respecto del mundo, no centrados al personaje
-- [ ] task-011 — Caché de frames por (animación, dirección, frame) y medir FPS real
 - [ ] task-012 — Skins en tiempo real (daño, guante, arma) sobre el renderer
 - [ ] task-013 — Iluminación en tiempo real (feature opcional)
-- [ ] task-014 — Test automático del motor (no depender de `debug.py` manual)
-- [ ] task-015 — Piso isométrico: verificar escala/posición respecto del mundo
+- [ ] task-016 — Pre-calentar la caché del renderer (evitar hitch de ~13 ms en caché fría)
