@@ -171,10 +171,6 @@ ESTILOS = {
         render=dict(
             umbrales=(0.28, 0.66), contorno="negro", interior="negro", sombreado="luz",
             luces=_luces_default(),
-            umbrales=(0.28, 0.66),
-            contorno="negro",
-            interior="negro",
-            sombreado="luz",
             paleta_fija=PALETA_RESURRECT64,
         ),
         proporciones=dict(
