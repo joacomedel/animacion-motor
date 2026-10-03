@@ -222,12 +222,14 @@ class Escena:
     def render(self, contorno=(16, 10, 24), salto=3.2, salto_pieza=.8, estilo=None, buffers=False):
         """estilo (ver sprites_lib/estilos.py): umbrales de tonos, contorno 'negro'|'color'
         (el tono más oscuro del material vecino), interior 'negro'|'color'|'ninguno', sombreado 'luz'|'borde'.
-        buffers=True devuelve además (depth, mat, pieza, comp, solido, comp_nombres, colores_detalle)."""
+        buffers=True devuelve además (depth, mat, pieza, comp, solido, normal, lam, comp_nombres,
+        colores_detalle). normal: RGB (ch, cw, 3) uint8 con la normal en ejes de mundo [-1,1] -> [0,255],
+        misma dimensión y alineación que el PNG; lam: (ch, cw) float con N·luz clippeado a [0,1]."""
         est = dict(umbrales=(.28, .66), contorno="negro", interior="negro", oscurecer=.55, sombreado="luz")
         est.update(estilo or {})
         cw, ch = self.cam.cw, self.cam.ch
         depth = np.full((ch, cw), -1e9); mat = np.full((ch, cw), -1); pieza = np.full((ch, cw), -1)
-        comp = np.full((ch, cw), -1); lam = np.zeros((ch, cw))
+        comp = np.full((ch, cw), -1); lam = np.zeros((ch, cw)); normal = np.zeros((ch, cw, 3), np.uint8)
         img = np.zeros((ch, cw, 4), np.uint8)
         colores_detalle = set()
         if self.P:
@@ -240,7 +242,9 @@ class Escena:
             o = np.argsort(d, kind="stable")              # lo más cercano a cámara queda último y gana
             xi, yi, d, Nn, M, K, C = (arr[o] for arr in (xi, yi, d, Nn, M, K, C))
             depth[yi, xi] = d; mat[yi, xi] = M; pieza[yi, xi] = K; comp[yi, xi] = C
-            lam[yi, xi] = np.clip(self.cam.a_mundo(Nn) @ self.cam.luz, 0, 1)
+            N_mundo = self.cam.a_mundo(Nn)
+            lam[yi, xi] = np.clip(N_mundo @ self.cam.luz, 0, 1)
+            normal[yi, xi] = ((N_mundo + 1) * 127.5).astype(np.uint8)
         nivel = None
         if est["sombreado"] == "borde":
             # como lo haría un artista: tono base plano; luz en el borde superior/izquierdo de cada pieza y
@@ -297,6 +301,7 @@ class Escena:
         if not buffers:
             return im
         return im, dict(depth=depth, mat=mat, pieza=pieza, comp=comp, solido=solido,
+                        normal=normal, lam=lam,
                         comp_nombres=list(self.comp_nombres), colores_detalle=colores_detalle)
 
 
