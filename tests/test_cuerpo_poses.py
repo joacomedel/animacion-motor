@@ -1,10 +1,20 @@
 import numpy as np
 import pytest
 
-from sprites_lib.cuerpo import (ANCLAS, PADRE, SEGMENTOS, VOCABULARIO, anatomia, anclas_ausentes, centro_cara,
-                                lado_de, masc, posar)
+from sprites_lib.cuerpo import (
+    ANCLAS,
+    PADRE,
+    SEGMENTOS,
+    VOCABULARIO,
+    anatomia,
+    anclas_ausentes,
+    centro_cara,
+    lado_de,
+    masc,
+    posar,
+)
 from sprites_lib.estilos import uz
-from sprites_lib.poses import POSES, cuadros
+from sprites_lib.poses import POSES, cuadros, loop
 
 FRENTE = np.array([1.0, 0, 0])
 
@@ -44,8 +54,12 @@ def test_lados():
 def test_huesos_miden_lo_que_dice_la_anatomia():
     A = anatomia("volumen")
     a = posar(A, cuadros("quieto")[0], FRENTE)
-    assert np.linalg.norm(a["rodilla_derecha"] - a["cadera_derecha"]) == pytest.approx(A.muslo, abs=.01)
-    assert np.linalg.norm(a["codo_izquierdo"] - a["hombro_izquierdo"]) == pytest.approx(A.brazo, abs=.01)
+    assert np.linalg.norm(a["rodilla_derecha"] - a["cadera_derecha"]) == pytest.approx(
+        A.muslo, abs=0.01
+    )
+    assert np.linalg.norm(a["codo_izquierdo"] - a["hombro_izquierdo"]) == pytest.approx(
+        A.brazo, abs=0.01
+    )
 
 
 def test_neutra_abre_los_brazos():
@@ -58,7 +72,7 @@ def test_neutra_abre_los_brazos():
 def test_la_cara_sigue_a_la_camara():
     A = anatomia("stardew")
     de_frente = posar(A, cuadros("quieto")[0], FRENTE)
-    camara_a_la_derecha = posar(A, cuadros("quieto")[0], np.array([0.0, -1.0, .3]))
+    camara_a_la_derecha = posar(A, cuadros("quieto")[0], np.array([0.0, -1.0, 0.3]))
     assert camara_a_la_derecha["cara"][1] < de_frente["cara"][1]
     assert np.linalg.norm(centro_cara(FRENTE) - FRENTE) < 1e-9
 
@@ -71,18 +85,55 @@ def test_anclas_ausentes_conserva_la_raiz():
 
 def test_vocabulario_y_padres():
     assert "brazo_derecho" in VOCABULARIO and "muneca_derecha" in VOCABULARIO
-    assert PADRE["codo_derecho"] == "hombro_derecho" and PADRE["muneca_derecha"] == "codo_derecho"
+    assert (
+        PADRE["codo_derecho"] == "hombro_derecho"
+        and PADRE["muneca_derecha"] == "codo_derecho"
+    )
     assert SEGMENTOS["pierna_izquierda"][0] == "cadera_izquierda"
     assert lado_de("codo_derecho") == "derecha" and masc("izquierda") == "izquierdo"
 
 
 def test_poses():
-    assert set(POSES) == {"neutra", "quieto", "caminar_lpc", "saltar", "agachar", "golpear"}
+    assert set(POSES) == {
+        "neutra",
+        "quieto",
+        "caminar_lpc",
+        "saltar",
+        "agachar",
+        "golpear",
+        "blandir",
+        "combo",
+        "desenvainar",
+    }
     assert [ps["bob"] for ps in cuadros("caminar_lpc")] == [1, 1, 0, 0, 1, 1, 0, 0]
     assert [ps["bob"] for ps in cuadros("quieto")] == [0, 0, 1, 1]
     assert [ps["cuadro"] for ps in cuadros("quieto")] == [0, 1, 2, 3]
     with pytest.raises(KeyError, match="pose desconocida"):
         cuadros("bailar")
+
+
+def test_blandir():
+    assert POSES["blandir"]["n"] >= 4
+    assert loop("blandir") is False
+    assert len(cuadros("blandir")) == POSES["blandir"]["n"]
+
+
+def test_combo():
+    assert POSES["combo"]["n"] == 9
+    assert loop("combo") is False
+    assert len(cuadros("combo")) == 9
+
+
+def test_desenvainar():
+    assert POSES["desenvainar"]["n"] == 5
+    assert loop("desenvainar") is False
+    assert [ps["objeto_visible"] for ps in cuadros("desenvainar")] == [
+        False,
+        False,
+        True,
+        True,
+        True,
+    ]
 
 
 def test_el_antebrazo_nunca_se_estira():
@@ -93,11 +144,19 @@ def test_el_antebrazo_nunca_se_estira():
                 a = posar(A, ps, FRENTE)
                 for s, lado in (("derecho", "derecha"), ("izquierdo", "izquierda")):
                     largo = np.linalg.norm(a[f"mano_{lado}"] - a[f"codo_{s}"])
-                    assert largo <= A.antebrazo + .01, (est, pose, s, largo, A.antebrazo)
+                    assert largo <= A.antebrazo + 0.01, (
+                        est,
+                        pose,
+                        s,
+                        largo,
+                        A.antebrazo,
+                    )
 
 
 def test_de_perfil_la_cara_mira_hacia_adelante_en_lateral():
     """La trampa de Stardew (cara hacia la cámara) no aplica en plataformas: de perfil, la cara mira hacia donde va."""
     A = anatomia("lateral")
-    a = posar(A, cuadros("quieto")[0], np.array([0.0, -1.0, 0.0]))     # cámara del lado derecho
-    assert abs(a["cara"][1] - a["cabeza"][1]) < A.cabeza[1] * .35
+    a = posar(
+        A, cuadros("quieto")[0], np.array([0.0, -1.0, 0.0])
+    )  # cámara del lado derecho
+    assert abs(a["cara"][1] - a["cabeza"][1]) < A.cabeza[1] * 0.35

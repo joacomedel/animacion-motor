@@ -480,6 +480,12 @@ diagonales (vector ±0,7071). No está en `ACTIVOS`: `stardew` (4 dir.) sigue si
 - **Objetos sostenidos (2026-10-02)**: componente `objeto` (`forma` espada/hacha/antorcha/escudo/bastón) enganchado a
   `mano_derecha`/`mano_izquierda` y orientado con el antebrazo (`codo→mano`). Sigue la mano en todos los ciclos: blandir =
   reusar `golpear`. Demo de iteración: `python -m sprites_lib.muneco objetos --anim golpear --formas espada,hacha`.
+- **Animaciones de espada (2026-10-02)**: `blandir` (6 cuadros, un tajo), `combo` (9, tres tajos encadenados) y
+  `desenvainar` (5; la espada aparece de golpe en el cuadro 2). Generadas con 3 subagentes (longcat-2.5-preview-free) en el
+  formato de `ciclos.py` + registro en `poses.POSES`, y verificadas. `desenvainar` usa la clave `objeto_visible` (lista de
+  n bools, por cuadro): `ciclos.pose` la propaga y el componente `objeto` no se dibuja si es `False`. Las tres son
+  one-shot (`loop=False`) y declaran `ancho` para que entre la espada. Demo:
+  `docs/diagnostico/objetos/nuevas_espada_stardew8.png`.
 
 ## Procesos del kit: estilo → animación → skin (2026-09-29)
 

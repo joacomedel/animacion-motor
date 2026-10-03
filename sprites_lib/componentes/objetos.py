@@ -134,6 +134,8 @@ class Objeto(Componente):
     params_opciones = {"forma": tuple(FORMAS), "agarre": ("antebrazo", "vertical")}
 
     def dibujar(self, esc, ctx, spec):
+        if not ctx.ps.get("objeto_visible", True):
+            return  # cuadro en que el objeto todavía no está (desenvainar: aparece de golpe)
         ancla = spec["ancla"]
         lado = lado_de(ancla)
         a, p = ctx.a, spec["parametros"]

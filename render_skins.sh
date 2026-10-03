@@ -6,7 +6,7 @@
 #   ./render_skins.sh --forzar               # regenera todo aunque exista
 #   ./render_skins.sh --listar               # muestra qué haría, sin renderizar
 #   ./render_skins.sh --anim quieto          # otra animación (o caminar_lpc,quieto,saltar)
-#   ./render_skins.sh --anim todas           # las 6: neutra,quieto,caminar_lpc,saltar,agachar,golpear
+#   ./render_skins.sh --anim todas           # las 9: neutra,quieto,caminar_lpc,saltar,agachar,golpear,blandir,combo,desenvainar
 #   ./render_skins.sh --estilo stardew8      # otro estilo
 #   ./render_skins.sh --entrega              # exporta a output/ con PNG por cuadro (entrega del juego)
 #   ./render_skins.sh --skins vampira,mago   # solo esas skins
@@ -48,7 +48,7 @@ if [ ! -x "$PY" ]; then
   exit 2
 fi
 
-[ "$ANIMS" = "todas" ] && ANIMS="neutra,quieto,caminar_lpc,saltar,agachar,golpear"
+[ "$ANIMS" = "todas" ] && ANIMS="neutra,quieto,caminar_lpc,saltar,agachar,golpear,blandir,combo,desenvainar"
 IFS=',' read -r -a LISTA_ANIMS <<< "$ANIMS"
 
 en_solo() { [ -z "$SOLO" ] || [[ ",$SOLO," == *",$1,"* ]]; }

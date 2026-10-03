@@ -5,7 +5,7 @@
 #   ./render_armas.sh                         # espada, estilo stardew, todas las animaciones; salta las ya hechas
 #   ./render_armas.sh --arma hacha            # otra arma (espada,hacha,antorcha,escudo,baston)
 #   ./render_armas.sh --anim golpear          # una animación (o caminar_lpc,quieto,saltar)
-#   ./render_armas.sh --anim todas            # las 6: neutra,quieto,caminar_lpc,saltar,agachar,golpear
+#   ./render_armas.sh --anim todas            # las 9: neutra,quieto,caminar_lpc,saltar,agachar,golpear,blandir,combo,desenvainar
 #   ./render_armas.sh --estilo stardew8       # 8 direcciones
 #   ./render_armas.sh --entrega               # exporta a output/ con PNG por cuadro
 #   ./render_armas.sh --skins vampira,mago    # solo esas skins
@@ -42,7 +42,7 @@ while [ $# -gt 0 ]; do
 done
 
 [ -x "$PY" ] || { echo "no encuentro $PY; corré esto desde la raíz del repo" >&2; exit 2; }
-[ "$ANIMS" = "todas" ] && ANIMS="neutra,quieto,caminar_lpc,saltar,agachar,golpear"
+[ "$ANIMS" = "todas" ] && ANIMS="neutra,quieto,caminar_lpc,saltar,agachar,golpear,blandir,combo,desenvainar"
 IFS=',' read -r -a LISTA_ANIMS <<< "$ANIMS"
 
 en_solo() { [ -z "$SOLO" ] || [[ ",$SOLO," == *",$1,"* ]]; }

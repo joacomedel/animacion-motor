@@ -95,6 +95,26 @@ def test_mas_largo_mas_pixeles():
     )
 
 
+def test_objeto_visible_es_por_cuadro():
+    """El objeto puede no estar en ciertos cuadros (desenvainar: la espada aparece de golpe)."""
+    from sprites_lib import ciclos
+
+    c = {
+        "n": 2,
+        "desfase": 0,
+        "bob": [0, 0],
+        "pie": [(18, 32)] * 2,
+        "pie_ang": [0, 0],
+        "mano": dict(cx=19.5, ax=0, y0=27, ay=0),
+        "lag_faldon": 1,
+        "objeto_visible": [False, True],
+    }
+    assert ciclos.pose(c, 0)["objeto_visible"] is False
+    assert ciclos.pose(c, 1)["objeto_visible"] is True
+    c2 = {k: v for k, v in c.items() if k != "objeto_visible"}
+    assert ciclos.pose(c2, 0)["objeto_visible"] is True
+
+
 def test_muneco_objetos_genera_la_grilla(tmp_path):
     """El comando `muneco objetos` arma la comparación misma-animación/distintos-objetos."""
     from PIL import Image
