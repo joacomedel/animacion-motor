@@ -190,7 +190,7 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 - `guia(ruta, zoom=16, estilo='stardew8')` PNG ampliado con cada zona rotulada, el frente marcado y la columna que muestrea cada dirección del estilo
 - `demo(ruta, anim='caminar_lpc', estilo='stardew')` Vista previa rápida (una skin cualquiera): docs/diagnostico/skins/<nombre>/<anim>*
 - `salida_juego(ruta, anim='caminar_lpc', estilo='stardew', raiz='salida', cuadros=False)` Salida final del juego (convención del proyecto): <raíz>/<personaje>/<estilo>/<anim>/<anim>*.
-- `salida_arma(ruta, arma='espada', anim='golpear', estilo='stardew', raiz='salida', cuadros=False, ancla='mano_derecha')` Salida de una skin con un arma en la mano, mismo layout que `salida_juego`:
+- `salida_arma(ruta, arma='espada', anim='golpear', estilo='stardew', raiz='salida', cuadros=False, ancla='mano_derecha')` Salida de una skin con un arma en la mano: el personaje conserva su nombre, el estilo sigue siendo la capa
 
 ### `muneco` — Muñeco base: sin skin ni ficha de personaje, solo para ver y probar un ciclo/pose antes de aplicarlo a alguien
 - `demo(anim='caminar_lpc', estilo='stardew')`

@@ -97,18 +97,18 @@ def test_ficha_con_arma_pone_el_arma_en_la_mano(ruta):
     from sprites_lib.tests_personaje import mascara
 
     f = skins.ficha_con_arma(ruta, "espada")
-    assert f["identidad"]["nombre"].endswith("_espada")
+    assert f["identidad"]["nombre"] == "prueba"  # el personaje conserva su nombre
     assert any(c["tipo"] == "objeto" for c in f["componentes"])
     c = render_cuadro(f, "stardew", "quieto", 0, "S")
     assert mascara(c, "objeto@mano_derecha").sum() > 0
 
 
-def test_salida_arma_exporta_la_animacion(ruta, tmp_path):
+def test_salida_arma_es_una_variante_de_animacion(ruta, tmp_path):
     import os
 
     car = skins.salida_arma(
         ruta, "espada", anim="golpear", estilo="stardew", raiz=str(tmp_path)
     )
-    assert car.endswith(os.path.join("_espada", "stardew", "golpear"))
-    assert os.path.exists(os.path.join(car, "golpear.png"))
-    assert os.path.exists(os.path.join(car, "golpear.json"))
+    assert car.endswith(os.path.join("prueba", "stardew", "golpear_espada"))
+    assert os.path.exists(os.path.join(car, "golpear_espada.png"))
+    assert os.path.exists(os.path.join(car, "golpear_espada.json"))

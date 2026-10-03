@@ -9,7 +9,7 @@ Uso:  .venv/bin/python -m sprites_lib.skins guia                     → skins/g
       .venv/bin/python -m sprites_lib.skins demo  [skin.png] [--anim caminar_lpc]  → docs/diagnostico/skins/<nombre>/ (vista previa)
       .venv/bin/python -m sprites_lib.skins juego [skin.png] [--anim caminar_lpc]  → <raíz>/<nombre>/<estilo>/<anim>/ (salida del juego)
       .venv/bin/python -m sprites_lib.skins arma  [skin.png] [--arma espada] [--anim golpear] [--estilo stardew]
-                                                                                     → <nombre>_<arma>/... (la skin con un arma en la mano)
+                                                                                     → <personaje>/<estilo>/<anim>_<arma>/
 """
 
 import functools
@@ -256,11 +256,11 @@ ARMAS = {
 
 def ficha_con_arma(ruta, arma="espada", nombre=None, ancla="mano_derecha"):
     """Ficha de una skin con un arma en la mano: la misma skin y las mismas animaciones, más el componente `objeto`.
-    El arma sigue la mano en cualquier ciclo (blandir = `golpear`)."""
+    El personaje conserva su nombre (el arma es una variante, no un personaje nuevo). El arma sigue la mano en
+    cualquier ciclo (blandir = `golpear`)."""
     if arma not in ARMAS:
         raise ValueError(f"arma desconocida {arma!r}; disponibles: {', '.join(ARMAS)}")
-    base = os.path.splitext(os.path.basename(ruta))[0]
-    f = ficha(ruta, nombre or f"{base}_{arma}")
+    f = ficha(ruta, nombre)
     f["paleta"].update(MATERIALES_ARMA)
     f["componentes"] = list(f.get("componentes", [])) + [
         {
@@ -376,7 +376,7 @@ def _por_dir_ficha(f, anim, estilo):
     return f, por_dir
 
 
-def _exportar(f, por_dir, anim, estilo, carpeta, zoom, cuadros=False):
+def _exportar(f, por_dir, anim, estilo, carpeta, zoom, cuadros=False, nombre=None):
     from .armado import pivote
     from .exportar import exportar_direcciones
     from .poses import fps, loop, offset_y
@@ -384,7 +384,7 @@ def _exportar(f, por_dir, anim, estilo, carpeta, zoom, cuadros=False):
     oy = offset_y(anim)
     exportar_direcciones(
         por_dir,
-        anim,
+        nombre or anim,
         carpeta,
         fps=fps(anim),
         zoom=zoom,
@@ -424,12 +424,16 @@ def salida_arma(
     cuadros=False,
     ancla="mano_derecha",
 ):
-    """Salida de una skin con un arma en la mano, mismo layout que `salida_juego`:
-    `<raíz>/<skin>_<arma>/<estilo>/<anim>/`."""
+    """Salida de una skin con un arma en la mano: el personaje conserva su nombre, el estilo sigue siendo la capa
+    intermedia, y la animación con arma es una variante `<anim>_<arma>`:
+    `<raíz>/<personaje>/<estilo>/<anim>_<arma>/<anim>_<arma>*`."""
     f = ficha_con_arma(ruta, arma, ancla=ancla)
+    nombre_anim = f"{anim}_{arma}"
     f, por_dir = _por_dir_ficha(f, anim, estilo)
-    carpeta = os.path.join(raiz, f["identidad"]["nombre"], estilo, anim)
-    return _exportar(f, por_dir, anim, estilo, carpeta, zoom=4, cuadros=cuadros)
+    carpeta = os.path.join(raiz, f["identidad"]["nombre"], estilo, nombre_anim)
+    return _exportar(
+        f, por_dir, anim, estilo, carpeta, zoom=4, cuadros=cuadros, nombre=nombre_anim
+    )
 
 
 if __name__ == "__main__":

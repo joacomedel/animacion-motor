@@ -12,7 +12,8 @@
 #   ./render_armas.sh --forzar                # regenera aunque exista
 #   ./render_armas.sh --listar                # muestra qué haría
 #
-# Layout: <raíz>/<skin>_<arma>/<estilo>/<anim>/<anim>{,_todas.gif,_DIR.gif,.png,.json}
+# Layout: <raíz>/<personaje>/<estilo>/<anim>_<arma>/<anim>_<arma>{,_todas.gif,_DIR.gif,.png,.json}
+# (el personaje conserva su nombre; el arma es una variante de animación, ver docs/ESTRUCTURA_SALIDAS.md)
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -57,10 +58,11 @@ for png in "${SKINS[@]}"; do
 
   for anim in "${LISTA_ANIMS[@]}"; do
     total=$((total+1))
+    vdir="${anim}_${ARMA}"
     if [ "$ENTREGA" = 1 ]; then
-      marca="output/${nombre}_${ARMA}/$ESTILO/$anim/$anim.png"
+      marca="output/${nombre}/$ESTILO/$vdir/$vdir.png"
     else
-      marca="salida/${nombre}_${ARMA}/$ESTILO/$anim/$anim.png"
+      marca="salida/${nombre}/$ESTILO/$vdir/$vdir.png"
     fi
     if [ "$FORZAR" = 0 ] && [ -f "$marca" ] && [ "$marca" -nt "$png" ]; then
       saltadas=$((saltadas+1)); [ "$LISTAR" = 1 ] && echo "= $nombre/$ARMA/$anim (ya está)"; continue
