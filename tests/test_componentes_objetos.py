@@ -93,3 +93,20 @@ def test_mas_largo_mas_pixeles():
         _mask(grande, "objeto@mano_derecha").sum()
         > _mask(chico, "objeto@mano_derecha").sum()
     )
+
+
+def test_muneco_objetos_genera_la_grilla(tmp_path):
+    """El comando `muneco objetos` arma la comparación misma-animación/distintos-objetos."""
+    from PIL import Image
+
+    from sprites_lib import muneco
+
+    ruta = muneco.objetos(
+        "quieto",
+        "stardew",
+        formas=("espada", "escudo"),
+        ruta=str(tmp_path / "o.png"),
+        zoom=2,
+    )
+    im = Image.open(ruta)
+    assert im.width > 0 and im.height > 0

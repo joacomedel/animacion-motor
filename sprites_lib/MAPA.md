@@ -193,6 +193,7 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 ### `muneco` — Muñeco base: sin skin ni ficha de personaje, solo para ver y probar un ciclo/pose antes de aplicarlo a alguien
 - `demo(anim='caminar_lpc', estilo='stardew')`
 - `ancho_necesario(anim='caminar_lpc', estilo='stardew8', margen=1)` Ancho de celda (par) que necesita la animación: se renderiza en una celda enorme con el muñeco y se mide cuánto
+- `objetos(anim='golpear', estilo='lateral', mira=None, formas=None, ruta=None, zoom=6)` Misma animación, distintas cosas en la mano: una fila por forma, una columna por cuadro. Sirve para
 - `grilla(anim='caminar_lpc', estilo='stardew8', ruta=None, zoom=6, cuadros=None)` Plantilla de zonas: una fila por dirección, una columna por cuadro (skins/zonas.png), para revisar a ojo.
 
 ### `zonas` — Zonas del cuerpo por cuadro: dónde está cada parte (cabeza, cada ojo, cada brazo...) y cómo cambia de un cuadro
