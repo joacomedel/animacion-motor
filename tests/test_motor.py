@@ -5,6 +5,7 @@ import os
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 
 import pygame  # noqa: E402
+import pytest  # noqa: E402
 
 from motor.estado import Estado  # noqa: E402
 from motor.game_loop import GameLoop  # noqa: E402
@@ -88,3 +89,38 @@ def test_piso_scrollea_con_el_mundo():
     _, pos0 = r.piso(800, 600, (0, 0))
     _, pos1 = r.piso(800, 600, (17, 9))
     assert pos0 != pos1
+
+
+def test_renderer_set_skin_invalida_cache():
+    r = Renderer("stardew8", SKIN, zoom=4)
+    r.renderizar(Estado(animacion="idle", direccion="S", frame=0))
+    assert len(r._cache) == 1
+    r.set_skin("skins/mago.png")
+    assert len(r._cache) == 0
+    assert r.skin_ruta == "skins/mago.png"
+
+
+def test_renderer_set_arma_y_dano():
+    r = Renderer("stardew8", SKIN, zoom=4)
+    r.set_arma("espada")
+    assert r.arma == "espada" and len(r._cache) == 0
+    r.set_dano(True)
+    assert r.dano and len(r._cache) == 0
+    r.set_arma(None)
+    assert r.arma is None
+
+
+def test_renderer_ambiente():
+    r = Renderer("stardew8", SKIN, zoom=4)
+    assert r.capa_ambiente(800, 600) is None  # día: sin tinte
+    r.set_ambiente("noche")
+    assert r.capa_ambiente(800, 600) is not None
+    with pytest.raises(ValueError):
+        r.set_ambiente("espacio")
+
+
+def test_precalentar_llena_la_cache():
+    r = Renderer("stardew8", SKIN, zoom=4)
+    r.precalentar()
+    esperado = sum(r.n_cuadros(a) for a in ("idle", "run", "jump", "crouch")) * 8
+    assert len(r._cache) == esperado

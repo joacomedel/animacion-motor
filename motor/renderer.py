@@ -33,6 +33,14 @@ def _superficie(img: Image.Image) -> pygame.Surface:
     return pygame.image.fromstring(img.tobytes(), img.size, "RGBA")
 
 
+def _paleta_con_dano(paleta: dict) -> dict:
+    """Paleta con la piel teñida de rojo para representar daño (sin regenerar PNGs)."""
+    p = {k: dict(v) if isinstance(v, dict) else v for k, v in paleta.items()}
+    if isinstance(p.get("piel"), dict):
+        p["piel"] = {**p["piel"], "base": "#ff5a5a"}
+    return p
+
+
 class Renderer:
     """Renderiza el personaje del kit de sprites como pixel art en tiempo real.
 
@@ -52,10 +60,85 @@ class Renderer:
             raise ValueError("zoom debe ser >= 1")
         self.estilo = estilo
         self.zoom = int(zoom)
-        self.ficha = skins.ficha(skin)
+        self.skin_ruta = skin
+        self.arma = None
+        self.dano = False
+        self.ambiente = "dia"
+        self.ficha = self._construir_ficha()
         self.pivote = armado.pivote(estilo)
         self._cache = {}
         self._piso = None
+        # capas de tinte de iluminación en tiempo real (baratas: no re-renderizan 3D)
+        self._ambientes = {
+            "dia": None,
+            "tarde": (255, 140, 60, 60),
+            "noche": (20, 20, 90, 110),
+        }
+        self._capa_ambiente = {}
+
+    def _construir_ficha(self):
+        """Ficha de la skin actual, con arma y/o daño si están activos."""
+        if self.arma:
+            f = skins.ficha_con_arma(self.skin_ruta, self.arma)
+        else:
+            f = skins.ficha(self.skin_ruta)
+        if self.dano:
+            f = {**f, "paleta": _paleta_con_dano(f["paleta"])}
+        return f
+
+    def _limpiar(self):
+        self._cache.clear()
+
+    # --- skins en tiempo real (task-012) ---
+
+    def set_skin(self, ruta: str):
+        """Cambia la skin en caliente: se reconstruye la ficha y se invalida la caché."""
+        self.skin_ruta = ruta
+        self.ficha = self._construir_ficha()
+        self._limpiar()
+
+    def set_arma(self, arma):
+        """Pone/quita un arma en la mano (espada, hacha, antorcha, escudo, bastón)."""
+        self.arma = arma
+        self.ficha = self._construir_ficha()
+        self._limpiar()
+
+    def set_dano(self, activo: bool):
+        """Representa daño: tiñe la piel de rojo sin regenerar PNGs."""
+        self.dano = bool(activo)
+        self.ficha = self._construir_ficha()
+        self._limpiar()
+
+    # --- iluminación en tiempo real (task-013) ---
+
+    def set_ambiente(self, nombre: str):
+        if nombre not in self._ambientes:
+            raise ValueError(
+                f"ambiente desconocido {nombre!r}; disponibles: {', '.join(self._ambientes)}"
+            )
+        self.ambiente = nombre
+
+    def capa_ambiente(self, ancho: int, alto: int):
+        """Capa de tinte para el ambiente actual (None = día, sin tinte)."""
+        color = self._ambientes[self.ambiente]
+        if color is None:
+            return None
+        clave = (ancho, alto, self.ambiente)
+        capa = self._capa_ambiente.get(clave)
+        if capa is None:
+            capa = pygame.Surface((ancho, alto), pygame.SRCALPHA)
+            capa.fill(color)
+            self._capa_ambiente[clave] = capa
+        return capa
+
+    # --- caché (task-011 / task-016) ---
+
+    def precalentar(self):
+        """Renderiza todas las combinaciones una vez para que ningún frame en vivo page 3D."""
+        for anim in ANIM_A_POSE:
+            for d in ESTILOS[self.estilo]["direcciones"]:
+                for f in range(self.n_cuadros(anim)):
+                    self._superficie(anim, d, f)
 
     def _pose(self, anim: str) -> str:
         """Traduce la animación del motor al nombre de pose del kit."""

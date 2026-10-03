@@ -1,6 +1,6 @@
 # task-016 — Pre-calentar la caché del renderer
 
-**Estado:** pendiente
+**Estado:** completada (2026-10-02)
 **Origen:** benchmark del renderer (2026-10-02).
 
 ## Problema

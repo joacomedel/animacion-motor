@@ -1,6 +1,6 @@
 # task-013 — Iluminación en tiempo real (feature opcional)
 
-**Estado:** pendiente
+**Estado:** completada (2026-10-02)
 **Origen:** pedido original del motor (2026-10-02); "posible feature".
 
 ## Contexto

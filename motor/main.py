@@ -13,6 +13,15 @@ from motor.game_loop import GameLoop
 from motor.renderer import Renderer
 from motor.input_handler import InputHandler
 
+# skins que se pueden cambiar en caliente (teclas 1-4)
+SKINS = [
+    "skins/aldeano_bosque.png",
+    "skins/caballero_carmesi.png",
+    "skins/mago.png",
+    "skins/vampira.png",
+]
+AMBIENTES = ["dia", "tarde", "noche"]
+
 
 def main():
     """Función principal del motor visual."""
@@ -29,6 +38,11 @@ def main():
     input_handler = InputHandler()
     fuente = pygame.font.Font(None, 24)
 
+    # Pre-calentar la caché: ningún frame en vivo paga el costo del render 3D
+    print("Pre-calentando caché del renderer...")
+    renderer.precalentar()
+    print(f"Caché lista: {len(renderer._cache)} cuadros")
+
     # Estado inicial
     estado_inicial = Estado(x=0, y=0, z=0, animacion="idle", direccion="S", frame=0)
     game_loop.iniciar(estado_inicial)
@@ -43,6 +57,21 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
+                elif event.key == pygame.K_1:
+                    renderer.set_skin(SKINS[0])
+                elif event.key == pygame.K_2:
+                    renderer.set_skin(SKINS[1])
+                elif event.key == pygame.K_3:
+                    renderer.set_skin(SKINS[2])
+                elif event.key == pygame.K_4:
+                    renderer.set_skin(SKINS[3])
+                elif event.key == pygame.K_g:
+                    renderer.set_arma(None if renderer.arma else "espada")
+                elif event.key == pygame.K_d:
+                    renderer.set_dano(not renderer.dano)
+                elif event.key == pygame.K_l:
+                    i = (AMBIENTES.index(renderer.ambiente) + 1) % len(AMBIENTES)
+                    renderer.set_ambiente(AMBIENTES[i])
 
         # Input
         input = input_handler.actualizar()
@@ -75,12 +104,22 @@ def main():
                 int(SCREEN_HEIGHT * 0.68) - py - int(estado_interpolado.z),
             )
             screen.blit(personaje, destino)
+
+            # Iluminación en tiempo real: capa de tinte sobre la escena
+            capa = renderer.capa_ambiente(SCREEN_WIDTH, SCREEN_HEIGHT)
+            if capa is not None:
+                screen.blit(capa, (0, 0))
         except Exception as e:
             print(f"Error renderizando: {e}")
 
         # HUD: FPS y estado
         fps = clock.get_fps()
-        hud = f"{fps:4.0f} FPS  {estado_interpolado.animacion} {estado_interpolado.direccion} f={estado_interpolado.frame}"
+        skin = renderer.skin_ruta.split("/")[-1].replace(".png", "")
+        hud = (
+            f"{fps:4.0f} FPS  {estado_interpolado.animacion} {estado_interpolado.direccion} "
+            f"f={estado_interpolado.frame}  skin={skin} arma={renderer.arma or '-'} "
+            f"dano={'SI' if renderer.dano else 'no'} amb={renderer.ambiente}"
+        )
         screen.blit(fuente.render(hud, True, (230, 230, 240)), (8, 8))
 
         # Actualizar pantalla

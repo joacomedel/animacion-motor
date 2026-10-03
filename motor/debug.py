@@ -56,6 +56,15 @@ def main():
         pygame.image.save(screen, f"debug_frame_{i}.png")
         print(f"Frame {i}: {desc}")
 
+    # features en tiempo real: arma + daño + noche (sin regenerar PNGs)
+    r2 = Renderer("stardew8", skin="skins/caballero_carmesi.png", zoom=4)
+    r2.set_arma("espada")
+    r2.set_dano(True)
+    r2.set_ambiente("noche")
+    escena(r2, Estado(x=0, y=0, z=0, animacion="run", direccion="S", frame=2), screen)
+    pygame.image.save(screen, "debug_frame_6.png")
+    print("Frame 6: run S con espada + daño + noche")
+
     pygame.quit()
     print("\nImágenes guardadas como debug_frame_*.png")
 
