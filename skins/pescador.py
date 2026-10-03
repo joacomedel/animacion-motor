@@ -128,9 +128,7 @@ for lado in ("derecha", "izquierda"):
     llenar(z, "pantalon_b", filas=[4])  # rodillera
     llenar(z, "cuerda", filas=[6])  # vuelta del botín
     llenar(z, "calzado", filas=range(7, 10))
-    llenar(
-        z, "calzado_b", filas=[7]
-    )  # 一年内 горутина de la bota (se espeja fila a fila)
+    llenar(z, "calzado_b", filas=[7])  # caña de la bota (se espeja fila a fila)
 
 llenar("iris", "iris")
 
