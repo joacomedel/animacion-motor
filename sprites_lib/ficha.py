@@ -1,5 +1,6 @@
 """Fichas de personaje: cargar el YAML y validarlo antes de generar nada. Los errores dicen qué está mal y,
 si es un nombre mal escrito, sugieren el correcto (como el validador del generador LPC)."""
+
 import difflib
 import os
 
@@ -12,14 +13,38 @@ from .estilos import ESTILOS, VERIFICACION
 from .paleta import HEX
 
 CARPETA = os.path.join("personajes", "fichas")
-TOPES = {"identidad", "cuerpo", "paleta", "componentes", "reglas_globales", "excepciones", "decisiones",
-         "objeciones_resueltas", "creditos", "estilos"}
-CLAVES_CUERPO = {"base", "clase_altura", "complexion", "piel", "cabello", "sustituciones", "ausentes"}
+TOPES = {
+    "identidad",
+    "cuerpo",
+    "paleta",
+    "componentes",
+    "reglas_globales",
+    "excepciones",
+    "decisiones",
+    "objeciones_resueltas",
+    "creditos",
+    "estilos",
+}
+CLAVES_CUERPO = {
+    "base",
+    "clase_altura",
+    "complexion",
+    "piel",
+    "cabello",
+    "sustituciones",
+    "ausentes",
+}
 CLAVES_COMP = {"tipo", "ancla", "material", "parametros", "por_que", "reglas", "nuevo"}
 CABELLOS = {"calvo", "rapado", "corto", "cresta"}
 REGLAS_COMP = {"visible_si_ancla_visible", "siempre_visible", "simetrico"}
-REGLAS_GLOBALES = {"paleta_identica_entre_direcciones", "lineas_guia", "nada_recortado", "tamano_de_clase",
-                   "cara_visible_en", "distinto_de"}
+REGLAS_GLOBALES = {
+    "paleta_identica_entre_direcciones",
+    "lineas_guia",
+    "nada_recortado",
+    "tamano_de_clase",
+    "cara_visible_en",
+    "distinto_de",
+}
 
 
 class FichaInvalida(ValueError):
@@ -29,7 +54,9 @@ class FichaInvalida(ValueError):
 
 
 def _sug(x, opciones):
-    m = difflib.get_close_matches(str(x).replace("ñ", "n"), list(opciones), n=1, cutoff=.6)
+    m = difflib.get_close_matches(
+        str(x).replace("ñ", "n"), list(opciones), n=1, cutoff=0.6
+    )
     return f" (¿quisiste decir {m[0]!r}?)" if m else ""
 
 
@@ -41,7 +68,7 @@ def _regla_ok(r):
     if r in REGLAS_COMP:
         return True
     if isinstance(r, str) and r.startswith("ausente_mas_alla_de_"):
-        return r[len("ausente_mas_alla_de_"):] in PADRE
+        return r[len("ausente_mas_alla_de_") :] in PADRE
     return False
 
 
@@ -63,13 +90,21 @@ def validar(f, estilos=None):
     for k in sorted(set(cu) - CLAVES_CUERPO):
         e.append(f"cuerpo: clave desconocida {k!r}{_sug(k, CLAVES_CUERPO)}")
     if cu.get("base") != "humano":
-        e.append(f"cuerpo.base {cu.get('base')!r} no soportado (por ahora solo 'humano')")
+        e.append(
+            f"cuerpo.base {cu.get('base')!r} no soportado (por ahora solo 'humano')"
+        )
     if cu.get("clase_altura", "adulto") not in CLASES:
-        e.append(f"cuerpo.clase_altura {cu.get('clase_altura')!r} no existe{_sug(cu.get('clase_altura'), CLASES)}")
+        e.append(
+            f"cuerpo.clase_altura {cu.get('clase_altura')!r} no existe{_sug(cu.get('clase_altura'), CLASES)}"
+        )
     if cu.get("complexion", "normal") not in COMPLEXIONES:
-        e.append(f"cuerpo.complexion {cu.get('complexion')!r} no existe{_sug(cu.get('complexion'), COMPLEXIONES)}")
+        e.append(
+            f"cuerpo.complexion {cu.get('complexion')!r} no existe{_sug(cu.get('complexion'), COMPLEXIONES)}"
+        )
     if cu.get("cabello", "corto") not in CABELLOS:
-        e.append(f"cuerpo.cabello {cu.get('cabello')!r} no existe; opciones: {', '.join(sorted(CABELLOS))}")
+        e.append(
+            f"cuerpo.cabello {cu.get('cabello')!r} no existe; opciones: {', '.join(sorted(CABELLOS))}"
+        )
     for aus in cu.get("ausentes") or []:
         if aus not in VOCABULARIO:
             e.append(f"cuerpo.ausentes: {aus!r} no existe{_sug(aus, VOCABULARIO)}")
@@ -82,8 +117,12 @@ def validar(f, estilos=None):
         e.append("paleta: falta el material 'piel' (lo usan cara y manos)")
     if cu.get("cabello", "corto") == "corto" and "pelo" not in pal:
         e.append("paleta: falta 'pelo' (cabello: corto)")
-    materiales = set(pal) | {f"{m}_b" for m in pal} | ({"mano"} if "piel" in pal else set())
-    estilos = estilos or f.get("estilos") or [k for k in ESTILOS if k not in VERIFICACION]
+    materiales = (
+        set(pal) | {f"{m}_b" for m in pal} | ({"mano"} if "piel" in pal else set())
+    )
+    estilos = (
+        estilos or f.get("estilos") or [k for k in ESTILOS if k not in VERIFICACION]
+    )
     for est in estilos:
         if est not in ESTILOS:
             e.append(f"estilo desconocido {est!r}{_sug(est, ESTILOS)}")
@@ -109,7 +148,9 @@ def validar(f, estilos=None):
             if an not in VOCABULARIO:
                 e.append(f"{donde}: ancla {an!r} no existe{_sug(an, VOCABULARIO)}")
             elif comp.anclas_validas and an not in comp.anclas_validas:
-                e.append(f"{donde}: no se puede poner en {an!r}; válidas: {', '.join(comp.anclas_validas)}")
+                e.append(
+                    f"{donde}: no se puede poner en {an!r}; válidas: {', '.join(comp.anclas_validas)}"
+                )
             elif an in ausentes:
                 e.append(f"{donde}: el ancla {an!r} está ausente en cuerpo.ausentes")
             if (t, an) in vistos:
@@ -117,42 +158,75 @@ def validar(f, estilos=None):
             vistos.add((t, an))
         mat = c.get("material") or comp.material_defecto
         if mat and mat not in materiales:
-            e.append(f"{donde}: el material {mat!r} no está en la paleta{_sug(mat, materiales)}")
+            e.append(
+                f"{donde}: el material {mat!r} no está en la paleta{_sug(mat, materiales)}"
+            )
         params = c.get("parametros") or {}
         for k, val in params.items():
             if k not in comp.params_defecto:
-                e.append(f"{donde}: parámetro desconocido {k!r}{_sug(k, comp.params_defecto)}")
-            elif k in comp.params_material and val is not None and val not in materiales:
-                e.append(f"{donde}: parámetros.{k} = {val!r} no es un material de la paleta")
+                e.append(
+                    f"{donde}: parámetro desconocido {k!r}{_sug(k, comp.params_defecto)}"
+                )
+            elif (
+                k in comp.params_material and val is not None and val not in materiales
+            ):
+                e.append(
+                    f"{donde}: parámetros.{k} = {val!r} no es un material de la paleta"
+                )
+            elif (
+                k in comp.params_opciones
+                and val is not None
+                and val not in comp.params_opciones[k]
+            ):
+                opciones = ", ".join(repr(o) for o in comp.params_opciones[k])
+                e.append(
+                    f"{donde}: parámetros.{k} = {val!r} no es válido (opciones: {opciones})"
+                )
         for r in c.get("reglas") or []:
             if not _regla_ok(r):
                 e.append(f"{donde}: regla desconocida {r!r}{_sug(r, REGLAS_COMP)}")
         for est in estilos:
             if est in ESTILOS and est not in comp.estilos:
-                e.append(f"{donde}: no soporta el estilo {est!r} (soporta: {', '.join(comp.estilos)})")
+                e.append(
+                    f"{donde}: no soporta el estilo {est!r} (soporta: {', '.join(comp.estilos)})"
+                )
     for seg, tipo in (cu.get("sustituciones") or {}).items():
         if seg not in SEGMENTOS or seg.startswith("antebrazo"):
-            e.append(f"cuerpo.sustituciones: {seg!r} no es un segmento sustituible (brazo_*/pierna_*)")
+            e.append(
+                f"cuerpo.sustituciones: {seg!r} no es un segmento sustituible (brazo_*/pierna_*)"
+            )
         if tipo not in REGISTRO:
-            e.append(f"cuerpo.sustituciones.{seg}: componente {tipo!r} no existe{_sug(tipo, REGISTRO)}")
+            e.append(
+                f"cuerpo.sustituciones.{seg}: componente {tipo!r} no existe{_sug(tipo, REGISTRO)}"
+            )
         elif (tipo, seg) not in vistos:
-            e.append(f"cuerpo.sustituciones.{seg}: no hay un componente {tipo!r} con ancla {seg!r} en componentes")
+            e.append(
+                f"cuerpo.sustituciones.{seg}: no hay un componente {tipo!r} con ancla {seg!r} en componentes"
+            )
     todas_dirs = {d for est in ESTILOS.values() for d in est["direcciones"]}
     for r in f.get("reglas_globales") or []:
         nombre = next(iter(r)) if isinstance(r, dict) else r
         if nombre not in REGLAS_GLOBALES:
-            e.append(f"reglas_globales: regla desconocida {nombre!r}{_sug(nombre, REGLAS_GLOBALES)}")
+            e.append(
+                f"reglas_globales: regla desconocida {nombre!r}{_sug(nombre, REGLAS_GLOBALES)}"
+            )
         elif nombre == "cara_visible_en":
             for d in r[nombre]:
                 if d not in todas_dirs:
-                    e.append(f"reglas_globales.cara_visible_en: dirección desconocida {d!r}")
+                    e.append(
+                        f"reglas_globales.cara_visible_en: dirección desconocida {d!r}"
+                    )
     for i, ex in enumerate(f.get("excepciones") or []):
         if ex.get("regla") not in REGLAS_COMP:
             e.append(f"excepciones[{i}]: regla desconocida {ex.get('regla')!r}")
         if ex.get("componente") not in tipos_ficha:
-            e.append(f"excepciones[{i}]: excepción sobre {ex.get('componente')!r}, que no está en componentes")
+            e.append(
+                f"excepciones[{i}]: excepción sobre {ex.get('componente')!r}, que no está en componentes"
+            )
         if not ex.get("motivo"):
-            e.append(f"excepciones[{i}]: falta 'motivo' (una desviación sin motivo es un error)")
+            e.append(
+                f"excepciones[{i}]: falta 'motivo' (una desviación sin motivo es un error)"
+            )
         for d in ex.get("direcciones") or []:
             if d not in todas_dirs:
                 e.append(f"excepciones[{i}]: dirección desconocida {d!r}")
@@ -162,7 +236,11 @@ def validar(f, estilos=None):
 
 
 def cargar(ruta_o_nombre, validar_=True, estilos=None):
-    ruta = ruta_o_nombre if ruta_o_nombre.endswith((".yaml", ".yml")) else os.path.join(CARPETA, f"{ruta_o_nombre}.yaml")
+    ruta = (
+        ruta_o_nombre
+        if ruta_o_nombre.endswith((".yaml", ".yml"))
+        else os.path.join(CARPETA, f"{ruta_o_nombre}.yaml")
+    )
     if not os.path.exists(ruta):
         raise FileNotFoundError(f"no existe la ficha {ruta}")
     try:

@@ -275,3 +275,34 @@ def vecino():
         }
     f["paleta"]["runa"] = {"base": "#ff2fd0", "emisivo": True, "por_que": "test"}
     return f
+
+
+def espadachin():
+    """Ficha (dict) del héroe con una espada en la mano derecha y un escudo en la izquierda: ejercita el
+    componente `objeto` (materiales planos) y que el objeto siga la mano en los ciclos."""
+    f = heroe()
+    f["identidad"]["nombre"] = "Espadachín de prueba"
+    f["identidad"]["silueta_clave"] = "espada en la derecha + escudo en la izquierda"
+    f["paleta"]["acero"] = {"base": "#c8d2dc", "por_que": "test"}
+    f["paleta"]["cuero"] = {"base": "#5a3a28", "por_que": "test"}
+    f["componentes"].append(
+        {
+            "tipo": "objeto",
+            "ancla": "mano_derecha",
+            "material": "acero",
+            "parametros": {"forma": "espada", "mango": "cuero", "pomo": "oro"},
+            "por_que": "espada en la mano derecha",
+            "reglas": ["visible_si_ancla_visible"],
+        }
+    )
+    f["componentes"].append(
+        {
+            "tipo": "objeto",
+            "ancla": "mano_izquierda",
+            "material": "cuero",
+            "parametros": {"forma": "escudo", "detalle": "oro"},
+            "por_que": "escudo en la mano izquierda",
+            "reglas": ["visible_si_ancla_visible"],
+        }
+    )
+    return f

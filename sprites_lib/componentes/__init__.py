@@ -1,6 +1,7 @@
 """Biblioteca de componentes: cada pieza de un personaje (cabeza, brazo robótico, pulsera...) sabe dibujarse
 en su ancla con primitivas del motor 3D. Las lecciones de CRITERIOS_ANIMACION.md viven acá, en el código:
 así se aplican siempre, sin depender de que alguien se acuerde."""
+
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -10,11 +11,12 @@ REGISTRO = {}
 
 class Componente:
     tipo = ""
-    anclas_validas = ()             # vacío = cualquiera del vocabulario
+    anclas_validas = ()  # vacío = cualquiera del vocabulario
     estilos = ("stardew", "stardew8", "volumen", "lateral")
     params_defecto = {}
-    params_material = ()            # parámetros cuyo valor tiene que ser un material de la paleta (o None)
-    material_defecto = None         # material si la ficha no indica uno
+    params_material = ()  # parámetros cuyo valor tiene que ser un material de la paleta (o None)
+    params_opciones = {}  # parámetros con valores cerrados: {nombre: (opciones válidas)}
+    material_defecto = None  # material si la ficha no indica uno
 
     def dibujar(self, esc, ctx, spec):
         raise NotImplementedError
@@ -65,4 +67,4 @@ def perpendicular(eje):
     return p / np.linalg.norm(p)
 
 
-from . import humano, mago, robot, ropa, skin  # noqa: E402,F401  (registra todos los componentes)
+from . import humano, mago, objetos, robot, ropa, skin  # noqa: E402,F401  (registra todos los componentes)
