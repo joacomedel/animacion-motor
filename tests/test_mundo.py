@@ -1,6 +1,6 @@
 """Tests del mundo 2D y la cámara."""
 
-from motor.mundo import Mundo, MURO, PISO
+from motor.mundo import Mundo, MURO, PISO, ARBOL
 from motor.camara import Camara
 
 
@@ -51,3 +51,40 @@ def test_camara_clampa_en_bordes():
     assert c.seguir(0, 0) == (0, 0)
     # esquina inferior derecha
     assert c.seguir(m.ancho_px, m.alto_px) == (m.ancho_px - 800, m.alto_px - 600)
+
+
+# --- Tests de colisión (task-027) ---
+
+
+def test_colision_muro_bloquea():
+    m = Mundo(ancho=20, alto=10, tile=16)
+    m.mapa[5][5] = MURO
+    # el centro del muro bloquea
+    assert m.colisiona(5 * 16 + 8, 5 * 16 + 8, radio=4)
+    # un punto lejos del muro no bloquea
+    assert not m.colisiona(5 * 16 + 8, 5 * 16 + 8 + 20, radio=4)
+
+
+def test_colision_borde_sigue_bloqueando():
+    m = Mundo(ancho=20, alto=10, tile=16)
+    # el borde del mapa es muro
+    assert m.colisiona(0, 5 * 16 + 8, radio=4)
+    assert m.colisiona(19 * 16 + 8, 5 * 16 + 8, radio=4)
+    assert m.colisiona(5 * 16 + 8, 0, radio=4)
+    assert m.colisiona(5 * 16 + 8, 9 * 16 + 8, radio=4)
+
+
+def test_colision_arbol_no_bloquea():
+    m = Mundo(ancho=20, alto=10, tile=16)
+    m.mapa[5][5] = ARBOL
+    # ARBOL no bloquea el paso
+    assert not m.colisiona(5 * 16 + 8, 5 * 16 + 8, radio=4)
+
+
+def test_colision_radio_chico_no_es_celda_entera():
+    m = Mundo(ancho=20, alto=10, tile=16)
+    m.mapa[5][5] = MURO
+    # a 1 tile de distancia del muro no hay colisión (radio chico)
+    assert not m.colisiona(5 * 16 + 8, 7 * 16 + 8, radio=4)
+    # a 2px del borde del muro sí hay colisión
+    assert m.colisiona(5 * 16 + 8, 5 * 16 + 8 + 6, radio=4)

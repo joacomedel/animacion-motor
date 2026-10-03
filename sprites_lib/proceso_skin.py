@@ -30,7 +30,7 @@ import os
 import re
 import sys
 
-from . import armado, estado, exportar, gates, paleta, proceso_anim, skins
+from . import armado, estado, exportar, gates, proceso_anim, skins
 from .estilos import ESTILOS
 from .poses import POSES, fps, loop, offset_y
 
@@ -116,16 +116,15 @@ def fuentes_skin(nombre):
 
 def _por_dir_quieto(ruta, estilo):
     """Frames de `quieto` en todas las direcciones del estilo con la ficha de la skin: el mismo render que
-    `skins.salida_juego` (incluida la reducción de paleta del estilo), para la hoja y el `smoke.gif` congelados."""
+    `skins.salida_juego` (incluida la paleta del estilo: fija si el estilo la declara), para la hoja y el
+    `smoke.gif` congelados."""
     ficha = skins.ficha(ruta)
     n = POSES["quieto"]["n"]
     por_dir = {
         m: [armado.render_cuadro(ficha, estilo, "quieto", p, m).img for p in range(n)]
         for m in ESTILOS[estilo]["direcciones"]
     }
-    tope = ESTILOS[estilo]["render"].get("paleta_max")
-    if tope:
-        paleta.reducir_paleta(por_dir, tope)
+    skins.ajustar_a_paleta_fija(por_dir, estilo)
     return por_dir
 
 

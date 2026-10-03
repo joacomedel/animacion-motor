@@ -133,3 +133,65 @@ def test_precalentar_llena_la_cache():
     r.precalentar()
     esperado = sum(r.n_cuadros(a) for a in ("idle", "run", "jump", "crouch")) * 8
     assert len(r._cache) == esperado
+
+
+# --- Tests de depth-sorting (task-027) ---
+
+
+def test_elementos_ordenados_por_y():
+    """Los árboles y el personaje se dibujan ordenados por su Y del mundo."""
+    from motor.main import elementos_ordenados
+    from motor.mundo import Mundo, ARBOL
+
+    m = Mundo(ancho=20, alto=10, tile=16)
+    # limpiar y poner árboles conocidos
+    for y in range(10):
+        for x in range(20):
+            m.mapa[y][x] = 0
+    m.mapa[2][3] = ARBOL  # y = 2*16 = 32
+    m.mapa[7][5] = ARBOL  # y = 7*16 = 112
+    m.mapa[4][8] = ARBOL  # y = 4*16 = 64
+
+    # cámara en (0,0), viewport 800x600, personaje en y=80
+    elementos = elementos_ordenados(m, 0, 0, 800, 600, char_y=80)
+    # debe haber 4 elementos: 3 árboles + 1 personaje
+    assert len(elementos) == 4
+    # ordenados por Y: árbol y=32, árbol y=64, personaje y=80, árbol y=112
+    assert elementos[0] == ("arbol", 3, 2)
+    assert elementos[1] == ("arbol", 8, 4)
+    assert elementos[2] == ("personaje", None)
+    assert elementos[3] == ("arbol", 5, 7)
+
+
+def test_elementos_ordenados_personaje_por_detras():
+    """El personaje con Y mayor que un árbol se dibuja después (encima)."""
+    from motor.main import elementos_ordenados
+    from motor.mundo import Mundo, ARBOL
+
+    m = Mundo(ancho=20, alto=10, tile=16)
+    for y in range(10):
+        for x in range(20):
+            m.mapa[y][x] = 0
+    m.mapa[2][3] = ARBOL  # y = 32
+
+    # personaje abajo del árbol (y mayor)
+    elementos = elementos_ordenados(m, 0, 0, 800, 600, char_y=100)
+    assert elementos[0] == ("arbol", 3, 2)
+    assert elementos[1] == ("personaje", None)
+
+
+def test_elementos_ordenados_personaje_por_delante():
+    """El personaje con Y menor que un árbol se dibuja antes (detrás)."""
+    from motor.main import elementos_ordenados
+    from motor.mundo import Mundo, ARBOL
+
+    m = Mundo(ancho=20, alto=10, tile=16)
+    for y in range(10):
+        for x in range(20):
+            m.mapa[y][x] = 0
+    m.mapa[7][5] = ARBOL  # y = 112
+
+    # personaje arriba del árbol (y menor)
+    elementos = elementos_ordenados(m, 0, 0, 800, 600, char_y=50)
+    assert elementos[0] == ("personaje", None)
+    assert elementos[1] == ("arbol", 5, 7)
