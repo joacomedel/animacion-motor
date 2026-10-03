@@ -14,6 +14,7 @@ mago/*.gif
 sprites_x/*.png
 sprites_x/animaciones/
 sprites_x/boxes.json
+.archify/
 
 # referencias descargadas: sprites con copyright de terceros, solo para uso local como referencia
 referencias/

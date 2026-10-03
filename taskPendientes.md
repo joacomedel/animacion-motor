@@ -21,3 +21,4 @@ Lista plana: id + nombre corto. El detalle de cada una vive en `task/task-XXX.md
 - [ ] task-026 — Movimiento secundario (pelo/faldón/capa) e interpolación/blending de animaciones
 - [ ] task-027 — Colisiones con tiles y depth-sorting en el mundo
 - [ ] task-028 — La herramienta `edit` reformatea el Python entero al guardar (diffs inflados)
+- [ ] task-029 — `test_referencia_compara_especimen`: métrica `huerfanos` fuera de tolerancia
