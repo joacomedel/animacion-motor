@@ -52,7 +52,8 @@ def llenar(zona, col, filas=None, cols=None):
 
 
 # Cabeza: pelo con costados más oscuros y flequillo con vetas (mitad izquierda).
-llenar("cabeza", carmesi_o, filas=range(4, 8), cols=[0, 1])
+# Ojo: la col 0 de cada zona es la nuca (N); no pintarla con rojo o se ve rojo al mirar al N.
+llenar("cabeza", carmesi_o, filas=range(4, 8), cols=[1])
 llenar("cabeza", (0x4A, 0x38, 0x26), filas=[0, 1, 2], cols=[3, 7])  # vetas de pelo
 llenar("cabeza", (0x4A, 0x38, 0x26), filas=[3], cols=[7])  # flequillo con entrante
 
