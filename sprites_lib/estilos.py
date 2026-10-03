@@ -64,6 +64,11 @@ ESTILOS = {
             cara_hacia_camara=0.55,
             luz=(-0.25, 0.75, 0.6),  # .9 dejaba el perfil de frente
             paso=0.7,
+            # rebote en píxeles ENTEROS: sin esto el bob (~0.8 px de mundo) se redondea a 0 y caminar/saltar
+            # quedan sin rebote (el analizador daba rebote [0,0,0,...]; la referencia de Stardew rebota 1 px al
+            # pisar). Con fracciones, además, la pestaña/ceja caen en filas distintas según el cuadro y parpadean.
+            # Mismo arreglo que ya tenía stardew8 (estilos.py, abajo).
+            bob_px=True,
         ),  # celda de 16 px: el paso completo de LPC saca el pie de la celda
         tonos=dict(
             sombra=(0.66, (70, 40, 120), 0.25), luz=(1.22, (255, 236, 160), 0.2)

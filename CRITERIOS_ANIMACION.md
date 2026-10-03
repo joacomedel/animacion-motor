@@ -470,6 +470,16 @@ diagonales (vector ±0,7071). No está en `ACTIVOS`: `stardew` (4 dir.) sigue si
   - `zonas`: los umbrales en px (`ESCALABLES`) se escalan por alto del personaje respecto de stardew8 (fry8 ×2.08); stardew8 no cambia.
 - **Pendiente en fry8**: las cejas/ojos dejan puntos sueltos en la frente porque la skin de 32×32 se estira ~2×: hace falta skin
   64×64. Quedan 4 alertas MEDIA: salto de 2.4 px del centro de `torso_frente` en S (el brazo tapa y destapa; umbral 2.08).
+- **Rebote entero en `stardew` (2026-10-02)**: el perfil `stardew` no tenía `bob_px`, así que el `bob` (~0.8 px de mundo a
+  16 px) se redondeaba a 0 y caminar/saltar quedaban sin rebote: `sprites_lib.analizar` daba `rebote [0,0,0,...]` en
+  `caminar_lpc` E/W, contra 1 px de la referencia Stardew. Se copió el arreglo que ya tenía `stardew8`
+  (`estilos.ESTILOS["stardew"]["proporciones"]["bob_px"] = True`). Ahora `caminar_lpc` E/W da `rebote [1,1,0,0,1,1,0,0]`,
+  `golpear` `[0,1,2,2,1,0]`, `saltar` `[3,0,0,0,0,5]`. Efecto colateral aceptado (ya documentado en `stardew8`): con rebote
+  entero la cabeza tapa el cuello, así que el torso base queda oculto bajo la ropa; los tests de visibilidad de componentes
+  ahora exigen solo los componentes **declarados** (el cuerpo base desnudo lo valida `test_armado`).
+- **Objetos sostenidos (2026-10-02)**: componente `objeto` (`forma` espada/hacha/antorcha/escudo/bastón) enganchado a
+  `mano_derecha`/`mano_izquierda` y orientado con el antebrazo (`codo→mano`). Sigue la mano en todos los ciclos: blandir =
+  reusar `golpear`. Demo de iteración: `python -m sprites_lib.muneco objetos --anim golpear --formas espada,hacha`.
 
 ## Procesos del kit: estilo → animación → skin (2026-09-29)
 

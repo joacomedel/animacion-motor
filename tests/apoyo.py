@@ -33,6 +33,17 @@ def fichas_dir(base):
     return carpeta
 
 
+def declarados(ficha):
+    """ids ('tipo@ancla') de los componentes que declara la ficha, sin el cuerpo base que agrega `armado.expandir`.
+    Sirve para chequear visibilidad: el cuerpo base puede quedar tapado por la ropa (eso lo valida `test_armado`
+    sobre una ficha desnuda)."""
+    ids = set()
+    for c in ficha.get("componentes", []):
+        anclas = c["ancla"] if isinstance(c["ancla"], (list, tuple)) else [c["ancla"]]
+        ids.update(f"{c['tipo']}@{an}" for an in anclas)
+    return ids
+
+
 def guardar_ficha(carpeta, ficha, nombre):
     """Escribe la ficha como YAML en `carpeta` y devuelve la ruta."""
     ruta = os.path.join(str(carpeta), f"{nombre}.yaml")

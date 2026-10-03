@@ -29,7 +29,12 @@ def test_ficha_sintetica_es_valida(heroe):
 def test_cada_componente_se_ve_en_alguna_direccion(heroe, estilo):
     todo = render_todo(heroe, estilo, poses=("quieto",))
     specs = next(iter(todo.values()))[0].specs
+    declarados = apoyo.declarados(
+        heroe
+    )  # el cuerpo base tapado por la ropa lo valida test_armado (ficha desnuda)
     for s in specs:
+        if s["id"] not in declarados:
+            continue
         total = sum(pix(c, s["id"]) for frs in todo.values() for c in frs)
         assert total > 0, (estilo, s["id"])
 
