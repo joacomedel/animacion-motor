@@ -67,7 +67,7 @@ class Cuadro:
     bob: int
 
 
-def render_cuadro(ficha, estilo, pose, p, mira, ancho=None):
+def render_cuadro(ficha, estilo, pose, p, mira, ancho=None, bloom=False):
     cu = ficha["cuerpo"]
     clase = cu.get("clase_altura", "adulto")
     anat = anatomia(estilo, clase, cu.get("complexion", "normal"))
@@ -87,17 +87,18 @@ def render_cuadro(ficha, estilo, pose, p, mira, ancho=None):
         ctx = Contexto(anat=anat, a=a, ps=ps, estilo=estilo, est=est, cam_local=cam.cam_local, paleta=pal,
                        mira=mira, ausentes=aus, pieza_base=s["pieza_base"], cuadro=ps["cuadro"])
         REGISTRO[s["tipo"]].dibujar(esc, ctx, s)
-    img, buf = esc.render(estilo=est["render"], buffers=True)
+    img, buf = esc.render(estilo=est["render"], buffers=True, bloom=bloom)
     anclas_px = {k: tuple(float(x) for x in cam.proyectar(val)) for k, val in a.items()}
     return Cuadro(img=img, buf=buf, anclas_px=anclas_px, specs=specs, mira=mira, pose=pose, indice=p, cam=cam,
                   anat=anat, escala=anat.H / 28.0, bob=ps["bob"])
 
 
-def render_todo(ficha, estilo, poses=("neutra", "quieto")):
+def render_todo(ficha, estilo, poses=("neutra", "quieto"), bloom=False):
     out = {}
     for pn in poses:
         for mira in ESTILOS[estilo]["direcciones"]:
-            out[(pn, mira)] = [render_cuadro(ficha, estilo, pn, p, mira) for p in range(len(cuadros(pn)))]
+            out[(pn, mira)] = [render_cuadro(ficha, estilo, pn, p, mira, bloom=bloom)
+                               for p in range(len(cuadros(pn)))]
     return out
 
 

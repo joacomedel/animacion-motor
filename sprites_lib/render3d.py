@@ -118,8 +118,9 @@ def _dirs_n(n):
 class Escena:
     """Acumula puntos de superficie (posición, normal, material, pieza, componente) en ejes locales."""
 
-    def __init__(self, camara, paleta):
+    def __init__(self, camara, paleta, emisivos=("runa", "visor", "fuego", "arma_brillo")):
         self.cam, self.pal = camara, paleta
+        self.emisivos = set(emisivos)
         self.mats = list(paleta)
         self.P, self.Nn, self.M, self.K, self.C = [], [], [], [], []
         self.pieza = 0          # cambiarlo antes de agregar cada parte: da contorno entre piezas distintas
@@ -219,7 +220,7 @@ class Escena:
         self.detalles.append((np.asarray(p, float), tuple(int(x) for x in col), self.componente))
 
     # -------------------------------------------------------------- render
-    def render(self, contorno=(16, 10, 24), salto=3.2, salto_pieza=.8, estilo=None, buffers=False):
+    def render(self, contorno=(16, 10, 24), salto=3.2, salto_pieza=.8, estilo=None, buffers=False, bloom=False):
         """estilo (ver sprites_lib/estilos.py): umbrales de tonos, contorno 'negro'|'color'
         (el tono más oscuro del material vecino), interior 'negro'|'color'|'ninguno', sombreado 'luz'|'borde'.
         buffers=True devuelve además (depth, mat, pieza, comp, solido, normal, lam, comp_nombres,
@@ -329,12 +330,47 @@ class Escena:
                     objetivo = np.array(tonos[1], float) * ao["factor"]
                     osc = tuple(int(x) for x in permitidos[((permitidos - objetivo) ** 2).sum(1).argmin()])
                     img[ao_mask & (mat == k)] = (*osc, 255)
+        if bloom and self.P:
+            img = self._bloom(img, mat, solido)
         im = Image.fromarray(img, "RGBA")
         if not buffers:
             return im
         return im, dict(depth=depth, mat=mat, pieza=pieza, comp=comp, solido=solido,
                         normal=normal, lam=lam,
                         comp_nombres=list(self.comp_nombres), colores_detalle=colores_detalle)
+
+    def _bloom(self, img, mat, solido):
+        """Halo aditivo 1-2 px de materiales emisivos. No sangra el contorno exterior:
+        los píxeles nuevos se recortan al bounding box del sprite original."""
+        emi = np.isin(mat, [self.mats.index(m) for m in self.emisivos if m in self.mats])
+        if not emi.any():
+            return img
+        ys, xs = np.where(solido)
+        y0, y1, x0, x1 = ys.min(), ys.max(), xs.min(), xs.max()
+        col = np.zeros((*mat.shape, 3), float)
+        col[emi] = img[emi][:, :3]
+        halo = np.zeros(mat.shape, float)
+        actual = emi.copy()
+        for peso in (.6, .3):                       # 1 px: fuerte; 2 px: débil
+            sig = actual.copy()
+            for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+                sig |= _mover(actual, dy, dx, False)
+            nuevo = sig & ~actual
+            halo[nuevo] = peso
+            for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0)):   # el halo toma el color del emisivo
+                m = _mover(nuevo, dy, dx, False) & ~actual
+                col[m] = _mover(col, dy, dx, 0)[m]
+                actual |= m
+            actual = sig
+        halo[:y0] = halo[y1 + 1:] = 0; halo[:, :x0] = halo[:, x1 + 1:] = 0
+        out = img.copy()
+        op = solido & halo.astype(bool)
+        out[op] = np.clip(out[op].astype(float) + np.concatenate(
+            [col[op] * halo[op, None], np.zeros((int(op.sum()), 1))], 1), 0, 255).astype(np.uint8)
+        nue = halo.astype(bool) & ~solido
+        rgb = np.clip(col[nue] * halo[nue, None], 0, 255).astype(np.uint8)
+        out[nue] = np.concatenate([rgb, np.full((len(rgb), 1), 255, np.uint8)], 1)
+        return out
 
 
 def ik_sagital(a, b, l1, l2, doblez):
