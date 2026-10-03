@@ -17,9 +17,11 @@ def test_alto_por_clase():
 
 
 def test_celda_pivote_en_los_pies():
-    assert celda("stardew") == dict(cw=16, ch=32, gx=8, gy=30)
+    # el pivote (gy) no se mueve al agregar aire abajo: cambia cuántas filas hay bajo la línea de piso, para que la
+    # suela del pie y su contorno no se recorten (en 3/4 el pie más cercano cae hasta 5 px debajo del pivote)
+    assert celda("stardew") == dict(cw=16, ch=36, gx=8, gy=30)
     assert celda("volumen") == dict(cw=56, ch=60, gx=28, gy=52)
-    assert celda("lateral") == dict(cw=40, ch=40, gx=20, gy=38)
+    assert celda("lateral") == dict(cw=40, ch=42, gx=20, gy=38)
 
 
 def test_todas_las_clases_entran_en_su_celda():

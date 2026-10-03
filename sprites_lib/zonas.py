@@ -495,7 +495,7 @@ FALSAS = {
     "extremidad_en_movimiento": "brazo/mano/pierna/pie: su área visible cambia al caminar (se gira, se tapa); es esperable",
     "tapada_por_su_par": "la mano/pie desaparece justo donde está su par: lo tapa la otra pierna/brazo al cruzarse",
     "cambio_minimo": "la zona cambió <= 2 px en absoluto: en zonas chicas (orejas) eso ya pasa el 35 %% por el rebote",
-    "pie_al_piso": "contorno del pie tocando el borde de abajo: el pivote está a 2 px del borde por diseño",
+    "pie_al_piso": "contorno del pie tocando el borde de abajo: el pivote tiene 6 px de aire por diseño (celda 16x36)",
 }
 
 

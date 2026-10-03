@@ -6,10 +6,10 @@ Flujo: ficha YAML → `ficha.cargar` → `armado.render_cuadro` (cuerpo base + c
 | estilo | vista | direcciones | adulto px | celda | activo |
 |---|---|---|---|---|---|
 | volumen | iso | SE E NE N NW W SW S | 36 | 56×60 | no |
-| stardew | cenital | S E N W | 26 | 16×32 | sí |
-| lateral | lateral | E W | 33 | 40×40 | sí |
+| stardew | cenital | S E N W | 26 | 16×36 | sí |
+| lateral | lateral | E W | 33 | 40×42 | sí |
 | lpc | lateral | E W | 43 | 64×64 | no |
-| stardew8 | cenital | S SE E NE N NW W SW | 26 | 16×32 | no |
+| stardew8 | cenital | S SE E NE N NW W SW | 26 | 16×36 | no |
 | fry8 | cenital | S SE E NE N NW W SW | 54 | 48×64 | no |
 
 ## Anclas
@@ -128,7 +128,7 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 - `colores_permitidos(ficha, estilo)`
 - `t_paleta(ficha, estilo, todo)`
 - `t_tamano(ficha, estilo, todo)`
-- `t_recorte(todo)` Arriba no se toca nunca (ahí se cortan pelo y sombreros). A los costados puede llegar el contorno (Stardew
+- `t_recorte(todo)` Arriba no se toca nunca (ahí se cortan pelo y sombreros). Abajo tampoco: la suela del pie y su contorno tienen
 - `t_cara(ficha, estilo, todo)`
 - `t_simetria(ficha, estilo, todo)`
 - `t_distinto(ficha)`

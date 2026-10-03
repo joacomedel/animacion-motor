@@ -71,7 +71,7 @@ def test_json_con_la_estructura_pedida(tmp_path):
     js = json.loads(ruta.read_text())
     assert set(js["direcciones"]) == {"S", "E"} and js["zonas"] == list(Z.ZONAS)
     c = js["direcciones"]["S"]["cuadros"][0]
-    assert c["pivote"] == [10, 30] and c["celda"] == [20, 32]
+    assert c["pivote"] == [10, 30] and c["celda"] == [20, 36]
     cab = c["zonas"]["cabeza_frente"]
     assert (
         set(cab) == {"px", "bbox", "centro"}

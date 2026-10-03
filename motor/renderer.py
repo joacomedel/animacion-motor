@@ -75,6 +75,7 @@ class Renderer:
         self._cache_normal = {}
         self._ultima_normal = None
         self._piso = None
+        self._sombra = None
         # capas de tinte de iluminación en tiempo real (baratas: no re-renderizan 3D)
         self._ambientes = {
             "dia": None,
@@ -298,6 +299,19 @@ class Renderer:
     def pies(self) -> tuple:
         """Posición (x, y) de los pies dentro de la superficie renderizada (px de pantalla)."""
         return (self.pivote[0] * self.zoom, self.pivote[1] * self.zoom)
+
+    def sombra(self) -> pygame.Surface:
+        """Sombra elíptica del personaje (cacheada): lo amarra al piso.
+
+        En los juegos de este género el personaje pisa una sombra; sin ella flota.
+        """
+        if self._sombra is None:
+            w = max(8, self.pivote[0] * 2)
+            h = max(4, int(w * 0.42))
+            s = pygame.Surface((w, h), pygame.SRCALPHA)
+            pygame.draw.ellipse(s, (8, 6, 14, 130), [0, 0, w - 1, h - 1])
+            self._sombra = s
+        return self._sombra
 
     def piso(self, ancho: int, alto: int, scroll=(0.0, 0.0)):
         """Superficie del piso isométrico cacheada y el offset para scrollear.

@@ -9,3 +9,15 @@ Lista plana: id + nombre corto. El detalle de cada una vive en `task/task-XXX.md
 - [ ] task-005 — `salida/_review/`: decidir si se borra o se deja
 - [ ] task-006 — Subagentes cancelados devuelven "Subagent cancelled" con trabajo done
 - [ ] task-007 — Revisar los 5 scripts en `desde_colores` con el checklist de CRITERIOS_ANIMACION.md
+- [ ] task-017 — Paleta fija compartida por estilo
+- [ ] task-018 — Aplicar `paleta_fija` en el motor en vivo y en los diagnósticos
+- [ ] task-019 — Guardar buffers de normal y material por frame (base de re-iluminación)
+- [ ] task-020 — Iluminación dinámica real en el motor (luces puntuales/radiales sobre las normales)
+- [ ] task-021 — Modelo de luces key/fill/rim + oclusión de contacto por estilo
+- [ ] task-022 — Materiales con propiedades (specular, translúcido, rugoso) y texturas procedurales
+- [ ] task-023 — Bloom/halo para materiales emisivos (antorcha, runas, visor)
+- [ ] task-024 — Exportar normal map + material map por animación (iluminar en la GPU del juego)
+- [ ] task-025 — Paleta fija por rampa de material (en vez de snap píxel a píxel)
+- [ ] task-026 — Movimiento secundario (pelo/faldón/capa) e interpolación/blending de animaciones
+- [ ] task-027 — Colisiones con tiles y depth-sorting en el mundo
+- [ ] task-028 — La herramienta `edit` reformatea el Python entero al guardar (diffs inflados)

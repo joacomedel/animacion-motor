@@ -192,6 +192,15 @@ def main():
                         arbol_sup, (tx * mundo.tile - cam_x, ty * mundo.tile - cam_y)
                     )
                 else:  # personaje
+                    # sombra de contacto
+                    sombra = renderer.sombra()
+                    screen.blit(
+                        sombra,
+                        (
+                            int(char_px - cam_x - sombra.get_width() // 2),
+                            int(char_py - cam_y - sombra.get_height() // 2 - estado_interpolado.z),
+                        ),
+                    )
                     screen.blit(
                         personaje,
                         (
