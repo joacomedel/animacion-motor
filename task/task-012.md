@@ -1,6 +1,6 @@
 # task-012 — Skins en tiempo real (daño, guante, arma)
 
-**Estado:** completada (2026-10-02)
+**Estado:** completada (2026-10-03)
 **Origen:** pedido original del motor (2026-10-02); confirmado en la revisión.
 
 ## Contexto

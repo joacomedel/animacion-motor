@@ -65,6 +65,13 @@ def main():
     pygame.image.save(screen, "debug_frame_6.png")
     print("Frame 6: run S con espada + daño + noche")
 
+    # equipamiento: armadura + sombrero + guante + espada roja (task-012)
+    r3 = Renderer("stardew8", skin="skins/caballero_carmesi.png", zoom=4)
+    r3.set_equipo(["armadura_malla", "sombrero", "guante_cuero", "espada_roja"])
+    escena(r3, Estado(x=0, y=0, z=0, animacion="run", direccion="S", frame=2), screen)
+    pygame.image.save(screen, "debug_frame_7.png")
+    print("Frame 7: run S equipado (armadura, sombrero, guante, espada roja)")
+
     pygame.quit()
     print("\nImágenes guardadas como debug_frame_*.png")
 

@@ -16,6 +16,7 @@ Flujo: ficha YAML → `ficha.cargar` → `armado.render_cuadro` (cuerpo base + c
 antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, cabeza, cadera_derecha, cadera_izquierda, cara, cintura, codo_derecho, codo_izquierdo, coronilla, cuello, frente, hombro_derecho, hombro_izquierdo, mano_derecha, mano_izquierda, muneca_derecha, muneca_izquierda, nuca, ojo_derecho, ojo_izquierdo, pecho, pie_derecho, pie_izquierdo, pierna_derecha, pierna_izquierda, rodilla_derecha, rodilla_izquierda, sien_derecha, sien_izquierda, suelo, tobillo_derecho, tobillo_izquierdo, torso
 
 ## Componentes (tipo · anclas · material por defecto · parámetros)
+- `armadura` · torso · metal · —
 - `botas` · pie_derecho, pie_izquierdo · bota · suela=None
 - `brazo_humano` · brazo_derecho, brazo_izquierdo · piel · —
 - `brazo_robotico` · brazo_derecho, brazo_izquierdo · metal · juntas=None, rayas=None, mano='pinza_3_dedos'
@@ -26,6 +27,7 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 - `cables_nuca` · nuca · cable · cables=2, luz_en_punta=None, largo='corto'
 - `camisa` · torso · ropa · mangas='cortas'
 - `cinturon` · cintura · cuero · hebilla=None
+- `guante` · mano_derecha, mano_izquierda · cuero · —
 - `munon_cables` · codo_derecho, codo_izquierdo, rodilla_derecha, rodilla_izquierda · cable · cables=3, largo_px=2, chispa=None, chispa_cada_cuadros=3
 - `objeto` · mano_derecha, mano_izquierda · metal · forma='espada', largo=8.0, angulo=0.0, agarre='antebrazo', mango=None, pomo=None, guarda=None, detalle=None
 - `ojos` · cara · — · solo=None, iris=None
@@ -37,6 +39,7 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 - `pulsera` · muneca_derecha, muneca_izquierda · oro · grosor=1.0
 - `rastas` · cabeza · pelo · cantidad=6, largo='hombros', cuentas=None
 - `remera_larga_rota` · torso · ropa · largo='medio_muslo', jirones=3, sin_mangas=True
+- `sombrero` · coronilla · cuero · alto=1.0
 - `tatuaje_runas` · brazo_derecho, brazo_izquierdo · runa · puntos_por_segmento=1
 - `torso_humano` · torso · piel · —
 - `torso_skin` · torso · — · skin=None

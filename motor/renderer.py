@@ -63,7 +63,9 @@ class Renderer:
         self.skin_ruta = skin
         self.arma = None
         self.dano = False
+        self.equipo = []
         self.ambiente = "dia"
+        self.ficha_base = skins.ficha(skin)
         self.ficha = self._construir_ficha()
         self.pivote = armado.pivote(estilo)
         self._cache = {}
@@ -77,13 +79,17 @@ class Renderer:
         self._capa_ambiente = {}
 
     def _construir_ficha(self):
-        """Ficha de la skin actual, con arma y/o daño si están activos."""
+        """Ficha de la skin actual, con arma, daño y equipo si están activos."""
         if self.arma:
             f = skins.ficha_con_arma(self.skin_ruta, self.arma)
         else:
-            f = skins.ficha(self.skin_ruta)
+            f = self.ficha_base
         if self.dano:
             f = {**f, "paleta": _paleta_con_dano(f["paleta"])}
+        if self.equipo:
+            from .equipo import ficha_con_equipo
+
+            f = ficha_con_equipo(f, self.equipo)
         return f
 
     def _limpiar(self):
@@ -106,6 +112,14 @@ class Renderer:
     def set_dano(self, activo: bool):
         """Representa daño: tiñe la piel de rojo sin regenerar PNGs."""
         self.dano = bool(activo)
+        self.ficha = self._construir_ficha()
+        self._limpiar()
+
+    def set_equipo(self, items):
+        """Equipa una lista de ítems (ver `motor.equipo.ITEMS`): reconstruye la ficha y limpia la caché."""
+        from .equipo import Equipo
+
+        self.equipo = Equipo(items).items
         self.ficha = self._construir_ficha()
         self._limpiar()
 

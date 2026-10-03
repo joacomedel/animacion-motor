@@ -12,6 +12,7 @@ from motor.logica import LogicaSimulada
 from motor.game_loop import GameLoop
 from motor.renderer import Renderer
 from motor.input_handler import InputHandler
+from motor.equipo import Equipo
 
 # skins que se pueden cambiar en caliente (teclas 1-4)
 SKINS = [
@@ -43,6 +44,12 @@ def main():
     renderer.precalentar()
     print(f"Caché lista: {len(renderer._cache)} cuadros")
 
+    equipo = Equipo()
+
+    def toggle(item):
+        equipo.alternar(item)
+        renderer.set_equipo(equipo.items)
+
     # Estado inicial
     estado_inicial = Estado(x=0, y=0, z=0, animacion="idle", direccion="S", frame=0)
     game_loop.iniciar(estado_inicial)
@@ -65,8 +72,16 @@ def main():
                     renderer.set_skin(SKINS[2])
                 elif event.key == pygame.K_4:
                     renderer.set_skin(SKINS[3])
-                elif event.key == pygame.K_g:
-                    renderer.set_arma(None if renderer.arma else "espada")
+                elif event.key == pygame.K_q:
+                    toggle("espada")
+                elif event.key == pygame.K_e:
+                    toggle("antorcha")
+                elif event.key == pygame.K_r:
+                    toggle("sombrero")
+                elif event.key == pygame.K_f:
+                    toggle("armadura_malla")
+                elif event.key == pygame.K_c:
+                    toggle("guante_cuero")
                 elif event.key == pygame.K_d:
                     renderer.set_dano(not renderer.dano)
                 elif event.key == pygame.K_l:
@@ -115,9 +130,10 @@ def main():
         # HUD: FPS y estado
         fps = clock.get_fps()
         skin = renderer.skin_ruta.split("/")[-1].replace(".png", "")
+        equipo_txt = ",".join(equipo.items) or "-"
         hud = (
             f"{fps:4.0f} FPS  {estado_interpolado.animacion} {estado_interpolado.direccion} "
-            f"f={estado_interpolado.frame}  skin={skin} arma={renderer.arma or '-'} "
+            f"f={estado_interpolado.frame}  skin={skin} equipo=[{equipo_txt}] "
             f"dano={'SI' if renderer.dano else 'no'} amb={renderer.ambiente}"
         )
         screen.blit(fuente.render(hud, True, (230, 230, 240)), (8, 8))
