@@ -56,7 +56,9 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 ### `paleta` — Paleta de un personaje por estilo: la ficha da solo el tono base de cada material; el estilo deriva
 - `hex_rgb(h)`
 - `tonos(base, regla, emisivo=False)` (sombra, base, luz). Los emisivos (runas, visor) no se oscurecen: brillan igual en todos lados.
-- `paleta_estilo(paleta_ficha, estilo)` {material: (sombra, base, luz)}. Agrega '<material>_b' (variante un poco más oscura para texturas:
+- `Material(tonos, especular=0.0, transmision=0.0, textura=None, rugosidad=0.5)` Subclass de tuple (sombra, base, luz) con props de render.
+- `MATERIALES_BASE` {nombre: {base, especular, transmision, rugosidad, ...}} Materiales estándar de equipamiento (cuero, metal, oro, tela, madera, fuego, agua, cristal, piedra, tierra).
+- `paleta_estilo(paleta_ficha, estilo)` {material: Material}. Agrega '<material>_b' (variante un poco más oscura para texturas:
 - `reducir_paleta(por_dir, n)` Deja a lo sumo `n` colores en TODAS las direcciones y cuadros a la vez ({dir: [imágenes RGBA]}, in situ).
 
 ### `estilos` — Perfiles de estilo: cómo se "ve" un sprite, independiente de qué personaje es y de cómo se mueve.
