@@ -30,6 +30,7 @@ class Mundo:
         self.tile = tile
         self.mapa = [[PISO] * ancho for _ in range(alto)]
         self._superficie = None
+        self._superficie_piso = None
         self._generar()
 
     def _generar(self):
@@ -60,12 +61,80 @@ class Mundo:
             return self.mapa[ty][tx]
         return MURO
 
+    def colisiona(self, px, py, radio=4):
+        """True si el círculo (px, py, radio) toca un tile MURO.
+
+        Usa el punto de los pies + un radio chico, no la celda entera.
+        ARBOL no bloquea.
+        """
+        tx = int(px // self.tile)
+        ty = int(py // self.tile)
+        for dy in range(-1, 2):
+            for dx in range(-1, 2):
+                if self.tile_en(tx + dx, ty + dy) == MURO:
+                    # distancia del círculo al tile vecino
+                    cx = max((tx + dx) * self.tile, min(px, (tx + dx + 1) * self.tile))
+                    cy = max((ty + dy) * self.tile, min(py, (ty + dy + 1) * self.tile))
+                    if (px - cx) ** 2 + (py - cy) ** 2 < radio**2:
+                        return True
+        return False
+
+    def arboles_visibles(self, cam_x, cam_y, vx, vy):
+        """Lista de (tx, ty) de árboles visibles, ordenados por Y (para depth-sorting)."""
+        tx0 = max(0, cam_x // self.tile)
+        ty0 = max(0, cam_y // self.tile)
+        tx1 = min(self.ancho - 1, (cam_x + vx) // self.tile)
+        ty1 = min(self.alto - 1, (cam_y + vy) // self.tile)
+        arboles = []
+        for ty in range(ty0, ty1 + 1):
+            for tx in range(tx0, tx1 + 1):
+                if self.mapa[ty][tx] == ARBOL:
+                    arboles.append((tx, ty))
+        return arboles
+
     def superficie(self):
         """Superficie del mundo pre-renderizada (se genera una sola vez)."""
         if self._superficie is None:
             img = self._render()
             self._superficie = pygame.image.fromstring(img.tobytes(), img.size, "RGBA")
         return self._superficie
+
+    def superficie_piso(self):
+        """Superficie del piso con muros (sin árboles) para depth-sorting."""
+        if self._superficie_piso is None:
+            img = self._render_piso()
+            self._superficie_piso = pygame.image.fromstring(
+                img.tobytes(), img.size, "RGBA"
+            )
+        return self._superficie_piso
+
+    def _render_piso(self):
+        img = piso_iso(self.ancho_px, self.alto_px).convert("RGBA")
+        d = ImageDraw.Draw(img)
+        t = self.tile
+        for y in range(self.alto):
+            for x in range(self.ancho):
+                tipo = self.mapa[y][x]
+                cx, cy = x * t, y * t
+                if tipo == MURO:
+                    d.rectangle(
+                        [cx + 1, cy + 1, cx + t - 1, cy + t - 1],
+                        fill=(72, 72, 92, 255),
+                        outline=(38, 38, 52, 255),
+                    )
+        return img
+
+    def _render_arbol(self, tx, ty):
+        """Renderiza un árbol individual como superficie transparente."""
+        t = self.tile
+        img = Image.new("RGBA", (t, t), (0, 0, 0, 0))
+        d = ImageDraw.Draw(img)
+        d.ellipse(
+            [3, 3, t - 3, t - 3],
+            fill=(40, 110, 50, 255),
+            outline=(18, 58, 28, 255),
+        )
+        return pygame.image.fromstring(img.tobytes(), img.size, "RGBA")
 
     def _render(self):
         img = piso_iso(self.ancho_px, self.alto_px).convert("RGBA")

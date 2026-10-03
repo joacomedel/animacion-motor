@@ -14,8 +14,24 @@ from motor.game_loop import GameLoop
 from motor.renderer import Renderer
 from motor.input_handler import InputHandler
 from motor.equipo import Equipo
-from motor.mundo import Mundo
+from motor.mundo import Mundo, ARBOL
 from motor.camara import Camara
+
+
+def elementos_ordenados(mundo, cam_x, cam_y, vx, vy, char_y):
+    """Elementos a dibujar ordenados por Y: árboles y personaje.
+
+    Returns:
+        Lista de tuplas ("arbol", tx, ty) y ("personaje", None),
+        ordenadas por Y del mundo en píxeles (ty*tile para árboles, char_y para personaje).
+    """
+    arboles = mundo.arboles_visibles(cam_x, cam_y, vx, vy)
+    elementos = [("arbol", tx, ty) for (tx, ty) in arboles]
+    elementos.append(("personaje", None))
+    # ordenar por Y en píxeles: árboles por ty * tile, personaje por char_y
+    elementos.sort(key=lambda e: e[2] * mundo.tile if e[0] == "arbol" else char_y)
+    return elementos
+
 
 # skins que se pueden cambiar en caliente (teclas 1-4)
 SKINS = [
@@ -113,6 +129,20 @@ def main():
         logica.procesar_input(input)
         nuevo_estado = logica.actualizar(1.0 / FPS)
 
+        # Colisión: no entrar a tiles MURO (usando punto de los pies + radio chico)
+        if mundo.colisiona(nuevo_estado.x, nuevo_estado.y, radio=4):
+            # revertir al estado anterior (no mover al personaje)
+            nuevo_estado = Estado(
+                x=logica.estado.x - logica.vel_x * (1.0 / FPS) * 60,
+                y=logica.estado.y - logica.vel_y * (1.0 / FPS) * 60,
+                z=nuevo_estado.z,
+                animacion=nuevo_estado.animacion,
+                direccion=nuevo_estado.direccion,
+                frame=nuevo_estado.frame,
+            )
+            logica.estado.x = nuevo_estado.x
+            logica.estado.y = nuevo_estado.y
+
         # Game loop (interpolación)
         game_loop.actualizar(nuevo_estado)
         estado_interpolado = game_loop.obtener_estado_interpolado()
@@ -135,35 +165,40 @@ def main():
 
             # cámara que sigue al personaje
             cam_x, cam_y = camara.seguir(char_px, char_py)
-            screen.blit(mundo.superficie(), (-cam_x, -cam_y))
 
-            # personaje: los pies en su posición del mundo, levantado por z (salto)
-            pos_personaje = (
-                int(char_px - cam_x - px),
-                int(char_py - cam_y - py - estado_interpolado.z),
-            )
+            # Depth-sorting: piso (con muros), luego arboles y personaje ordenados por Y
+            screen.blit(mundo.superficie_piso(), (-cam_x, -cam_y))
 
-            # Iluminación dinámica (task-020): antorcha que ilumina por píxel
-            # sobre normales cacheadas, sin re-renderizar 3D.
-            tiempo_ilum = 0.0
+            # Iluminacion dinamica (task-020): antorcha por pixel sobre normales cacheadas
             if "antorcha" in equipo.items:
                 normal = renderer.buffer_normal()
                 if normal is not None:
                     t0 = time.perf_counter()
-                    # Luz en la mano derecha del personaje (relativa a la superficie)
                     luz_x = personaje.get_width() - 8
                     luz_y = personaje.get_height() // 3
                     personaje = renderer.iluminar(
-                        personaje,
-                        normal,
-                        (luz_x, luz_y),
-                        (255, 180, 80),  # color cálido de antorcha
-                        120,  # radio en px
-                        1.5,  # intensidad
+                        personaje, normal, (luz_x, luz_y), (255, 180, 80), 120, 1.5
                     )
                     tiempo_ilum = (time.perf_counter() - t0) * 1000
 
-            screen.blit(personaje, pos_personaje)
+            elementos = elementos_ordenados(
+                mundo, cam_x, cam_y, SCREEN_WIDTH, SCREEN_HEIGHT, char_py
+            )
+            for elem in elementos:
+                if elem[0] == "arbol":
+                    tx, ty = elem[1], elem[2]
+                    arbol_sup = mundo._render_arbol(tx, ty)
+                    screen.blit(
+                        arbol_sup, (tx * mundo.tile - cam_x, ty * mundo.tile - cam_y)
+                    )
+                else:  # personaje
+                    screen.blit(
+                        personaje,
+                        (
+                            int(char_px - cam_x - px),
+                            int(char_py - cam_y - py - estado_interpolado.z),
+                        ),
+                    )
 
             # Iluminación en tiempo real: capa de tinte sobre la escena
             capa = renderer.capa_ambiente(SCREEN_WIDTH, SCREEN_HEIGHT)
