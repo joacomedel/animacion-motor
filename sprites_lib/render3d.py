@@ -301,7 +301,7 @@ class Escena:
         if not buffers:
             return im
         return im, dict(depth=depth, mat=mat, pieza=pieza, comp=comp, solido=solido,
-                        normal=normal, lam=lam,
+                        normal=normal, lam=lam, mat_nombres=list(self.mats),
                         comp_nombres=list(self.comp_nombres), colores_detalle=colores_detalle)
 
 
