@@ -1,6 +1,6 @@
 # task-018 — Aplicar `paleta_fija` en el motor en vivo y en los diagnósticos
 
-**Estado:** pendiente
+**Estado:** completada (2026-10-03)
 **Origen:** hallazgo al implementar task-017 (2026-10-03).
 
 ## Contexto
@@ -31,3 +31,21 @@ Lo mismo pasa con diagnósticos que renderizan imágenes sin pasar por la export
 
 `motor/renderer.py`, `motor/main.py` y `motor/debug.py` estaban con cambios sin commitear al crear esta
 tarea: coordinar antes de tocarlos.
+
+## Resolución (2026-10-03)
+
+Se eligió la **opción 1** (snap en el motor), para no alterar bocetos/hoja de modelo/mediciones de `zonas`:
+`armado.render_cuadro` sigue devolviendo los tonos crudos y gana un parámetro `luces=None` para inyectar el
+modelo de luces del motor sin mutar `ESTILOS`.
+
+Regla del motor: **todo lo que se ve cae en la paleta fija del estilo**.
+
+- `Renderer._superficie` snapea cada cuadro a `render.paleta_fija` (una vez, al llenar la caché).
+- `Renderer.iluminar` snapea **solo los píxeles que la luz toca** (los de afuera del radio quedan intactos).
+- `Renderer.ambientar` reemplaza el tinte plano de pantalla (task-013) por un **remapeo dentro de la paleta**:
+  apaga cada color (factor) y lo corre un poco hacia el tono del ambiente, y lo vuelve a snappear. Se cachea
+  por (superficie, ambiente), así el piso y el sprite no se reprocesan por frame.
+- `snap_rgb` (en `sprites_lib/paleta.py`) es el snap por píxel sobre arrays/superficies; `ajustar_paleta`
+  (PIL) sigue usándose en el camino de exportación.
+
+Tests: `tests/test_motor_paleta.py` (sprite, luz dinámica, ambiente, luces, bloom, overrides).

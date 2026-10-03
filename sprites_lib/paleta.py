@@ -2,6 +2,7 @@
 sombra y luz con su propio corrimiento de tono (p. ej. Stardew: sombras a violeta, luces a amarillo)."""
 
 import re
+from functools import lru_cache
 
 HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
 
@@ -154,6 +155,62 @@ def _lab(c):
     )
     f = np.where(x > 0.008856, np.cbrt(x), 7.787 * x + 16 / 116)
     return np.array([116 * f[1] - 16, 500 * (f[0] - f[1]), 200 * (f[1] - f[2])])
+
+
+def _lab_lote(c):
+    """Lab (CIE) vectorizado para un lote de colores (N, 3) o (..., 3) en 0..255."""
+    import numpy as np
+
+    v = np.asarray(c, float) / 255.0
+    v = np.where(v > 0.04045, ((v + 0.055) / 1.055) ** 2.4, v / 12.92)
+    M = np.array(
+        [
+            [0.4124, 0.3576, 0.1805],
+            [0.2126, 0.7152, 0.0722],
+            [0.0193, 0.1192, 0.9505],
+        ]
+    )
+    x = (v @ M.T) / np.array([0.9505, 1.0, 1.089])
+    f = np.where(x > 0.008856, np.cbrt(x), 7.787 * x + 16 / 116)
+    return np.stack(
+        [116 * f[..., 1] - 16, 500 * (f[..., 0] - f[..., 1]), 200 * (f[..., 1] - f[..., 2])],
+        axis=-1,
+    )
+
+
+def como_rgb(colores):
+    """Normaliza una lista de colores a tuplas (r, g, b): acepta '#rrggbb' o tuplas."""
+    return [hex_rgb(c) if isinstance(c, str) else tuple(int(v) for v in c) for c in colores]
+
+
+@lru_cache(maxsize=64)
+def _lab_pal_cache(colores_key):
+    """Lab de la paleta memoizado (la paleta es fija; no hay que recalcularlo por frame)."""
+    import numpy as np
+
+    return _lab_lote(np.array(colores_key, float))
+
+
+def snap_rgb(arr, colores):
+    """Cada píxel de `arr` (..., 3) al color más cercano de `colores` (hex o tuplas), en Lab.
+
+    A diferencia de `ajustar_paleta` (que trabaja sobre imágenes PIL), sirve para arrays y para
+    superficies del motor: mismo snap por píxel, sin inventar color. Devuelve np.uint8 con la forma de `arr`.
+    """
+    import numpy as np
+
+    arr = np.asarray(arr)
+    forma = arr.shape
+    plano = arr.reshape(-1, 3)
+    pal = np.array(como_rgb(colores), float)
+    lab_pal = _lab_pal_cache(tuple(map(tuple, pal.tolist())))
+    uniq, inv = np.unique(plano, axis=0, return_inverse=True)
+    if uniq.size == 0:
+        return arr.astype(np.uint8)
+    lab = _lab_lote(uniq.astype(float))
+    d = ((lab[:, None, :] - lab_pal[None, :, :]) ** 2).sum(-1)
+    cerca = pal[d.argmin(1)].astype(np.uint8)
+    return cerca[inv].reshape(forma)
 
 
 def reducir_paleta(por_dir, n):

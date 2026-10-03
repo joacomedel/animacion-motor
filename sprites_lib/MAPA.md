@@ -58,6 +58,8 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 - `hex_rgb(h)`
 - `tonos(base, regla, emisivo=False)` (sombra, base, luz). Los emisivos (runas, visor) no se oscurecen: brillan igual en todos lados.
 - `paleta_estilo(paleta_ficha, estilo)` {material: Material}. Agrega '<material>_b' (variante un poco más oscura para texturas:
+- `como_rgb(colores)` Normaliza una lista de colores a tuplas (r, g, b): acepta '#rrggbb' o tuplas.
+- `snap_rgb(arr, colores)` Cada píxel de `arr` (..., 3) al color más cercano de `colores` (hex o tuplas), en Lab.
 - `reducir_paleta(por_dir, n)` Deja a lo sumo `n` colores en TODAS las direcciones y cuadros a la vez ({dir: [imágenes RGBA]}, in situ).
 - `ajustar_paleta(por_dir, colores)` Mapea cada píxel opaco al color más cercano de `colores` (lista de hex #rrggbb), en TODAS las direcciones
 
@@ -107,7 +109,7 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 ### `armado` — Armado: ficha → lista de componentes (cuerpo base + los de la ficha) → escena → cuadros renderizados.
 - `expandir(ficha)` Specs finales, una por (tipo, ancla): cuerpo base (salvo sustituciones o componentes propios del mismo
 - clase `Cuadro`
-- `render_cuadro(ficha, estilo, pose, p, mira, ancho=None, bloom=False)`
+- `render_cuadro(ficha, estilo, pose, p, mira, ancho=None, bloom=False, luces=None)`
 - `render_todo(ficha, estilo, poses=('neutra', 'quieto'), bloom=False)`
 - `pivote(estilo, clase_altura='adulto', pose='quieto')` Punto de los pies (piso) dentro de la celda: el mismo para cualquier pose/dirección/personaje de ese
 

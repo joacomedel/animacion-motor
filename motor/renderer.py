@@ -16,6 +16,7 @@ from PIL import Image
 
 from sprites_lib import armado, skins
 from sprites_lib.estilos import ESTILOS
+from sprites_lib.paleta import ajustar_paleta, hex_rgb, snap_rgb
 from sprites_lib.poses import cuadros
 from sprites_lib.render3d import piso_iso
 
@@ -27,6 +28,25 @@ ANIM_A_POSE = {
     "crouch": "agachar",
 }
 SKIN_DEFECTO = "skins/caballero_carmesi.png"
+
+# Luces key/fill/rim + AO para el motor (task-021). El kit las trae apagadas por defecto para no cambiar
+# los PNGs; el motor las prende (así se ve el modelo de luces) y se pueden apagar con una tecla.
+LUCES_MOTOR = dict(
+    activas=True,
+    fill=dict(dir=(0.5, -0.3, 0.4), color=(180, 160, 200), intensidad=0.35),
+    rim=dict(dir=(0.3, -0.6, 0.5), color=(255, 250, 230), intensidad=0.5),
+    ao_contacto=dict(activo=True, factor=0.6),
+)
+
+# Ambientes (task-013) como remapeo DENTRO de la paleta: cada color de la paleta se apaga (factor) y se
+# corre un poco hacia el tono del ambiente (tinte), y se vuelve a snappear; el resultado nunca sale de la
+# paleta y conserva el matiz (no lo aplasta a dos o tres colores).
+# dict(factor, tinte, t)
+AMBIENTES_PALETA = {
+    "dia": None,
+    "tarde": dict(factor=0.85, tinte=(255, 150, 60), t=0.20),
+    "noche": dict(factor=0.55, tinte=(24, 24, 80), t=0.20),
+}
 
 
 def _superficie(img: Image.Image) -> pygame.Surface:
@@ -53,7 +73,7 @@ class Renderer:
         pivote: punto de los pies (suelo) dentro de la celda, en px de celda
     """
 
-    def __init__(self, estilo="stardew8", skin=SKIN_DEFECTO, zoom=4, bloom=False):
+    def __init__(self, estilo="stardew8", skin=SKIN_DEFECTO, zoom=4, bloom=False, luces=None):
         if estilo not in ESTILOS:
             raise ValueError(
                 f"estilo desconocido {estilo!r}; disponibles: {', '.join(ESTILOS)}"
@@ -63,16 +83,24 @@ class Renderer:
         self.estilo = estilo
         self.zoom = int(zoom)
         self.bloom = bloom
+        self.luces = luces
         self.skin_ruta = skin
         self.arma = None
         self.dano = False
         self.equipo = []
         self.ambiente = "dia"
+        # paleta fija del estilo (task-017/018): es el universo de color del motor; si el estilo no la
+        # declara, el motor no fuerza ningún snap.
+        fija = ESTILOS[estilo]["render"].get("paleta_fija")
+        self.paleta_fija = list(fija) if fija else None
+        self.paleta_rgb = [hex_rgb(c) for c in self.paleta_fija] if self.paleta_fija else None
         self.ficha_base = skins.ficha(skin)
         self.ficha = self._construir_ficha()
         self.pivote = armado.pivote(estilo)
         self._cache = {}
         self._cache_normal = {}
+        self._cache_amb = {}
+        self._lut_amb = {}
         self._ultima_normal = None
         self._piso = None
         self._sombra = None
@@ -105,6 +133,7 @@ class Renderer:
     def _limpiar(self):
         self._cache.clear()
         self._cache_normal.clear()
+        self._cache_amb.clear()
         self._ultima_normal = None
 
     # --- skins en tiempo real (task-012) ---
@@ -134,6 +163,18 @@ class Renderer:
 
         self.equipo = Equipo(items).items
         self.ficha = self._construir_ficha()
+        self._limpiar()
+
+    # --- luces y bloom del estilo (task-021 / task-023) ---
+
+    def set_luces(self, activas: bool):
+        """Prende/apaga el modelo de luces key/fill/rim + AO (task-021) y limpia la caché."""
+        self.luces = LUCES_MOTOR if activas else None
+        self._limpiar()
+
+    def set_bloom(self, activo: bool):
+        """Prende/apaga el bloom de materiales emisivos (task-023) y limpia la caché."""
+        self.bloom = bool(activo)
         self._limpiar()
 
     # --- iluminación en tiempo real (task-013) ---
@@ -191,8 +232,13 @@ class Renderer:
         clave = (pose, direccion, p)
         if clave in self._cache:
             return self._cache[clave], self._cache_normal.get(clave)
-        cuadro = armado.render_cuadro(self.ficha, self.estilo, pose, p, direccion, bloom=self.bloom)
+        cuadro = armado.render_cuadro(
+            self.ficha, self.estilo, pose, p, direccion, bloom=self.bloom, luces=self.luces
+        )
         img = cuadro.img.convert("RGBA")
+        # task-018: el motor usa exactamente la paleta del estilo (lo mismo que la skin exportada).
+        if self.paleta_fija:
+            ajustar_paleta({"_": [img]}, self.paleta_fija)
         if self.zoom != 1:
             img = img.resize(
                 (img.width * self.zoom, img.height * self.zoom), Image.NEAREST
@@ -209,10 +255,55 @@ class Renderer:
         return sup, normal
 
     def renderizar(self, estado) -> pygame.Surface:
-        """Superficie del personaje para el estado dado, ya escalada."""
+        """Superficie del personaje para el estado dado, ya escalada y con el ambiente aplicado."""
         sup, normal = self._superficie(estado.animacion, estado.direccion, estado.frame)
         self._ultima_normal = normal
-        return sup
+        return self.ambientar(sup)
+
+    # --- ambiente dentro de la paleta (task-013 + paleta fija) ---
+
+    def _lut_ambiente(self, ambiente):
+        """Tabla que manda cada color de la paleta a su versión ambiente (también en la paleta)."""
+        if ambiente in self._lut_amb:
+            return self._lut_amb[ambiente]
+        conf = AMBIENTES_PALETA[ambiente]
+        pal = np.array(self.paleta_rgb, float)
+        mezcla = (
+            pal * conf["factor"] * (1.0 - conf["t"])
+            + np.array(conf["tinte"], float) * conf["t"]
+        )
+        amb = snap_rgb(mezcla, self.paleta_fija)
+        self._lut_amb[ambiente] = amb
+        return amb
+
+    def ambientar(self, surface):
+        """Remapea una superficie al ambiente actual SIN salirse de la paleta fija.
+
+        Cada píxel se lleva al color más cercano de la paleta y después a la versión ambiente de ese
+        color (que también es de la paleta). Cacheado por (superficie, ambiente): el mundo y el sprite
+        se remapean una sola vez por ambiente, no por frame.
+        """
+        conf = AMBIENTES_PALETA.get(self.ambiente)
+        if conf is None or not self.paleta_fija:
+            return surface
+        clave = (id(surface), self.ambiente)
+        out = self._cache_amb.get(clave)
+        if out is not None:
+            return out
+        arr = pygame.surfarray.array3d(surface)  # (w, h, 3)
+        alpha = pygame.surfarray.array_alpha(surface)  # (w, h)
+        forma = arr.shape
+        snapped = snap_rgb(arr.reshape(-1, 3), self.paleta_fija)
+        uniq, inv = np.unique(snapped, axis=0, return_inverse=True)
+        pal = np.array(self.paleta_rgb)
+        lut = self._lut_ambiente(self.ambiente)
+        idx = np.array([int(np.where((pal == u).all(1))[0][0]) for u in uniq])
+        mapeado = lut[idx][inv].astype(np.uint8)
+        nueva = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+        pygame.surfarray.pixels3d(nueva)[:] = mapeado.reshape(forma)
+        pygame.surfarray.pixels_alpha(nueva)[:] = alpha
+        self._cache_amb[clave] = nueva
+        return nueva
 
     def buffer_normal(self):
         """Buffer de normal (h, w, 3) uint8 del último cuadro renderizado.
@@ -291,6 +382,12 @@ class Renderer:
         arr_ilu = arr * (1.0 - alpha_w) + arr_ilu * alpha_w
 
         arr_ilu = np.clip(arr_ilu, 0, 255).astype(np.uint8)
+        # La luz no inventa colores: los píxeles que SÍ reciben luz caen en la paleta fija (task-018).
+        # Los que quedan fuera del radio no se tocan (el test de task-020 lo exige).
+        if self.paleta_fija:
+            snapped = snap_rgb(arr_ilu, self.paleta_fija)
+            mask = (factor.T > 1e-6) & (alpha > 0)  # (w, h)
+            arr_ilu = np.where(mask[..., None], snapped, arr_ilu)
         result = pygame.Surface((w, h), pygame.SRCALPHA)
         pygame.surfarray.pixels3d(result)[:] = arr_ilu
         pygame.surfarray.pixels_alpha(result)[:] = alpha

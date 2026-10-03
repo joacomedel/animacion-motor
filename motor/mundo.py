@@ -31,6 +31,7 @@ class Mundo:
         self.mapa = [[PISO] * ancho for _ in range(alto)]
         self._superficie = None
         self._superficie_piso = None
+        self._arbol = None
         self._generar()
 
     def _generar(self):
@@ -125,7 +126,9 @@ class Mundo:
         return img
 
     def _render_arbol(self, tx, ty):
-        """Renderiza un árbol individual como superficie transparente."""
+        """Renderiza un árbol individual como superficie transparente (cacheado: el dibujo no depende de tx/ty)."""
+        if self._arbol is not None:
+            return self._arbol
         t = self.tile
         img = Image.new("RGBA", (t, t), (0, 0, 0, 0))
         d = ImageDraw.Draw(img)
@@ -134,7 +137,8 @@ class Mundo:
             fill=(40, 110, 50, 255),
             outline=(18, 58, 28, 255),
         )
-        return pygame.image.fromstring(img.tobytes(), img.size, "RGBA")
+        self._arbol = pygame.image.fromstring(img.tobytes(), img.size, "RGBA")
+        return self._arbol
 
     def _render(self):
         img = piso_iso(self.ancho_px, self.alto_px).convert("RGBA")

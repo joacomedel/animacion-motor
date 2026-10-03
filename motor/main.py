@@ -11,7 +11,7 @@ from motor.config import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, COLOR_FONDO
 from motor.estado import Estado
 from motor.logica import LogicaSimulada
 from motor.game_loop import GameLoop
-from motor.renderer import Renderer
+from motor.renderer import LUCES_MOTOR, Renderer
 from motor.input_handler import InputHandler
 from motor.equipo import Equipo
 from motor.mundo import Mundo, ARBOL
@@ -54,7 +54,13 @@ def main():
     # Crear componentes
     logica = LogicaSimulada()
     game_loop = GameLoop()
-    renderer = Renderer(estilo="stardew8", skin="skins/caballero_carmesi.png", zoom=4)
+    renderer = Renderer(
+        estilo="stardew8",
+        skin="skins/caballero_carmesi.png",
+        zoom=4,
+        bloom=True,
+        luces=LUCES_MOTOR,
+    )
     input_handler = InputHandler()
     fuente = pygame.font.Font(None, 24)
 
@@ -118,6 +124,10 @@ def main():
                     toggle("guante_cuero")
                 elif event.key == pygame.K_h:
                     renderer.set_dano(not renderer.dano)
+                elif event.key == pygame.K_g:
+                    renderer.set_luces(renderer.luces is None)
+                elif event.key == pygame.K_b:
+                    renderer.set_bloom(not renderer.bloom)
                 elif event.key == pygame.K_l:
                     i = (AMBIENTES.index(renderer.ambiente) + 1) % len(AMBIENTES)
                     renderer.set_ambiente(AMBIENTES[i])
@@ -167,7 +177,8 @@ def main():
             cam_x, cam_y = camara.seguir(char_px, char_py)
 
             # Depth-sorting: piso (con muros), luego arboles y personaje ordenados por Y
-            screen.blit(mundo.superficie_piso(), (-cam_x, -cam_y))
+            # El ambiente se aplica como remapeo dentro de la paleta (no como tinte de pantalla).
+            screen.blit(renderer.ambientar(mundo.superficie_piso()), (-cam_x, -cam_y))
 
             # Iluminacion dinamica (task-020): antorcha por pixel sobre normales cacheadas
             if "antorcha" in equipo.items:
@@ -187,7 +198,7 @@ def main():
             for elem in elementos:
                 if elem[0] == "arbol":
                     tx, ty = elem[1], elem[2]
-                    arbol_sup = mundo._render_arbol(tx, ty)
+                    arbol_sup = renderer.ambientar(mundo._render_arbol(tx, ty))
                     screen.blit(
                         arbol_sup, (tx * mundo.tile - cam_x, ty * mundo.tile - cam_y)
                     )
@@ -209,10 +220,7 @@ def main():
                         ),
                     )
 
-            # Iluminación en tiempo real: capa de tinte sobre la escena
-            capa = renderer.capa_ambiente(SCREEN_WIDTH, SCREEN_HEIGHT)
-            if capa is not None:
-                screen.blit(capa, (0, 0))
+            # Iluminación en tiempo real: el ambiente ya se aplicó por remapeo de paleta (arriba).
         except Exception as e:
             print(f"Error renderizando: {e}")
 
@@ -224,7 +232,9 @@ def main():
         hud = (
             f"{fps:4.0f} FPS  {estado_interpolado.animacion} {estado_interpolado.direccion} "
             f"f={estado_interpolado.frame}  skin={skin} equipo=[{equipo_txt}] "
-            f"dano={'SI' if renderer.dano else 'no'} amb={renderer.ambiente}{ilum_txt}"
+            f"dano={'SI' if renderer.dano else 'no'} amb={renderer.ambiente} "
+            f"luces={'on' if renderer.luces else 'off'} bloom={'on' if renderer.bloom else 'off'}"
+            f"{ilum_txt}"
         )
         screen.blit(fuente.render(hud, True, (230, 230, 240)), (8, 8))
 
