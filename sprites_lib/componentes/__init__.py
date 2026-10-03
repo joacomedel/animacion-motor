@@ -44,6 +44,7 @@ class Contexto:
     ausentes: frozenset = field(default_factory=frozenset)
     pieza_base: int = 0
     cuadro: int = 0
+    mov_secundario: bool = False  # flag: movimiento secundario (resorte) activado
 
     def ausente(self, nombre):
         return nombre in self.ausentes
