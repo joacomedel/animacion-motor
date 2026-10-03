@@ -60,6 +60,7 @@ Guía para trabajar en este repo con OpenCode. Reemplaza a `CLAUDE.md` como guí
 | Referencias descargadas | `referencias/` (y `sprites_x/`: Mega Man X separado en 14 animaciones) |
 | Motor tiempo real | `motor/`: render 3D→2D en vivo con el kit (`armado.render_cuadro`) + caché por (anim, dir, frame); lógica `LogicaSimulada` desacoplable; correr `SDL_VIDEODRIVER=dummy .venv/bin/python -m motor.debug` para capturas, `python -m motor.main` para la ventana |
 | Equipamiento | `motor/equipo.py` (catálogo `ITEMS`: agregar ítem = 1 entrada) + `sprites_lib/componentes/equipo.py` (`guante`/`sombrero`/`armadura`) + `sprites_lib/skins_item.py` (skins simples: color + forma) |
+| Mundo y cámara | `motor/mundo.py` (mapa de tiles pre-renderizado, más grande que la pantalla) + `motor/camara.py` (sigue al personaje y se clampea a los bordes) |
 | Archivo v1 | contenido anterior (skins, fichas, `mago/`, `el_llamado/`, `prueba/`) fuera de este repo, en `/home/jm/claude-code/archivo-animaciones-v1/` |
 
 ## Subagentes

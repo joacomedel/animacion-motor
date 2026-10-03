@@ -1,4 +1,4 @@
-"""Captura imágenes del motor (piso + personaje) sin abrir ventana.
+"""Capturas imágenes del motor (mundo 2D + personaje) sin abrir ventana.
 
 Uso:
     SDL_VIDEODRIVER=dummy .venv/bin/python -m motor.debug
@@ -9,20 +9,24 @@ import pygame
 from motor.config import SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_FONDO
 from motor.estado import Estado
 from motor.renderer import Renderer
+from motor.mundo import Mundo
+from motor.camara import Camara
 
 
-def escena(
-    renderer: Renderer, estado: Estado, screen: pygame.Surface
-) -> pygame.Surface:
-    """Compone una vista del motor: piso desplazado por el mundo + personaje."""
+def escena(renderer, mundo, camara, estado, screen):
+    """Compone una vista: región visible del mundo + personaje en su posición."""
+    char_px = min(max(estado.x, mundo.tile), mundo.ancho_px - mundo.tile)
+    char_py = min(max(estado.y, mundo.tile), mundo.alto_px - mundo.tile)
+    cam_x, cam_y = camara.seguir(char_px, char_py)
+
     screen.fill(COLOR_FONDO)
-    piso, pos_piso = renderer.piso(SCREEN_WIDTH, SCREEN_HEIGHT, (estado.x, estado.y))
-    screen.blit(piso, pos_piso)
+    screen.blit(mundo.superficie(), (-cam_x, -cam_y))
 
     personaje = renderer.renderizar(estado)
     px, py = renderer.pies()
-    destino = (SCREEN_WIDTH // 2 - px, int(SCREEN_HEIGHT * 0.68) - py - int(estado.z))
-    screen.blit(personaje, destino)
+    screen.blit(
+        personaje, (int(char_px - cam_x - px), int(char_py - cam_y - py - estado.z))
+    )
     return screen
 
 
@@ -31,46 +35,45 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     renderer = Renderer("stardew8", skin="skins/caballero_carmesi.png", zoom=4)
+    mundo = Mundo(ancho=80, alto=50, tile=16)
+    camara = Camara(SCREEN_WIDTH, SCREEN_HEIGHT, mundo)
 
-    # (estado, descripción) — incluye dos posiciones de mundo para ver el scroll del piso
+    cx, cy = mundo.ancho_px // 2, mundo.alto_px // 2
     casos = [
-        (Estado(x=0, y=0, z=0, animacion="idle", direccion="S", frame=0), "idle S"),
-        (Estado(x=0, y=0, z=0, animacion="idle", direccion="E", frame=0), "idle E"),
-        (Estado(x=0, y=0, z=0, animacion="run", direccion="S", frame=2), "run S f2"),
         (
-            Estado(x=64, y=0, z=0, animacion="run", direccion="S", frame=5),
-            "run S f5 (x=64)",
+            Estado(x=cx, y=cy, z=0, animacion="idle", direccion="S", frame=0),
+            "idle centro",
         ),
         (
-            Estado(x=0, y=0, z=40, animacion="jump", direccion="S", frame=2),
-            "jump S (z=40)",
+            Estado(x=cx, y=cy, z=0, animacion="idle", direccion="E", frame=0),
+            "idle centro E",
         ),
         (
-            Estado(x=0, y=0, z=0, animacion="crouch", direccion="S", frame=3),
-            "crouch S f3",
+            Estado(x=cx + 200, y=cy, z=0, animacion="run", direccion="S", frame=2),
+            "run +200px",
+        ),
+        (
+            Estado(x=cx, y=cy + 150, z=0, animacion="run", direccion="S", frame=5),
+            "run +150py",
+        ),
+        (Estado(x=cx, y=cy, z=40, animacion="jump", direccion="S", frame=2), "jump"),
+        (
+            Estado(
+                x=mundo.tile,
+                y=mundo.tile,
+                z=0,
+                animacion="idle",
+                direccion="S",
+                frame=0,
+            ),
+            "esquina",
         ),
     ]
 
     for i, (estado, desc) in enumerate(casos):
-        escena(renderer, estado, screen)
+        escena(renderer, mundo, camara, estado, screen)
         pygame.image.save(screen, f"debug_frame_{i}.png")
         print(f"Frame {i}: {desc}")
-
-    # features en tiempo real: arma + daño + noche (sin regenerar PNGs)
-    r2 = Renderer("stardew8", skin="skins/caballero_carmesi.png", zoom=4)
-    r2.set_arma("espada")
-    r2.set_dano(True)
-    r2.set_ambiente("noche")
-    escena(r2, Estado(x=0, y=0, z=0, animacion="run", direccion="S", frame=2), screen)
-    pygame.image.save(screen, "debug_frame_6.png")
-    print("Frame 6: run S con espada + daño + noche")
-
-    # equipamiento: armadura + sombrero + guante + espada roja (task-012)
-    r3 = Renderer("stardew8", skin="skins/caballero_carmesi.png", zoom=4)
-    r3.set_equipo(["armadura_malla", "sombrero", "guante_cuero", "espada_roja"])
-    escena(r3, Estado(x=0, y=0, z=0, animacion="run", direccion="S", frame=2), screen)
-    pygame.image.save(screen, "debug_frame_7.png")
-    print("Frame 7: run S equipado (armadura, sombrero, guante, espada roja)")
 
     pygame.quit()
     print("\nImágenes guardadas como debug_frame_*.png")

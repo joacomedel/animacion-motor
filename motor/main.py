@@ -13,6 +13,8 @@ from motor.game_loop import GameLoop
 from motor.renderer import Renderer
 from motor.input_handler import InputHandler
 from motor.equipo import Equipo
+from motor.mundo import Mundo
+from motor.camara import Camara
 
 # skins que se pueden cambiar en caliente (teclas 1-4)
 SKINS = [
@@ -44,14 +46,26 @@ def main():
     renderer.precalentar()
     print(f"Caché lista: {len(renderer._cache)} cuadros")
 
+    # Mundo 2D (más grande que la pantalla) y cámara que sigue al personaje
+    mundo = Mundo(ancho=80, alto=50, tile=16)
+    camara = Camara(SCREEN_WIDTH, SCREEN_HEIGHT, mundo)
+    print(f"Mundo: {mundo.ancho_px}×{mundo.alto_px} px")
+
     equipo = Equipo()
 
     def toggle(item):
         equipo.alternar(item)
         renderer.set_equipo(equipo.items)
 
-    # Estado inicial
-    estado_inicial = Estado(x=0, y=0, z=0, animacion="idle", direccion="S", frame=0)
+    # Estado inicial: el personaje en el centro del mundo
+    estado_inicial = Estado(
+        x=mundo.ancho_px // 2,
+        y=mundo.alto_px // 2,
+        z=0,
+        animacion="idle",
+        direccion="S",
+        frame=0,
+    )
     game_loop.iniciar(estado_inicial)
 
     # Loop principal
@@ -103,20 +117,24 @@ def main():
         screen.fill(COLOR_FONDO)
 
         try:
-            # Piso: se desplaza con la posición del mundo (el movimiento se ve)
-            piso, pos_piso = renderer.piso(
-                SCREEN_WIDTH,
-                SCREEN_HEIGHT,
-                (estado_interpolado.x, estado_interpolado.y),
+            # posición del personaje en el mundo (px), clampeada a los bordes
+            char_px = min(
+                max(estado_interpolado.x, mundo.tile), mundo.ancho_px - mundo.tile
             )
-            screen.blit(piso, pos_piso)
+            char_py = min(
+                max(estado_interpolado.y, mundo.tile), mundo.alto_px - mundo.tile
+            )
 
-            # Personaje: los pies en el centro-bajo, levantado por z (salto)
+            # cámara que sigue al personaje
+            cam_x, cam_y = camara.seguir(char_px, char_py)
+            screen.blit(mundo.superficie(), (-cam_x, -cam_y))
+
+            # personaje: los pies en su posición del mundo, levantado por z (salto)
             personaje = renderer.renderizar(estado_interpolado)
             px, py = renderer.pies()
             destino = (
-                SCREEN_WIDTH // 2 - px,
-                int(SCREEN_HEIGHT * 0.68) - py - int(estado_interpolado.z),
+                int(char_px - cam_x - px),
+                int(char_py - cam_y - py - estado_interpolado.z),
             )
             screen.blit(personaje, destino)
 
