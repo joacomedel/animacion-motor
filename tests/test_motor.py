@@ -70,6 +70,15 @@ def test_renderer_renderiza_todas_las_animaciones_y_direcciones():
             assert sup.get_width() > 0 and sup.get_height() > 0
 
 
+def test_renderer_set_skin_cambia_personaje():
+    r = Renderer("stardew8", "skins/caballero_carmesi.png", zoom=4)
+    r.renderizar(Estado(animacion="idle", direccion="S", frame=0))
+    r.set_skin("skins/mago.png")
+    assert r.ficha_base["cuerpo"]["skin"] == "skins/mago.png"
+    sup = r.renderizar(Estado(animacion="idle", direccion="S", frame=0))
+    assert isinstance(sup, pygame.Surface) and sup.get_width() > 0
+
+
 def test_renderer_cachea_mismos_cuadros():
     r = Renderer("stardew8", SKIN, zoom=4)
     e = Estado(animacion="run", direccion="S", frame=2)

@@ -100,6 +100,7 @@ class Renderer:
     def set_skin(self, ruta: str):
         """Cambia la skin en caliente: se reconstruye la ficha y se invalida la caché."""
         self.skin_ruta = ruta
+        self.ficha_base = skins.ficha(ruta)
         self.ficha = self._construir_ficha()
         self._limpiar()
 

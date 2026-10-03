@@ -40,11 +40,11 @@ class Sombrero(Componente):
         copa = a["coronilla"]
         alto = float(spec["parametros"]["alto"])
         # ala: caja ancha y plana sobre la coronilla (no tapa la cara)
-        esc.caja(copa + v(0, 0, -rz * 0.12), (rf * 1.7, rf * 1.7, rz * 0.18), m, n=2.0)
-        # copa: más angosta y alta
+        esc.caja(copa + v(0, 0, -rz * 0.05), (rf * 1.6, rf * 1.6, rz * 0.16), m, n=2.0)
+        # copa: más angosta y baja (no se corta contra el borde de la celda)
         esc.caja(
-            copa + v(0, 0, rz * 0.5 * alto),
-            (rf * 0.95, rf * 0.95, rz * 0.55 * alto),
+            copa + v(0, 0, rz * 0.28 * alto),
+            (rf * 0.9, rf * 0.9, rz * 0.34 * alto),
             m,
             n=2.0,
         )
@@ -62,10 +62,11 @@ class Armadura(Componente):
         A, a, m = ctx.anat, ctx.a, spec["material"]
         pecho, pelvis = A.pecho, A.pelvis
         centro = (a["torso"] + a["cintura"]) * 0.5
-        alto = (pecho[2] + pelvis[2]) * 0.62
+        alto = (pecho[2] + pelvis[2]) * 0.55
+        # ajustada al pecho (no más ancha): así no tapa las manos en vista cenital
         esc.caja(
             centro + v(0, 0, 0.1),
-            (pecho[0] * 1.18, pecho[1] * 1.18, alto),
+            (pecho[0] * 1.0, pecho[1] * 1.0, alto),
             m,
             n=2.0,
         )

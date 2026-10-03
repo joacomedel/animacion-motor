@@ -82,7 +82,7 @@ def main():
                     toggle("armadura_malla")
                 elif event.key == pygame.K_c:
                     toggle("guante_cuero")
-                elif event.key == pygame.K_d:
+                elif event.key == pygame.K_h:
                     renderer.set_dano(not renderer.dano)
                 elif event.key == pygame.K_l:
                     i = (AMBIENTES.index(renderer.ambiente) + 1) % len(AMBIENTES)
