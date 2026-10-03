@@ -22,6 +22,9 @@ referencias/
 *.mp4
 *.wav
 
+# capturas del motor
+debug_frame_*.png
+
 # configuración local de Claude Code (permisos personales)
 .claude/settings.local.json
 .superpowers/

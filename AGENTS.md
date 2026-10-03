@@ -23,6 +23,19 @@ Guía para trabajar en este repo con OpenCode. Reemplaza a `CLAUDE.md` como guí
 - En los procesos de `docs/procesos/`: tope 3 vueltas propias; si no converge, consultar con el estado y las
   opciones. Nunca subir un umbral "para que dé verde" sin mirar qué era.
 
+## Tareas
+
+- **Listas planas:** `taskPendientes.md` y `taskCompletadas.md` son solo una lista (id + nombre corto), una línea
+  por tarea, sin contexto ni detalle. Leerlas siempre al arrancar.
+- **Explicación aparte:** cada tarea tiene su `task/task-XXX.md` con contexto, origen y criterio de aceptación.
+  Esos archivos se leen **solo a pedido** (o cuando se va a trabajar esa tarea), nunca de entrada.
+- **Tarea nueva:** cada vez que surja una tarea (propia, un hallazgo fuera de alcance o un pedido del usuario)
+  agregarla a `taskPendientes.md` y crear el `task/task-XXX.md` con la explicación. Numeración correlativa.
+- **Completar:** mover la línea de `taskPendientes.md` a `taskCompletadas.md` conservando el id; la explicación
+  queda archivada en `task/`.
+- **Contexto del proyecto:** `ANALISIS-PROYECTO-ANIMACIONES.md` resume la arquitectura y los flujos. Si hace falta
+  más, leer las sesiones previas de este mismo directorio antes de re-deducir el proyecto.
+
 ## Flujos
 
 - **Animación**: referencia (sprite sheet / video) → skill `sprite-referencia` (descargar y separar) → skill
