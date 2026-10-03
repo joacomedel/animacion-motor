@@ -322,7 +322,12 @@ class Escena:
                     vecino_pieza = _mover(pieza, dy, dx, -1)
                     ao_mask |= solido & (vecino_pieza >= 0) & (vecino_pieza != pieza)
                 for k, nm in enumerate(self.mats):
-                    base = np.array(self.pal[nm][1]); osc = tuple((base * ao["factor"]).astype(int))
+                    tonos = self.pal[nm]
+                    permitidos = np.array(
+                        [tonos[0], tonos[1], tonos[2], _oscurecer(tonos[0], 0.8),
+                         _oscurecer(tonos[0], est.get("oscurecer", 0.55))], float)
+                    objetivo = np.array(tonos[1], float) * ao["factor"]
+                    osc = tuple(int(x) for x in permitidos[((permitidos - objetivo) ** 2).sum(1).argmin()])
                     img[ao_mask & (mat == k)] = (*osc, 255)
         im = Image.fromarray(img, "RGBA")
         if not buffers:
