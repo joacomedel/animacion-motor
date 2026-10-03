@@ -136,6 +136,15 @@ def main():
             screen.blit(mundo.superficie(), (-cam_x, -cam_y))
 
             # personaje: los pies en su posición del mundo, levantado por z (salto)
+            sombra = renderer.sombra()
+            screen.blit(
+                sombra,
+                (
+                    int(char_px - cam_x - sombra.get_width() // 2),
+                    int(char_py - cam_y - sombra.get_height() // 2 - estado_interpolado.z),
+                ),
+            )
+
             screen.blit(
                 personaje,
                 (

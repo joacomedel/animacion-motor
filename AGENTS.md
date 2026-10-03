@@ -7,16 +7,21 @@ Guía para trabajar en este repo con OpenCode. Reemplaza a `CLAUDE.md` como guí
 - Antes de crear o modificar cualquier animación o sprite, leer `CRITERIOS_ANIMACION.md`.
 - Cada vez que se use una animación existente como base (sprite sheet, video, referencia), analizarla píxel por
   píxel (proporciones, paleta, tiempos, trayectorias de articulaciones) y **anotar en `CRITERIOS_ANIMACION.md`**
-  los criterios útiles y los errores corregidos.
+  los criterios útiles y los errores corregidos. **Tope:** si `CRITERIOS_ANIMACION.md` supera ~600 líneas,
+  resumir y compactar criterios viejos en vez de seguir agregando.
 - Ejecutar Python siempre desde la raíz del proyecto con `.venv/bin/python ...`.
-- **Mostrar los PNG generados:** cada vez que generes un PNG/GIF nuevo (skin, hoja, render, guía, recorte), mostrarlo
-  en el chat (incluir la imagen en la respuesta) además de abrirlo con `xdg-open`; la ventana puede abrirse del lado
-  del servidor y no verse.
+- **Imágenes fuera del contexto principal:** la revisión visual de PNG/GIF va siempre a un subagente
+  (`revisor-sprites`) que mira una vez y devuelve un veredicto corto (≤ 10 líneas). En el chat principal
+  mostrar solo el PNG/GIF final de cada entrega, nunca iteraciones intermedias ni diagnósticos. La sesión
+  principal no hace `read` de imágenes generadas: cada imagen en contexto se reenvía en cada turno y llena
+  la ventana.
 - La exportación es genérica (PNG + JSON + GIF): el motor del juego todavía no está definido.
 - **Forma de trabajo:** mostrar algo rápido y pedir feedback en cada etapa (boceto antes de afinar); como máximo 2
   vueltas de corrección propias antes de consultar; estilos activos: `stardew` y `lateral` (volumen solo si se pide).
 - **Tokens:** números antes que imágenes; un estilo por vez al iterar; correr los tests del archivo tocado;
-  ajuste fino largo → subagente.
+  ajuste fino largo → subagente. Nunca `glob` ni `read` de directorios generados (`salida/`,
+  `docs/diagnostico/`, `referencias/`, `.venv/`): esos paths ya están en `.gitignore` pero igual entran al
+  contexto si se leen; abrir solo archivos puntuales cuando haga falta.
 - Para usar o extender la librería, leer primero `sprites_lib/MAPA.md` (firmas, componentes, anclas) y abrir solo
   el archivo necesario; si cambia la API, regenerarlo con `.venv/bin/python -m sprites_lib.mapa`.
 - `pytest` por defecto saltea los tests lentos (volumen); `-m ""` corre todos, solo al cerrar la rama.
@@ -33,8 +38,9 @@ Guía para trabajar en este repo con OpenCode. Reemplaza a `CLAUDE.md` como guí
   agregarla a `taskPendientes.md` y crear el `task/task-XXX.md` con la explicación. Numeración correlativa.
 - **Completar:** mover la línea de `taskPendientes.md` a `taskCompletadas.md` conservando el id; la explicación
   queda archivada en `task/`.
-- **Contexto del proyecto:** `ANALISIS-PROYECTO-ANIMACIONES.md` resume la arquitectura y los flujos. Si hace falta
-  más, leer las sesiones previas de este mismo directorio antes de re-deducir el proyecto.
+- **Contexto del proyecto:** `ANALISIS-PROYECTO-ANIMACIONES.md` resume la arquitectura y los flujos. No leer
+  transcripts de sesiones previas completos: si hace falta contexto viejo, leer solo el `task/task-XXX.md`
+  correspondiente.
 
 ## Flujos
 
@@ -69,8 +75,8 @@ Guía para trabajar en este repo con OpenCode. Reemplaza a `CLAUDE.md` como guí
   → modelo barato; integración/depuración (revisar sprites, medir plantillas nuevas) → modelo estándar; diseño
   del motor y revisión final de rama → sesión principal (modelo más capaz).
 - Las **imágenes no deben entrar al contexto principal** para *revisiones*: la revisión visual va a un subagente que
-  mira una vez y devuelve un veredicto corto (≤ 10 líneas). Excepción: los PNG recién generados se muestran al usuario
-  en el chat (regla "Mostrar los PNG generados").
+  mira una vez y devuelve un veredicto corto (≤ 10 líneas). La sesión principal no abre ni adjunta PNG/GIF
+  intermedios; al usuario se le muestra solo el artefacto final de cada entrega.
 - Tareas de 1-2 comandos (correr tests, generar una demo) hacerlas directo: delegar cuesta más.
 - No cambiar de modelo a mitad de sesión (rompe la caché); hacer compactación antes de una pausa larga.
 - Hay prompts de subagente listos en `.claude/agents/` (`pintor-skins`, `revisor-sprites`, `medidor-animaciones`);

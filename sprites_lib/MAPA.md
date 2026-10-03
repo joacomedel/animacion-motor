@@ -6,10 +6,10 @@ Flujo: ficha YAML → `ficha.cargar` → `armado.render_cuadro` (cuerpo base + c
 | estilo | vista | direcciones | adulto px | celda | activo |
 |---|---|---|---|---|---|
 | volumen | iso | SE E NE N NW W SW S | 36 | 56×60 | no |
-| stardew | cenital | S E N W | 26 | 16×32 | sí |
-| lateral | lateral | E W | 33 | 40×40 | sí |
+| stardew | cenital | S E N W | 26 | 16×36 | sí |
+| lateral | lateral | E W | 33 | 40×42 | sí |
 | lpc | lateral | E W | 43 | 64×64 | no |
-| stardew8 | cenital | S SE E NE N NW W SW | 26 | 16×32 | no |
+| stardew8 | cenital | S SE E NE N NW W SW | 26 | 16×36 | no |
 | fry8 | cenital | S SE E NE N NW W SW | 54 | 48×64 | no |
 
 ## Anclas
@@ -58,6 +58,7 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 - `tonos(base, regla, emisivo=False)` (sombra, base, luz). Los emisivos (runas, visor) no se oscurecen: brillan igual en todos lados.
 - `paleta_estilo(paleta_ficha, estilo)` {material: (sombra, base, luz)}. Agrega '<material>_b' (variante un poco más oscura para texturas:
 - `reducir_paleta(por_dir, n)` Deja a lo sumo `n` colores en TODAS las direcciones y cuadros a la vez ({dir: [imágenes RGBA]}, in situ).
+- `ajustar_paleta(por_dir, colores)` Mapea cada píxel opaco al color más cercano de `colores` (lista de hex #rrggbb), en TODAS las direcciones
 
 ### `estilos` — Perfiles de estilo: cómo se "ve" un sprite, independiente de qué personaje es y de cómo se mueve.
 - `uz(estilo)` Cuántos px de pantalla ocupa 1 unidad de altura del mundo en ese estilo.
@@ -126,7 +127,7 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 - `colores_permitidos(ficha, estilo)`
 - `t_paleta(ficha, estilo, todo)`
 - `t_tamano(ficha, estilo, todo)`
-- `t_recorte(todo)` Arriba no se toca nunca (ahí se cortan pelo y sombreros). A los costados puede llegar el contorno (Stardew
+- `t_recorte(todo)` Arriba no se toca nunca (ahí se cortan pelo y sombreros). Abajo tampoco: la suela del pie y su contorno tienen
 - `t_cara(ficha, estilo, todo)`
 - `t_simetria(ficha, estilo, todo)`
 - `t_distinto(ficha)`
@@ -191,6 +192,7 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 - `ficha_con_arma(ruta, arma='espada', nombre=None, ancla='mano_derecha')` Ficha de una skin con un arma en la mano: la misma skin y las mismas animaciones, más el componente `objeto`.
 - `ficha(ruta, nombre=None)` Ficha mínima para renderizar una skin con el pipeline de siempre (render_cuadro, tests, exportar).
 - `guia(ruta, zoom=16, estilo='stardew8')` PNG ampliado con cada zona rotulada, el frente marcado y la columna que muestrea cada dirección del estilo
+- `ajustar_a_paleta_fija(por_dir, estilo)` Si el estilo declara `render.paleta_fija`, mapea todo el render a esa lista (y no reduce más, porque
 - `demo(ruta, anim='caminar_lpc', estilo='stardew')` Vista previa rápida (una skin cualquiera): docs/diagnostico/skins/<nombre>/<anim>*
 - `salida_juego(ruta, anim='caminar_lpc', estilo='stardew', raiz='salida', cuadros=False)` Salida final del juego (convención del proyecto): <raíz>/<personaje>/<estilo>/<anim>/<anim>*.
 - `salida_arma(ruta, arma='espada', anim='golpear', estilo='stardew', raiz='salida', cuadros=False, ancla='mano_derecha')` Salida de una skin con un arma en la mano: el personaje conserva su nombre, el estilo sigue siendo la capa

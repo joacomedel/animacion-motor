@@ -318,9 +318,10 @@ def t_tamano(ficha, estilo, todo):
                 f"{c.pose}/{c.mira}/{c.indice}: mide {alto:.1f} px y su clase mide {objetivo}"
             )
         filas = np.nonzero((np.array(c.img)[..., 3] > 0).any(1))[0]
-        margen = (
-            4 if ESTILOS[estilo]["vista"] == "iso" else 2
-        )  # en iso cada pie está a otra profundidad
+        # margen = el aire que la celda deja debajo del pivote (que nada se corte lo vigila t_recorte): en 3/4 el
+        # pie más cercano cae a otra profundidad y baja más que la línea de piso, pero nunca menos (si el pie queda
+        # arriba del pivote, el personaje flota).
+        margen = cel["ch"] - 1 - cel["gy"]
         if len(filas) and not (cel["gy"] - 1 <= filas.max() <= cel["gy"] + margen):
             fallas.append(
                 f"{c.pose}/{c.mira}/{c.indice}: los pies terminan en la fila {filas.max()}, pivote {cel['gy']}"
@@ -331,14 +332,20 @@ def t_tamano(ficha, estilo, todo):
 
 
 def t_recorte(todo):
-    """Arriba no se toca nunca (ahí se cortan pelo y sombreros). A los costados puede llegar el contorno (Stardew
-    también lo hace); es recorte solo si el cuerpo mismo llega al borde, porque entonces sigue más allá."""
+    """Arriba no se toca nunca (ahí se cortan pelo y sombreros). Abajo tampoco: la suela del pie y su contorno tienen
+    que entrar enteros en la celda (en 3/4 el pie más cercano queda 2-5 px debajo del pivote, según la pose). A los
+    costados puede llegar el contorno (Stardew también lo hace); es recorte solo si el cuerpo mismo llega al borde,
+    porque entonces sigue más allá."""
     fallas = []
     for c in _cuadros(todo):
         op = np.array(c.img)[..., 3] > 0
         sol = c.buf["solido"]
         if op[0].any():
             fallas.append(f"{c.pose}/{c.mira}/{c.indice}: toca el borde superior")
+        elif op[-1].any():
+            fallas.append(
+                f"{c.pose}/{c.mira}/{c.indice}: toca el borde inferior (suela o contorno del pie cortados)"
+            )
         elif sol[:, 0].any() or sol[:, -1].any():
             fallas.append(
                 f"{c.pose}/{c.mira}/{c.indice}: el cuerpo llega al borde lateral (queda cortado)"

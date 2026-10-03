@@ -27,6 +27,12 @@ def escena(renderer, mundo, camara, estado, screen):
     screen.fill(COLOR_FONDO)
     screen.blit(mundo.superficie(), (-cam_x, -cam_y))
 
+    sombra = renderer.sombra()
+    screen.blit(
+        sombra,
+        (int(char_px - cam_x - sombra.get_width() // 2),
+         int(char_py - cam_y - sombra.get_height() // 2 - estado.z)),
+    )
     screen.blit(
         personaje, (int(char_px - cam_x - px), int(char_py - cam_y - py - estado.z))
     )

@@ -5,7 +5,10 @@ from sprites_lib.escala import celda
 from sprites_lib.estilos import crear_camara
 from sprites_lib.render3d import Camara, CamaraCenital, CamaraLateral, Escena, v
 
-PAL = {"a": ((50, 50, 50), (100, 100, 100), (200, 200, 200)), "b": ((50, 0, 0), (150, 0, 0), (250, 0, 0))}
+PAL = {
+    "a": ((50, 50, 50), (100, 100, 100), (200, 200, 200)),
+    "b": ((50, 0, 0), (150, 0, 0), (250, 0, 0)),
+}
 
 
 def opacos(img):
@@ -62,7 +65,7 @@ def test_buffer_de_componente_y_detalles():
 def test_render_sin_buffers_devuelve_imagen():
     esc = Escena(crear_camara("stardew", "S", celda("stardew")), PAL)
     esc.esfera(v(0, 0, 10), 3, "a")
-    assert esc.render().size == (16, 32)
+    assert esc.render().size == (16, 36)
 
 
 def test_conservar_recorta_la_primitiva():
@@ -78,10 +81,14 @@ def test_faldon_recorte():
     a = Escena(crear_camara("volumen", "S", celda("volumen")), PAL)
     a.faldon(v(0, 0, 20), v(0, 0, 6), 5, 7, "a", conservar=todo)
     b = Escena(crear_camara("volumen", "S", celda("volumen")), PAL)
-    b.faldon(v(0, 0, 20), v(0, 0, 6), 5, 7, "a", conservar=todo, recorte=lambda d, t: t < .5)
+    b.faldon(
+        v(0, 0, 20), v(0, 0, 6), 5, 7, "a", conservar=todo, recorte=lambda d, t: t < 0.5
+    )
     assert 0 < opacos(b.render()) < opacos(a.render())
 
 
 def test_escena_vacia():
-    img, buf = Escena(crear_camara("stardew", "S", celda("stardew")), PAL).render(buffers=True)
+    img, buf = Escena(crear_camara("stardew", "S", celda("stardew")), PAL).render(
+        buffers=True
+    )
     assert opacos(img) == 0 and not buf["solido"].any()
