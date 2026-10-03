@@ -5,6 +5,7 @@ Uso:
 """
 
 import sys
+import time
 import pygame
 from motor.config import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, COLOR_FONDO
 from motor.estado import Estado
@@ -118,6 +119,7 @@ def main():
 
         # Renderizar
         screen.fill(COLOR_FONDO)
+        tiempo_ilum = 0.0
 
         try:
             # Renderizar el personaje primero: su tamaño define el margen con el que se
@@ -136,13 +138,32 @@ def main():
             screen.blit(mundo.superficie(), (-cam_x, -cam_y))
 
             # personaje: los pies en su posición del mundo, levantado por z (salto)
-            screen.blit(
-                personaje,
-                (
-                    int(char_px - cam_x - px),
-                    int(char_py - cam_y - py - estado_interpolado.z),
-                ),
+            pos_personaje = (
+                int(char_px - cam_x - px),
+                int(char_py - cam_y - py - estado_interpolado.z),
             )
+
+            # Iluminación dinámica (task-020): antorcha que ilumina por píxel
+            # sobre normales cacheadas, sin re-renderizar 3D.
+            tiempo_ilum = 0.0
+            if "antorcha" in equipo.items:
+                normal = renderer.buffer_normal()
+                if normal is not None:
+                    t0 = time.perf_counter()
+                    # Luz en la mano derecha del personaje (relativa a la superficie)
+                    luz_x = personaje.get_width() - 8
+                    luz_y = personaje.get_height() // 3
+                    personaje = renderer.iluminar(
+                        personaje,
+                        normal,
+                        (luz_x, luz_y),
+                        (255, 180, 80),  # color cálido de antorcha
+                        120,  # radio en px
+                        1.5,  # intensidad
+                    )
+                    tiempo_ilum = (time.perf_counter() - t0) * 1000
+
+            screen.blit(personaje, pos_personaje)
 
             # Iluminación en tiempo real: capa de tinte sobre la escena
             capa = renderer.capa_ambiente(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -155,10 +176,11 @@ def main():
         fps = clock.get_fps()
         skin = renderer.skin_ruta.split("/")[-1].replace(".png", "")
         equipo_txt = ",".join(equipo.items) or "-"
+        ilum_txt = f" ilum={tiempo_ilum:.2f}ms" if "antorcha" in equipo.items else ""
         hud = (
             f"{fps:4.0f} FPS  {estado_interpolado.animacion} {estado_interpolado.direccion} "
             f"f={estado_interpolado.frame}  skin={skin} equipo=[{equipo_txt}] "
-            f"dano={'SI' if renderer.dano else 'no'} amb={renderer.ambiente}"
+            f"dano={'SI' if renderer.dano else 'no'} amb={renderer.ambiente}{ilum_txt}"
         )
         screen.blit(fuente.render(hud, True, (230, 230, 240)), (8, 8))
 
