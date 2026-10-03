@@ -57,7 +57,9 @@ def main():
         equipo.alternar(item)
         renderer.set_equipo(equipo.items)
 
-    # Estado inicial: el personaje en el centro del mundo
+    # Estado inicial: el personaje en el centro del mundo.
+    # logica.estado es su propio estado (game_loop.iniciar no lo toca): sin esto el
+    # personaje arranca en (0,0), la esquina, y se ve cortado contra el borde.
     estado_inicial = Estado(
         x=mundo.ancho_px // 2,
         y=mundo.alto_px // 2,
@@ -66,6 +68,7 @@ def main():
         direccion="S",
         frame=0,
     )
+    logica.estado = estado_inicial
     game_loop.iniciar(estado_inicial)
 
     # Loop principal
