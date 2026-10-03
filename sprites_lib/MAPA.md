@@ -154,8 +154,8 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 
 ### `exportar` — Exportación genérica de animaciones (sirve para cualquier motor).
 - `revision(frames, ruta, zoom=5, columnas=5)`
-- `exportar(frames, nombre, carpeta, fps=12, pivote=None, zoom=4, extra=None, loop=True)`
-- `exportar_direcciones(por_dir, nombre, carpeta, fps=12, pivote=None, zoom=3, loop=True, extra=None, cuadros=False)` por_dir: {"SE": [frames], "E": [...], ...} → hoja con una fila por dirección + JSON + GIF por dirección.
+- `exportar(frames, nombre, carpeta, fps=12, pivote=None, zoom=4, extra=None, loop=True, buffers=None)` buffers: lista (uno por frame) de dicts con normal/mat/solido/mat_nombres (de Escena.render).
+- `exportar_direcciones(por_dir, nombre, carpeta, fps=12, pivote=None, zoom=3, loop=True, extra=None, cuadros=False, buffers=None)` por_dir: {"SE": [frames], "E": [...], ...} → hoja con una fila por dirección + JSON + GIF por dirección.
 
 ### `referencia` — Separar sprite sheets de referencia en animaciones.
 - `color_fondo(a)`

@@ -209,6 +209,7 @@ def _exportar(anim, estilo, todo):
     """Exporta la hoja con una fila por dirección, el JSON con pivote/fps/loop y los GIF a `docs/diagnostico/animaciones`."""
     oy = poses.offset_y(anim)
     por_dir = {m: [c.img for c in frs] for m, frs in todo.items()}
+    bufs = {m: [c.buf for c in frs] for m, frs in todo.items()}
     return exportar.exportar_direcciones(
         por_dir,
         anim,
@@ -217,6 +218,7 @@ def _exportar(anim, estilo, todo):
         pivote=armado.pivote(estilo, pose=anim),
         loop=poses.loop(anim),
         extra={"offset_y": oy} if oy is not None else None,
+        buffers=bufs,
     )
 
 
