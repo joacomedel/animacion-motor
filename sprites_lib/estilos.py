@@ -15,6 +15,14 @@ Claves de cada perfil:
 Los números medidos y el razonamiento quedan en CRITERIOS_ANIMACION.md.
 """
 
+
+def _luces_default():
+    """Luces key/fill/rim + AO de contacto (task-021). Por defecto apagadas para no romper PNGs."""
+    return dict(activas=False, fill=dict(dir=(0.5, -0.3, 0.4), color=(180, 160, 200), intensidad=0.35),
+                rim=dict(dir=(0.3, -0.6, 0.5), color=(255, 250, 230), intensidad=0.5),
+                ao_contacto=dict(activo=False, factor=0.6))
+
+
 ESTILOS = {
     "volumen": dict(
         descripcion="Pre-renderizado tipo Diablo II/Isometric Hero: volumen marcado, contorno negro por pieza.",
@@ -22,7 +30,8 @@ ESTILOS = {
         direcciones=["SE", "E", "NE", "N", "NW", "W", "SW", "S"],
         celda=dict(cw=56, ch=60, gx=26, gy=52),
         render=dict(
-            umbrales=(0.28, 0.66), contorno="negro", interior="negro", sombreado="luz"
+            umbrales=(0.28, 0.66), contorno="negro", interior="negro", sombreado="luz",
+            luces=_luces_default(),
         ),
         proporciones=dict(
             cabezas=3.3,
@@ -52,6 +61,7 @@ ESTILOS = {
             interior="color",
             oscurecer=0.45,
             sombreado="borde",
+            luces=_luces_default(),
         ),
         proporciones=dict(
             cabezas=2.2,
@@ -90,7 +100,8 @@ ESTILOS = {
         vista="lateral",
         direcciones=["E", "W"],
         render=dict(
-            umbrales=(0.15, 0.8), contorno="negro", interior="negro", sombreado="borde"
+            umbrales=(0.15, 0.8), contorno="negro", interior="negro", sombreado="borde",
+            luces=_luces_default(),
         ),
         proporciones=dict(
             cabezas=2.2,
@@ -125,6 +136,7 @@ ESTILOS = {
             interior="color",
             oscurecer=0.45,
             sombreado="borde",
+            luces=_luces_default(),
         ),
         proporciones=dict(
             cabezas=2.2,

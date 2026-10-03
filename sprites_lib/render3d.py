@@ -227,6 +227,7 @@ class Escena:
         misma dimensión y alineación que el PNG; lam: (ch, cw) float con N·luz clippeado a [0,1]."""
         est = dict(umbrales=(.28, .66), contorno="negro", interior="negro", oscurecer=.55, sombreado="luz")
         est.update(estilo or {})
+        luces = est.get("luces", {})
         cw, ch = self.cam.cw, self.cam.ch
         depth = np.full((ch, cw), -1e9); mat = np.full((ch, cw), -1); pieza = np.full((ch, cw), -1)
         comp = np.full((ch, cw), -1); lam = np.zeros((ch, cw)); normal = np.zeros((ch, cw, 3), np.uint8)
@@ -244,6 +245,12 @@ class Escena:
             depth[yi, xi] = d; mat[yi, xi] = M; pieza[yi, xi] = K; comp[yi, xi] = C
             N_mundo = self.cam.a_mundo(Nn)
             lam[yi, xi] = np.clip(N_mundo @ self.cam.luz, 0, 1)
+            # luces: fill suma iluminación difusa desde otra dirección
+            if luces.get("activas"):
+                fill = luces.get("fill")
+                if fill:
+                    fdir = np.array(fill["dir"], float); fdir /= np.linalg.norm(fdir)
+                    lam[yi, xi] = np.clip(lam[yi, xi] + np.clip(N_mundo @ fdir, 0, 1) * fill["intensidad"], 0, 1)
             normal[yi, xi] = ((N_mundo + 1) * 127.5).astype(np.uint8)
         nivel = None
         if est["sombreado"] == "borde":
@@ -297,6 +304,26 @@ class Escena:
                 img[anillo & (vecino == k)] = (*_oscurecer(self.pal[nm][0], est["oscurecer"]), 255)
         else:
             img[anillo] = (*contorno, 255)
+        # luces: rim y AO de contacto
+        if luces.get("activas"):
+            N_img = normal.astype(float) / 127.5 - 1
+            rim = luces.get("rim")
+            if rim:
+                key_dot = N_img @ self.cam.luz
+                borde = solido & ~(_mover(solido, 1, 0, False) & _mover(solido, -1, 0, False)
+                                   & _mover(solido, 0, 1, False) & _mover(solido, 0, -1, False))
+                rim_mask = borde & (key_dot < -0.15)
+                for k, nm in enumerate(self.mats):
+                    img[rim_mask & (mat == k)] = (*self.pal[nm][2], 255)
+            ao = luces.get("ao_contacto", {})
+            if ao.get("activo"):
+                ao_mask = np.zeros_like(solido)
+                for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+                    vecino_pieza = _mover(pieza, dy, dx, -1)
+                    ao_mask |= solido & (vecino_pieza >= 0) & (vecino_pieza != pieza)
+                for k, nm in enumerate(self.mats):
+                    base = np.array(self.pal[nm][1]); osc = tuple((base * ao["factor"]).astype(int))
+                    img[ao_mask & (mat == k)] = (*osc, 255)
         im = Image.fromarray(img, "RGBA")
         if not buffers:
             return im
