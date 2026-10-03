@@ -88,3 +88,16 @@ def test_colision_radio_chico_no_es_celda_entera():
     assert not m.colisiona(5 * 16 + 8, 7 * 16 + 8, radio=4)
     # a 2px del borde del muro sí hay colisión
     assert m.colisiona(5 * 16 + 8, 5 * 16 + 8 + 6, radio=4)
+
+
+# --- Offset de cámara entero (fix del crash de render con estado interpolado) ---
+
+
+def test_camara_devuelve_enteros_con_entrada_float():
+    m = Mundo(ancho=80, alto=50, tile=16)  # 1280x800
+    c = Camara(800, 600, m)
+    x, y = c.seguir(640.5, 400.7)  # estado interpolado: floats
+    assert isinstance(x, int) and isinstance(y, int)
+    assert (x, y) == c.seguir(640, 400)
+    # el uso real aguas abajo: arboles_visibles con el offset no debe romper
+    m.arboles_visibles(x, y, 800, 600)

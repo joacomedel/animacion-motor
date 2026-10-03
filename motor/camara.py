@@ -20,4 +20,6 @@ class Camara:
         max_y = max(self.mundo.alto_px - self.vy, 0)
         x = min(max(px - self.vx // 2, 0), max_x)
         y = min(max(py - self.vy // 2, 0), max_y)
-        return x, y
+        # el estado interpolado (px/py float) no debe filtrar floats al render:
+        # el offset de cámara es en px enteros (range() y blit() no aceptan floats)
+        return int(x), int(y)
