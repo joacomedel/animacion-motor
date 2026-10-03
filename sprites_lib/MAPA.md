@@ -29,7 +29,7 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 - `cinturon` · cintura · cuero · hebilla=None
 - `guante` · mano_derecha, mano_izquierda · cuero · —
 - `munon_cables` · codo_derecho, codo_izquierdo, rodilla_derecha, rodilla_izquierda · cable · cables=3, largo_px=2, chispa=None, chispa_cada_cuadros=3
-- `objeto` · mano_derecha, mano_izquierda · metal · forma='espada', largo=8.0, angulo=0.0, agarre='antebrazo', mango=None, pomo=None, guarda=None, detalle=None
+- `objeto` · mano_derecha, mano_izquierda · metal · forma='espada', largo=8.0, angulo=0.0, agarre='antebrazo', mango=None, pomo=None, guarda=None, detalle=None, llama=None
 - `ojos` · cara · — · solo=None, iris=None
 - `pelo_rizado` · cabeza · pelo · filas=2, volumen=1.0
 - `pierna_humana` · pierna_derecha, pierna_izquierda · piel · calzado=None

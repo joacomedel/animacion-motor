@@ -75,12 +75,15 @@ def _hacha(esc, ctx, mano, d, e, m, p):
 def _antorcha(esc, ctx, mano, d, e, m, p):
     largo = float(p["largo"]) * e
     mango = p["mango"] or m
+    llama = (
+        p["llama"] or m
+    )  # color de llama (el motor lo pone 'fuego'; si no, el del objeto)
     esc.capsula(mano - d * 0.7 * e, mano + d * largo, 0.3 * e, mango)
-    llama = mano + d * (largo + 0.3 * e)
-    esc.esfera(llama, 0.95 * e, m)  # llama (material emisivo)
-    esc.esfera(llama + d * 0.7 * e, 0.55 * e, m)
+    base = mano + d * (largo + 0.3 * e)
+    esc.esfera(base, 0.95 * e, llama)  # llama
+    esc.esfera(base + d * 0.7 * e, 0.55 * e, llama)
     if p["detalle"]:
-        esc.detalle(llama + ctx.cam_local * 0.5 * e, ctx.paleta[p["detalle"]][2])
+        esc.detalle(base + ctx.cam_local * 0.5 * e, ctx.paleta[p["detalle"]][2])
 
 
 def _escudo(esc, ctx, mano, d, e, m, p):
@@ -129,8 +132,9 @@ class Objeto(Componente):
         "pomo": None,
         "guarda": None,
         "detalle": None,
+        "llama": None,  # color de la llama (antorcha); None = el del objeto
     }
-    params_material = ("mango", "pomo", "guarda", "detalle")
+    params_material = ("mango", "pomo", "guarda", "detalle", "llama")
     params_opciones = {"forma": tuple(FORMAS), "agarre": ("antebrazo", "vertical")}
 
     def dibujar(self, esc, ctx, spec):

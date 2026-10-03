@@ -71,6 +71,12 @@ def test_renderer_set_equipo_invalida_cache():
     assert r.equipo == ["armadura_malla", "sombrero"]
 
 
+def test_antorcha_usa_fuego():
+    f = ficha_con_equipo(skins.ficha(SKIN), ["antorcha"])
+    assert "fuego" in f["paleta"]
+    assert f["componentes"][-1]["parametros"]["llama"] == "fuego"
+
+
 def test_item_nuevo_sin_tocar_motor(monkeypatch):
     """Regla de escalabilidad: un ítem nuevo es 1 entrada en ITEMS y funciona sin tocar el motor."""
     from motor import equipo as eq

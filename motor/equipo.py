@@ -15,6 +15,7 @@ MATERIALES = {
     "oro": {"base": "#e0b34a"},
     "tela": {"base": "#4a6fa5"},
     "madera": {"base": "#7a4a22"},
+    "fuego": {"base": "#ff8c1a", "emisivo": True},
 }
 
 # nombre -> spec de componente. "skin" (opcional) aporta materiales a la paleta y define el
@@ -29,7 +30,7 @@ ITEMS = {
     "antorcha": {
         "tipo": "objeto",
         "ancla": "mano_derecha",
-        "parametros": {"forma": "antorcha"},
+        "parametros": {"forma": "antorcha", "llama": "fuego"},
     },
     "espada_roja": {
         "tipo": "objeto",

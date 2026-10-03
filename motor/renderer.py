@@ -80,10 +80,14 @@ class Renderer:
 
     def _construir_ficha(self):
         """Ficha de la skin actual, con arma, daño y equipo si están activos."""
+        from .equipo import MATERIALES
+
         if self.arma:
             f = skins.ficha_con_arma(self.skin_ruta, self.arma)
         else:
             f = self.ficha_base
+        # materiales estándar de equipamiento siempre disponibles (p. ej. 'fuego' para la antorcha)
+        f = {**f, "paleta": {**MATERIALES, **f["paleta"]}}
         if self.dano:
             f = {**f, "paleta": _paleta_con_dano(f["paleta"])}
         if self.equipo:
