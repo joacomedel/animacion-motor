@@ -368,12 +368,27 @@ def _por_dir_ficha(f, anim, estilo):
         m: [render_cuadro(f, estilo, anim, p, m).img for p in range(n)]
         for m in ESTILOS[estilo]["direcciones"]
     }
-    tope = ESTILOS[estilo]["render"].get("paleta_max")
+    ajustar_a_paleta_fija(por_dir, estilo)
+    return f, por_dir
+
+
+def ajustar_a_paleta_fija(por_dir, estilo):
+    """Si el estilo declara `render.paleta_fija`, mapea todo el render a esa lista (y no reduce más, porque
+    reducir después rompería la pertenencia); si no, aplica la reducción de siempre por `paleta_max`."""
+    from .estilos import ESTILOS
+
+    render = ESTILOS[estilo]["render"]
+    fija = render.get("paleta_fija")
+    if fija:
+        from .paleta import ajustar_paleta
+
+        ajustar_paleta(por_dir, fija)
+        return
+    tope = render.get("paleta_max")
     if tope:
         from .paleta import reducir_paleta
 
         reducir_paleta(por_dir, tope)
-    return f, por_dir
 
 
 def _exportar(f, por_dir, anim, estilo, carpeta, zoom, cuadros=False, nombre=None):

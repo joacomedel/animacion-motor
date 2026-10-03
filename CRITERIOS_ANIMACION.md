@@ -452,6 +452,12 @@ diagonales (vector ±0,7071). No está en `ACTIVOS`: `stardew` (4 dir.) sigue si
 - **Paleta reducida en stardew8 (2026-09-29)**: `estilos.ESTILOS["stardew8"]["render"]["paleta_max"] = 28` y
   `paleta.reducir_paleta` (une colores parecidos en Lab, ponderado por píxeles, conserva siempre el más usado). Clast pasó de 70 a
   28 colores en las 8 direcciones. 28 casi no se distingue; con 20 se apagan los ojos y sube el blanco de la cara en NE. Sin sombra.
+- **Paleta fija por estilo (2026-10-03, task-017)**: cada estilo puede declarar `render.paleta_fija` (lista de hex). Si
+  está, todo el render se mapea al color más cercano en Lab (`paleta.ajustar_paleta`) y no se reduce más; si falta, sigue
+  la derivación por personaje + `reducir_paleta`. Fuentes: stardew/stardew8 → PLOT50 (top-down cozy, 50),
+  volumen → Resurrect 64 (dark fantasy RPG, 64), fry8 → los 14 medidos de `referencias/8dir/fry_40x64`. Efecto medido
+  en el aldeano (stardew, quieto S/E): 42 colores derivados → 17 de PLOT50, todos dentro de la lista. Dos personajes del
+  mismo estilo ahora caen exactamente en la misma paleta.
 - **Boceto `fry8` (2026-09-29)**: estilo derivado de stardew8 (`adulto_px=58`, celda 40×64, `cabeza_frac=.30`, `hombros_frac=.16`,
   `piernas_frac=.27`, `paleta_max=16`). Alto real 63 px = igual que Fry, pero la cabeza sale de 23 px de ancho (Fry 14) y el
   cuerpo de 31-34 (Fry 38). La skin de 32×32 estirada ~2× deja los ojos como puntos sueltos: el detalle de cara no sale de ahí.

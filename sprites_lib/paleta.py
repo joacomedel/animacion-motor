@@ -190,3 +190,31 @@ def reducir_paleta(por_dir, n):
         for im in fs:
             im.putdata([(*rep[p[:3]], p[3]) if p[3] > 0 else p for p in im.getdata()])
     return por_dir
+
+
+def ajustar_paleta(por_dir, colores):
+    """Mapea cada píxel opaco al color más cercano de `colores` (lista de hex #rrggbb), en TODAS las direcciones
+    y cuadros a la vez ({dir: [imágenes RGBA]}, in situ). A diferencia de `reducir_paleta`, el mapeo es por píxel
+    contra una lista fija: no inventa un color y el resultado no depende de cómo se agrupen las imágenes, así que
+    dos personajes del mismo estilo caen exactamente en la misma paleta."""
+    pal = [hex_rgb(c) for c in colores]
+    lab = [_lab(c) for c in pal]
+    cache = {}
+    for fs in por_dir.values():
+        for im in fs:
+            salida = []
+            for p in im.getdata():
+                if p[3] == 0:
+                    salida.append(p)
+                    continue
+                k = p[:3]
+                cerca = cache.get(k)
+                if cerca is None:
+                    v = _lab(k)
+                    i = min(
+                        range(len(pal)), key=lambda j: float(((lab[j] - v) ** 2).sum())
+                    )
+                    cerca = cache[k] = pal[i]
+                salida.append((*cerca, p[3]))
+            im.putdata(salida)
+    return por_dir
