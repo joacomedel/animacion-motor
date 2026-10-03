@@ -1,14 +1,89 @@
 """Paleta de un personaje por estilo: la ficha da solo el tono base de cada material; el estilo deriva
 sombra y luz con su propio corrimiento de tono (p. ej. Stardew: sombras a violeta, luces a amarillo)."""
+
 import re
 
 HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
 
 
+class Material(tuple):
+    """Material con propiedades de render: (sombra, base, luz) + especular, transmision, textura, rugosidad.
+
+    Subclass de tuple para compatibilidad con todo el código existente que espera (sombra, base, luz).
+    """
+
+    def __new__(
+        cls, tonos, especular=0.0, transmision=0.0, textura=None, rugosidad=0.5
+    ):
+        obj = super().__new__(cls, tonos)
+        obj.especular = especular
+        obj.transmision = transmision
+        obj.textura = textura
+        obj.rugosidad = rugosidad
+        return obj
+
+
+# Materiales estándar de equipamiento: siempre presentes en la paleta.
+# Se usan como base para motor/equipo.py y como referencia para materiales con propiedades.
+MATERIALES_BASE = {
+    "cuero": {
+        "base": "#8a5a2b",
+        "especular": 0.1,
+        "transmision": 0.0,
+        "rugosidad": 0.8,
+    },
+    "metal": {
+        "base": "#9aa0a8",
+        "especular": 0.9,
+        "transmision": 0.0,
+        "rugosidad": 0.2,
+    },
+    "oro": {
+        "base": "#e0b34a",
+        "especular": 0.95,
+        "transmision": 0.0,
+        "rugosidad": 0.15,
+    },
+    "tela": {"base": "#4a6fa5", "especular": 0.0, "transmision": 0.0, "rugosidad": 0.9},
+    "madera": {
+        "base": "#7a4a22",
+        "especular": 0.05,
+        "transmision": 0.0,
+        "rugosidad": 0.7,
+    },
+    "fuego": {
+        "base": "#ff8c1a",
+        "emisivo": True,
+        "especular": 0.0,
+        "transmision": 0.0,
+        "rugosidad": 0.5,
+    },
+    "agua": {"base": "#4a90d9", "especular": 0.3, "transmision": 0.6, "rugosidad": 0.1},
+    "cristal": {
+        "base": "#a0d8ef",
+        "especular": 0.8,
+        "transmision": 0.9,
+        "rugosidad": 0.05,
+    },
+    "piedra": {
+        "base": "#808080",
+        "especular": 0.0,
+        "transmision": 0.0,
+        "rugosidad": 0.95,
+    },
+    "tierra": {
+        "base": "#8b6914",
+        "especular": 0.0,
+        "transmision": 0.0,
+        "rugosidad": 0.9,
+    },
+}
+
+
 def hex_rgb(h):
     if not isinstance(h, str) or not HEX.match(h):
         raise ValueError(f"color inválido {h!r}: tiene que ser #rrggbb")
-    return tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
+    return tuple(int(h[i : i + 2], 16) for i in (1, 3, 5))
 
 
 def _mezclar(c, hacia, t):
@@ -23,34 +98,61 @@ def tonos(base, regla, emisivo=False):
     """(sombra, base, luz). Los emisivos (runas, visor) no se oscurecen: brillan igual en todos lados."""
     base = tuple(base)
     if emisivo:
-        return (base, base, _mezclar(base, (255, 255, 255), .35))
+        return (base, base, _mezclar(base, (255, 255, 255), 0.35))
     ks, hs, ms = regla["sombra"]
     kl, hl, ml = regla["luz"]
     return (_mezclar(_mult(base, ks), hs, ms), base, _mezclar(_mult(base, kl), hl, ml))
 
 
+def _props_mat(nombre, ficha_mat):
+    """Propiedades de render para un material: busca en MATERIALES_BASE y mezcla con la ficha."""
+    base = MATERIALES_BASE.get(nombre, {})
+    return {
+        "especular": ficha_mat.get("especular", base.get("especular", 0.0)),
+        "transmision": ficha_mat.get("transmision", base.get("transmision", 0.0)),
+        "textura": ficha_mat.get("textura", base.get("textura")),
+        "rugosidad": ficha_mat.get("rugosidad", base.get("rugosidad", 0.5)),
+    }
+
+
 def paleta_estilo(paleta_ficha, estilo):
-    """{material: (sombra, base, luz)}. Agrega '<material>_b' (variante un poco más oscura para texturas:
+    """{material: Material}. Agrega '<material>_b' (variante un poco más oscura para texturas:
     mechones, pliegues) y 'mano' (piel un tono más clara) si la ficha no la define."""
     regla = estilo["tonos"]
     out = {}
     for nombre, m in paleta_ficha.items():
         base = hex_rgb(m["base"])
         emi = bool(m.get("emisivo", False))
-        out[nombre] = tonos(base, regla, emi)
+        props = _props_mat(nombre, m)
+        out[nombre] = Material(tonos(base, regla, emi), **props)
         if not nombre.endswith("_b"):
-            out.setdefault(f"{nombre}_b", tonos(_mult(base, .86), regla, emi))
+            out.setdefault(
+                f"{nombre}_b", Material(tonos(_mult(base, 0.86), regla, emi), **props)
+            )
     if "piel" in paleta_ficha and "mano" not in paleta_ficha:
-        out["mano"] = tonos(_mezclar(hex_rgb(paleta_ficha["piel"]["base"]), (255, 255, 255), .12), regla)
+        base = _mezclar(hex_rgb(paleta_ficha["piel"]["base"]), (255, 255, 255), 0.12)
+        props = _props_mat("piel", paleta_ficha["piel"])
+        out["mano"] = Material(tonos(base, regla), **props)
     return out
 
 
 def _lab(c):
     import numpy as np
-    v = np.array(c) / 255.
-    v = np.where(v > .04045, ((v + .055) / 1.055) ** 2.4, v / 12.92)
-    x = np.array([[.4124, .3576, .1805], [.2126, .7152, .0722], [.0193, .1192, .9505]]) @ v / np.array([.9505, 1, 1.089])
-    f = np.where(x > .008856, np.cbrt(x), 7.787 * x + 16 / 116)
+
+    v = np.array(c) / 255.0
+    v = np.where(v > 0.04045, ((v + 0.055) / 1.055) ** 2.4, v / 12.92)
+    x = (
+        np.array(
+            [
+                [0.4124, 0.3576, 0.1805],
+                [0.2126, 0.7152, 0.0722],
+                [0.0193, 0.1192, 0.9505],
+            ]
+        )
+        @ v
+        / np.array([0.9505, 1, 1.089])
+    )
+    f = np.where(x > 0.008856, np.cbrt(x), 7.787 * x + 16 / 116)
     return np.array([116 * f[1] - 16, 500 * (f[0] - f[1]), 200 * (f[1] - f[2])])
 
 
@@ -59,15 +161,28 @@ def reducir_paleta(por_dir, n):
     Junta de a pares los colores más parecidos (distancia Lab, ponderada por cantidad de píxeles) y conserva
     siempre el más usado del par: nunca inventa un color nuevo. Referencia: Fry (CC0) usa 14 en toda su hoja."""
     import collections
-    cnt = collections.Counter(p[:3] for fs in por_dir.values() for im in fs for p in im.getdata() if p[3] > 0)
+
+    cnt = collections.Counter(
+        p[:3] for fs in por_dir.values() for im in fs for p in im.getdata() if p[3] > 0
+    )
     if len(cnt) <= n:
         return por_dir
     lab = {k: _lab(k) for k in cnt}
     rep = {k: k for k in cnt}
     while len(cnt) > n:
         ks = list(cnt)
-        w, a, b = min((cnt[a] * cnt[b] / (cnt[a] + cnt[b]) * float(((lab[a] - lab[b]) ** 2).sum()), a, b)
-                      for i, a in enumerate(ks) for b in ks[i + 1:])
+        w, a, b = min(
+            (
+                cnt[a]
+                * cnt[b]
+                / (cnt[a] + cnt[b])
+                * float(((lab[a] - lab[b]) ** 2).sum()),
+                a,
+                b,
+            )
+            for i, a in enumerate(ks)
+            for b in ks[i + 1 :]
+        )
         keep, drop = (a, b) if cnt[a] >= cnt[b] else (b, a)
         cnt[keep] += cnt.pop(drop)
         rep = {k: (keep if v == drop else v) for k, v in rep.items()}

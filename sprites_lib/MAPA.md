@@ -54,9 +54,10 @@ antebrazo_derecho, antebrazo_izquierdo, boca, brazo_derecho, brazo_izquierdo, ca
 - `celda(estilo, clase='adulto', ancho=None)` ancho: ancho propio de una animación (ver poses.ancho); el alto y los pies no cambian.
 
 ### `paleta` — Paleta de un personaje por estilo: la ficha da solo el tono base de cada material; el estilo deriva
+- clase `Material` Material con propiedades de render: (sombra, base, luz) + especular, transmision, textura, rugosidad.
 - `hex_rgb(h)`
 - `tonos(base, regla, emisivo=False)` (sombra, base, luz). Los emisivos (runas, visor) no se oscurecen: brillan igual en todos lados.
-- `paleta_estilo(paleta_ficha, estilo)` {material: (sombra, base, luz)}. Agrega '<material>_b' (variante un poco más oscura para texturas:
+- `paleta_estilo(paleta_ficha, estilo)` {material: Material}. Agrega '<material>_b' (variante un poco más oscura para texturas:
 - `reducir_paleta(por_dir, n)` Deja a lo sumo `n` colores en TODAS las direcciones y cuadros a la vez ({dir: [imágenes RGBA]}, in situ).
 
 ### `estilos` — Perfiles de estilo: cómo se "ve" un sprite, independiente de qué personaje es y de cómo se mueve.

@@ -6,17 +6,12 @@ la ficha resultante.
 """
 
 from sprites_lib import skins_item
+from sprites_lib.paleta import MATERIALES_BASE
 
 # materiales estándar de equipamiento: siempre presentes en la paleta, así un ítem con
 # material "metal" o "cuero" funciona aunque la skin del personaje no los tenga.
-MATERIALES = {
-    "cuero": {"base": "#8a5a2b"},
-    "metal": {"base": "#9aa0a8"},
-    "oro": {"base": "#e0b34a"},
-    "tela": {"base": "#4a6fa5"},
-    "madera": {"base": "#7a4a22"},
-    "fuego": {"base": "#ff8c1a", "emisivo": True},
-}
+# Se derivan de MATERIALES_BASE del kit (sprites_lib.paleta) para no duplicar definiciones.
+MATERIALES = MATERIALES_BASE
 
 # nombre -> spec de componente. "skin" (opcional) aporta materiales a la paleta y define el
 # material principal del componente (el color más usado del PNG).
